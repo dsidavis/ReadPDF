@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!DOCTYPE pdf2xml SYSTEM "pdf2xml.dtd">
+
+<pdf2xml>
+<page number="1" position="absolute" top="0" left="0" height="1080" width="1080" rotation="0.000000">
+<line bbox="220.935,969.840,220.935,88.560" lineWidth="0.750" fill.color="0,0,0"  stroke.color="65536,0,0"  />
+<line bbox="318.270,969.840,318.270,88.560" lineWidth="1.500" fill.color="0,0,0"  stroke.color="0,0,65536" dashes="4.500,7.500" startDash="0.000"  />
+<line bbox="415.605,969.840,415.605,88.560" lineWidth="2.250" fill.color="0,0,0"  stroke.color="0,65536,0" dashes="0.000,9.000" startDash="0.000"  />
+<line bbox="512.940,969.840,512.940,88.560" lineWidth="3.000" fill.color="0,0,0"  stroke.color="48824,48824,48824" dashes="0.000,12.000,9.000,12.000" startDash="0.000"  />
+<line bbox="610.260,969.840,610.260,88.560" lineWidth="3.750" fill.color="0,0,0"  stroke.color="43450,43450,43450" dashes="22.500,15.000" startDash="0.000"  />
+<rect bbox="707.595,846.540,902.265,665.205" lineWidth="0.750" fill.color="65536,42401,0"  stroke.color="65536,0,0" />
+<rect bbox="707.595,846.540,902.265,665.205" lineWidth="0.750" fill.color="65536,42401,0"  stroke.color="65536,0,0" />
+</page>
+</pdf2xml>
