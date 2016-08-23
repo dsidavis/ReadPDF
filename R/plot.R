@@ -18,7 +18,7 @@ function(file)
 
 showPage =
     # toplevel function.  Provide a file and a page number, and we render that page.
-function(f = "foo.xml", pageNum = 1, doc = xmlParse(f), page = getNodeSet(doc, "//page")[[pageNum]])
+function(f, pageNum = 1, doc = xmlParse(f), page = getNodeSet(doc, "//page")[[pageNum]])
 {
   renderPage(page)
 }
