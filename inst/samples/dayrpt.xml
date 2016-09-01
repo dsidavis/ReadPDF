@@ -1,0 +1,308 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!DOCTYPE pdf2xml SYSTEM "pdf2xml.dtd">
+
+<pdf2xml>
+<page number="1" position="absolute" top="0" left="0" height="1188" width="918" rotation="0.000000">
+	<fontspec id="0" size="10" family="Helvetica" color="#000000"/>
+	<fontspec id="1" size="13" family="Helvetica" color="#000000"/>
+	<fontspec id="2" size="16" family="Helvetica" color="#0000df"/>
+	<fontspec id="3" size="13" family="Helvetica" color="#0000df"/>
+	<fontspec id="4" size="11" family="Helvetica" color="#000000"/>
+	<fontspec id="5" size="13" family="Helvetica" color="#0000df"/>
+	<fontspec id="6" size="10" family="Helvetica" color="#000000"/>
+	<fontspec id="7" size="11" family="Helvetica" color="#000000"/>
+<text top="58" left="260" width="291" height="11" font="0">UNITED STATES DEPARTMENT OF THE INTERIOR</text>
+<text top="72" left="189" width="433" height="11" font="0">U.S. BUREAU OF RECLAMATION-CENTRAL VALLEY PROJECT-CALIFORNIA</text>
+<text top="110" left="678" width="110" height="14" font="1">August 31, 2016</text>
+<text top="89" left="264" width="323" height="17" font="2">DAILY CVP WATER SUPPLY REPORT</text>
+<text top="111" left="72" width="126" height="14" font="3">AUGUST 30, 2016</text>
+<text top="112" left="602" width="73" height="12" font="4">RUN DATE:</text>
+<text top="133" left="253" width="355" height="14" font="5">RESERVOIR RELEASES IN CUBIC FEET/SECOND</text>
+<text top="197" left="103" width="47" height="11" font="6">TRINITY</text>
+<text top="226" left="103" width="85" height="11" font="6">SACRAMENTO</text>
+<text top="254" left="103" width="56" height="11" font="6">FEATHER</text>
+<text top="282" left="103" width="64" height="11" font="6">AMERICAN</text>
+<text top="310" left="103" width="76" height="11" font="6">STANISLAUS</text>
+<text top="337" left="103" width="83" height="11" font="6">SAN JOAQUIN</text>
+<text top="197" left="236" width="63" height="11" font="6">LEWISTON</text>
+<text top="226" left="236" width="57" height="11" font="6">KESWICK</text>
+<text top="254" left="236" width="100" height="11" font="6">OROVILLE (SWP)</text>
+<text top="281" left="236" width="47" height="11" font="6">NIMBUS</text>
+<text top="310" left="236" width="60" height="11" font="6">GOODWIN</text>
+<text top="337" left="236" width="44" height="11" font="6">FRIANT</text>
+<text top="167" left="98" width="80" height="12" font="7">RESERVOIR</text>
+<text top="175" left="698" width="57" height="12" font="7">MEDIAN </text>
+<text top="167" left="438" width="30" height="12" font="7">2015</text>
+<text top="167" left="575" width="30" height="12" font="7">2016</text>
+<text top="158" left="702" width="19" height="12" font="7"> 15</text>
+<text top="197" left="468" width="34" height="11" font="6"> 1,157</text>
+<text top="226" left="468" width="34" height="11" font="6"> 6,908</text>
+<text top="254" left="468" width="34" height="11" font="6"> 1,500</text>
+<text top="282" left="468" width="34" height="11" font="6"> 1,519</text>
+<text top="310" left="478" width="24" height="11" font="6"> 154</text>
+<text top="337" left="478" width="24" height="11" font="6"> 801</text>
+<text top="198" left="607" width="34" height="11" font="6"> 1,241</text>
+<text top="226" left="600" width="40" height="11" font="6"> 10,162</text>
+<text top="254" left="607" width="34" height="11" font="6"> 6,600</text>
+<text top="282" left="607" width="34" height="11" font="6"> 1,851</text>
+<text top="310" left="617" width="24" height="11" font="6"> 152</text>
+<text top="337" left="617" width="24" height="11" font="6"> 443</text>
+<text top="405" left="106" width="80" height="12" font="7">RESERVOIR</text>
+<text top="405" left="236" width="68" height="12" font="7">CAPACITY</text>
+<text top="412" left="711" width="51" height="12" font="7">YR AVG</text>
+<text top="438" left="101" width="47" height="11" font="6">TRINITY</text>
+<text top="465" left="101" width="49" height="11" font="6">SHASTA</text>
+<text top="628" left="101" width="100" height="11" font="6">OROVILLE (SWP)</text>
+<text top="493" left="101" width="51" height="11" font="6">FOLSOM</text>
+<text top="519" left="101" width="91" height="11" font="6">NEW MELONES</text>
+<text top="547" left="101" width="86" height="11" font="6">FED. SAN LUIS</text>
+<text top="405" left="490" width="30" height="12" font="7">2015</text>
+<text top="405" left="611" width="30" height="12" font="7">2016</text>
+<text top="438" left="521" width="24" height="11" font="6"> 685</text>
+<text top="465" left="511" width="34" height="11" font="6"> 1,795</text>
+<text top="628" left="511" width="34" height="11" font="6"> 1,073</text>
+<text top="493" left="521" width="24" height="11" font="6"> 197</text>
+<text top="519" left="521" width="24" height="11" font="6"> 296</text>
+<text top="548" left="528" width="17" height="11" font="6"> 51</text>
+<text top="438" left="630" width="34" height="11" font="6"> 1,064</text>
+<text top="465" left="630" width="34" height="11" font="6"> 3,147</text>
+<text top="628" left="630" width="34" height="11" font="6"> 1,850</text>
+<text top="493" left="640" width="24" height="11" font="6"> 347</text>
+<text top="519" left="640" width="24" height="11" font="6"> 546</text>
+<text top="548" left="647" width="17" height="11" font="6"> 58</text>
+<text top="397" left="747" width="19" height="12" font="7"> 15</text>
+<text top="371" left="185" width="486" height="14" font="5">STORAGE IN MAJOR RESERVOIRS IN THOUSANDS OF ACRE-FEET</text>
+<text top="601" left="101" width="73" height="11" font="6">MILLERTON </text>
+<text top="573" left="101" width="117" height="11" font="6">TOTAL NORTH CVP </text>
+<text top="601" left="521" width="24" height="11" font="6"> 156</text>
+<text top="601" left="640" width="24" height="11" font="6"> 261</text>
+<text top="573" left="511" width="34" height="11" font="6"> 3,024</text>
+<text top="573" left="630" width="34" height="11" font="6"> 5,162</text>
+<text top="438" left="271" width="30" height="11" font="6">2,448</text>
+<text top="465" left="271" width="30" height="11" font="6">4,552</text>
+<text top="628" left="271" width="30" height="11" font="6">3,538</text>
+<text top="493" left="281" width="20" height="11" font="6">977</text>
+<text top="519" left="271" width="30" height="11" font="6">2,420</text>
+<text top="548" left="281" width="20" height="11" font="6">966</text>
+<text top="601" left="281" width="20" height="11" font="6">520</text>
+<text top="573" left="265" width="37" height="11" font="6">11,363</text>
+<text top="397" left="707" width="34" height="12" font="7">% OF</text>
+<text top="405" left="365" width="55" height="12" font="7">YR AVG </text>
+<text top="405" left="345" width="19" height="12" font="7"> 15</text>
+<text top="698" left="101" width="80" height="12" font="7">RESERVOIR</text>
+<text top="689" left="228" width="66" height="12" font="7">CURRENT</text>
+<text top="703" left="715" width="51" height="12" font="7">YR AVG</text>
+<text top="727" left="100" width="47" height="11" font="6">TRINITY</text>
+<text top="756" left="100" width="49" height="11" font="6">SHASTA</text>
+<text top="782" left="100" width="51" height="11" font="6">FOLSOM</text>
+<text top="810" left="100" width="91" height="11" font="6">NEW MELONES</text>
+<text top="703" left="507" width="30" height="12" font="7">1983</text>
+<text top="727" left="519" width="34" height="11" font="6"> 2,853</text>
+<text top="756" left="512" width="40" height="11" font="6"> 10,496</text>
+<text top="782" left="519" width="34" height="11" font="6"> 6,383</text>
+<text top="810" left="519" width="34" height="11" font="6"> 2,690</text>
+<text top="727" left="278" width="34" height="11" font="6"> 1,418</text>
+<text top="756" left="278" width="34" height="11" font="6"> 5,176</text>
+<text top="782" left="278" width="34" height="11" font="6"> 2,460</text>
+<text top="810" left="288" width="24" height="11" font="6"> 923</text>
+<text top="689" left="747" width="19" height="12" font="7"> 15</text>
+<text top="839" left="100" width="73" height="11" font="6">MILLERTON </text>
+<text top="839" left="519" width="34" height="11" font="6"> 4,488</text>
+<text top="839" left="278" width="34" height="11" font="6"> 1,045</text>
+<text top="689" left="710" width="34" height="12" font="7">% OF</text>
+<text top="689" left="359" width="53" height="12" font="7">DRIEST </text>
+<text top="660" left="134" width="621" height="14" font="5">ACCUMULATED INFLOW FOR WATER YEAR TO DATE IN THOUSANDS OF ACRE-FEET</text>
+<text top="703" left="228" width="26" height="12" font="7">WY </text>
+<text top="702" left="349" width="26" height="12" font="7">WY </text>
+<text top="689" left="477" width="65" height="12" font="7">WETTEST</text>
+<text top="703" left="476" width="26" height="12" font="7">WY </text>
+<text top="689" left="627" width="19" height="12" font="7">YR</text>
+<text top="703" left="612" width="29" height="12" font="7">AVG</text>
+<text top="689" left="600" width="19" height="12" font="7"> 15</text>
+<text top="703" left="259" width="30" height="12" font="7">2016</text>
+<text top="703" left="379" width="30" height="12" font="7">1977</text>
+<text top="167" left="268" width="34" height="12" font="7">DAM </text>
+<text top="158" left="723" width="19" height="12" font="7">YR</text>
+<text top="912" left="98" width="80" height="12" font="7">RESERVOIR</text>
+<text top="900" left="223" width="66" height="12" font="7">CURRENT</text>
+<text top="934" left="92" width="66" height="11" font="6">TRINITY AT</text>
+<text top="948" left="92" width="97" height="11" font="6">FISH HATCHERY</text>
+<text top="975" left="92" width="104" height="11" font="6">SACRAMENTO AT</text>
+<text top="989" left="92" width="82" height="11" font="6">SHASTA DAM </text>
+<text top="1013" left="92" width="86" height="11" font="6">AMERICAN AT </text>
+<text top="1027" left="92" width="87" height="11" font="6">BLUE CANYON</text>
+<text top="1054" left="92" width="95" height="11" font="6">STANISLAUS AT</text>
+<text top="1069" left="92" width="91" height="11" font="6">NEW MELONES</text>
+<text top="916" left="453" width="30" height="12" font="7">1983</text>
+<text top="939" left="458" width="34" height="11" font="6"> 56.22</text>
+<text top="978" left="451" width="40" height="11" font="6"> 114.16</text>
+<text top="1018" left="451" width="40" height="11" font="6"> 103.88</text>
+<text top="1060" left="458" width="34" height="11" font="6"> 45.73</text>
+<text top="939" left="753" width="27" height="11" font="6"> 0.00</text>
+<text top="978" left="753" width="27" height="11" font="6"> 0.00</text>
+<text top="1018" left="753" width="27" height="11" font="6"> 0.00</text>
+<text top="1060" left="753" width="27" height="11" font="6"> 0.00</text>
+<text top="1094" left="92" width="102" height="11" font="6">SAN JOAQUIN AT</text>
+<text top="1108" left="92" width="103" height="11" font="6">HUNTINGTON LK </text>
+<text top="1097" left="458" width="34" height="11" font="6"> 83.10</text>
+<text top="1097" left="753" width="27" height="11" font="6"> 0.00</text>
+<text top="900" left="325" width="53" height="12" font="7">DRIEST </text>
+<text top="872" left="169" width="526" height="14" font="5">ACCUMULATED PRECIPITATION FOR WATER YEAR TO DATE IN INCHES</text>
+<text top="916" left="224" width="26" height="12" font="7">WY </text>
+<text top="916" left="318" width="26" height="12" font="7">WY </text>
+<text top="900" left="424" width="65" height="12" font="7">WETTEST</text>
+<text top="916" left="423" width="26" height="12" font="7">WY </text>
+<text top="900" left="637" width="34" height="12" font="7">% OF</text>
+<text top="916" left="639" width="29" height="12" font="7">AVG</text>
+<text top="916" left="255" width="30" height="12" font="7">2016</text>
+<text top="916" left="347" width="30" height="12" font="7">1977</text>
+<text top="900" left="540" width="29" height="12" font="7">AVG</text>
+<text top="916" left="529" width="50" height="12" font="7">(N YRS)</text>
+<text top="727" left="408" width="24" height="11" font="6"> 208</text>
+<text top="756" left="398" width="34" height="11" font="6"> 2,385</text>
+<text top="782" left="408" width="24" height="11" font="6"> 330</text>
+<text top="810" left="421" width="10" height="11" font="6"> 0</text>
+<text top="839" left="408" width="24" height="11" font="6"> 330</text>
+<text top="939" left="359" width="34" height="11" font="6"> 14.16</text>
+<text top="978" left="359" width="34" height="11" font="6"> 17.55</text>
+<text top="1018" left="359" width="34" height="11" font="6"> 16.96</text>
+<text top="1060" left="366" width="27" height="11" font="6"> 0.00</text>
+<text top="1097" left="359" width="34" height="11" font="6"> 17.50</text>
+<text top="939" left="261" width="34" height="11" font="6"> 34.02</text>
+<text top="978" left="261" width="34" height="11" font="6"> 65.12</text>
+<text top="1018" left="261" width="34" height="11" font="6"> 77.12</text>
+<text top="1060" left="261" width="34" height="11" font="6"> 30.88</text>
+<text top="1097" left="261" width="34" height="11" font="6"> 35.63</text>
+<text top="196" left="757" width="24" height="11" font="6"> 835</text>
+<text top="225" left="747" width="34" height="11" font="6"> 9,354</text>
+<text top="252" left="747" width="34" height="11" font="6"> 4,000</text>
+<text top="281" left="747" width="34" height="11" font="6"> 1,851</text>
+<text top="310" left="757" width="24" height="11" font="6"> 228</text>
+<text top="336" left="757" width="24" height="11" font="6"> 306</text>
+<text top="438" left="392" width="34" height="11" font="6"> 1,533</text>
+<text top="438" left="758" width="17" height="11" font="6"> 69</text>
+<text top="465" left="392" width="34" height="11" font="6"> 2,608</text>
+<text top="628" left="392" width="34" height="11" font="6"> 1,983</text>
+<text top="493" left="402" width="24" height="11" font="6"> 508</text>
+<text top="519" left="392" width="34" height="11" font="6"> 1,278</text>
+<text top="547" left="402" width="24" height="11" font="6"> 205</text>
+<text top="601" left="402" width="24" height="11" font="6"> 269</text>
+<text top="573" left="392" width="34" height="11" font="6"> 6,132</text>
+<text top="465" left="751" width="24" height="11" font="6"> 121</text>
+<text top="628" left="758" width="17" height="11" font="6"> 93</text>
+<text top="493" left="758" width="17" height="11" font="6"> 68</text>
+<text top="519" left="758" width="17" height="11" font="6"> 43</text>
+<text top="547" left="758" width="17" height="11" font="6"> 28</text>
+<text top="601" left="758" width="17" height="11" font="6"> 97</text>
+<text top="573" left="758" width="17" height="11" font="6"> 84</text>
+<text top="939" left="556" width="34" height="11" font="6"> 31.69</text>
+<text top="728" left="639" width="34" height="11" font="6"> 1,225</text>
+<text top="757" left="639" width="34" height="11" font="6"> 4,911</text>
+<text top="783" left="639" width="34" height="11" font="6"> 2,205</text>
+<text top="811" left="649" width="24" height="11" font="6"> 878</text>
+<text top="839" left="639" width="34" height="11" font="6"> 1,390</text>
+<text top="728" left="755" width="24" height="11" font="6"> 116</text>
+<text top="757" left="755" width="24" height="11" font="6"> 105</text>
+<text top="783" left="755" width="24" height="11" font="6"> 112</text>
+<text top="811" left="755" width="24" height="11" font="6"> 105</text>
+<text top="839" left="762" width="17" height="11" font="6"> 75</text>
+<text top="939" left="660" width="24" height="11" font="6"> 107</text>
+<text top="978" left="556" width="34" height="11" font="6"> 61.13</text>
+<text top="1018" left="556" width="34" height="11" font="6"> 64.50</text>
+<text top="1060" left="556" width="34" height="11" font="6"> 26.66</text>
+<text top="1097" left="556" width="34" height="11" font="6"> 40.87</text>
+<text top="978" left="660" width="24" height="11" font="6"> 107</text>
+<text top="1018" left="660" width="24" height="11" font="6"> 120</text>
+<text top="1060" left="660" width="24" height="11" font="6"> 116</text>
+<text top="1097" left="667" width="17" height="11" font="6"> 87</text>
+<text top="957" left="567" width="17" height="11" font="6"> 54</text>
+<text top="996" left="567" width="17" height="11" font="6"> 59</text>
+<text top="1037" left="567" width="17" height="11" font="6"> 41</text>
+<text top="1078" left="567" width="17" height="11" font="6"> 38</text>
+<text top="1116" left="567" width="17" height="11" font="6"> 41</text>
+<text top="955" left="590" width="4" height="12" font="7">)</text>
+<text top="954" left="541" width="4" height="12" font="7">(</text>
+<text top="994" left="590" width="4" height="12" font="7">)</text>
+<text top="995" left="541" width="4" height="12" font="7">(</text>
+<text top="1035" left="590" width="4" height="12" font="7">)</text>
+<text top="1034" left="541" width="4" height="12" font="7">(</text>
+<text top="1077" left="590" width="4" height="12" font="7">)</text>
+<text top="1077" left="541" width="4" height="12" font="7">(</text>
+<text top="1116" left="590" width="4" height="12" font="7">)</text>
+<text top="1116" left="541" width="4" height="12" font="7">(</text>
+<text top="898" left="720" width="42" height="12" font="7"> LAST </text>
+<text top="914" left="718" width="47" height="12" font="7">24 HRS</text>
+<text top="167" left="409" width="22" height="12" font="7">WY</text>
+<text top="167" left="546" width="22" height="12" font="7">WY</text>
+<text top="405" left="462" width="22" height="12" font="7">WY</text>
+<text top="405" left="583" width="22" height="12" font="7">WY</text>
+<rect bbox="81.000,354.480,791.100,186.720" lineWidth="0.000" fill.color="0,0,57344"  stroke.color="0,0,0" />
+<rect bbox="81.000,187.140,791.100,152.700" lineWidth="0.000" fill.color="57671,57671,57671"  stroke.color="0,0,0" />
+<rect bbox="81.000,187.140,791.100,152.700" lineWidth="0.000" fill.color="57671,57671,57671"  stroke.color="0,0,0" />
+<line bbox="218.640,153.660,218.640,354.540" lineWidth="0.000" fill.color="0,0,0"  stroke.color="0,0,0"  />
+<line bbox="372.600,152.700,372.600,187.200" lineWidth="0.000" fill.color="0,0,0"  stroke.color="0,0,0"  />
+<line bbox="82.800,214.200,790.185,214.200" lineWidth="0.000" fill.color="0,0,0"  stroke.color="0,0,0"  />
+<line bbox="82.800,242.340,788.400,242.340" lineWidth="0.000" fill.color="0,0,0"  stroke.color="0,0,0"  />
+<line bbox="84.600,270.480,786.600,270.480" lineWidth="0.000" fill.color="0,0,0"  stroke.color="0,0,0"  />
+<rect bbox="372.540,354.540,513.120,187.200" lineWidth="0.000" fill.color="0,0,0"  stroke.color="0,0,0" />
+<line bbox="83.700,298.635,788.400,298.635" lineWidth="0.000" fill.color="0,0,0"  stroke.color="0,0,0"  />
+<line bbox="83.700,326.760,788.400,326.760" lineWidth="0.000" fill.color="0,0,0"  stroke.color="0,0,0"  />
+<rect bbox="513.120,354.540,653.460,187.200" lineWidth="0.000" fill.color="0,0,0"  stroke.color="0,0,0" />
+<rect bbox="653.460,354.540,791.100,187.140" lineWidth="0.000" fill.color="0,0,0"  stroke.color="0,0,0" />
+<line bbox="513.120,188.100,513.120,152.640" lineWidth="0.000" fill.color="0,0,0"  stroke.color="0,0,0"  />
+<line bbox="653.640,188.100,653.640,152.700" lineWidth="0.000" fill.color="0,0,0"  stroke.color="0,0,0"  />
+<rect bbox="84.600,424.740,792.000,390.300" lineWidth="0.000" fill.color="57671,57671,57671"  stroke.color="0,0,0" />
+<rect bbox="84.600,424.740,792.000,390.300" lineWidth="0.000" fill.color="57671,57671,57671"  stroke.color="0,0,0" />
+<rect bbox="84.600,643.860,792.000,425.220" lineWidth="0.000" fill.color="0,0,0"  stroke.color="0,0,0" />
+<rect bbox="440.100,643.860,558.840,425.220" lineWidth="0.000" fill.color="0,0,0"  stroke.color="0,0,0" />
+<rect bbox="558.960,643.860,678.600,425.220" lineWidth="0.000" fill.color="0,0,0"  stroke.color="0,0,0" />
+<line bbox="86.400,454.440,792.000,454.440" lineWidth="0.000" fill.color="0,0,0"  stroke.color="0,0,0"  />
+<line bbox="84.600,481.740,791.100,481.740" lineWidth="0.000" fill.color="0,0,0"  stroke.color="0,0,0"  />
+<line bbox="85.500,509.940,789.300,509.940" lineWidth="0.000" fill.color="0,0,0"  stroke.color="0,0,0"  />
+<line bbox="85.500,535.500,789.300,535.500" lineWidth="0.000" fill.color="0,0,0"  stroke.color="0,0,0"  />
+<line bbox="84.600,563.700,789.300,563.700" lineWidth="1.000" fill.color="0,0,0"  stroke.color="0,0,0" dashes="4.000,1.000,2.000,1.000,2.000,1.000" startDash="0.000"  />
+<line bbox="85.500,590.340,789.300,590.340" lineWidth="1.000" fill.color="0,0,0"  stroke.color="0,0,0" dashes="4.000,1.000,2.000,1.000,2.000,1.000" startDash="0.000"  />
+<line bbox="85.500,617.880,791.100,617.880" lineWidth="0.000" fill.color="0,0,0"  stroke.color="0,0,0"  />
+<line bbox="558.960,433.080,558.960,390.315" lineWidth="0.000" fill.color="0,0,0"  stroke.color="0,0,0"  />
+<line bbox="440.040,433.500,440.040,390.720" lineWidth="0.000" fill.color="0,0,0"  stroke.color="0,0,0"  />
+<line bbox="678.720,425.640,678.720,390.315" lineWidth="0.000" fill.color="0,0,0"  stroke.color="0,0,0"  />
+<line bbox="226.680,390.540,226.680,642.540" lineWidth="0.000" fill.color="0,0,0"  stroke.color="0,0,0"  />
+<line bbox="317.640,390.315,317.640,642.540" lineWidth="0.000" fill.color="0,0,0"  stroke.color="0,0,0"  />
+<rect bbox="85.500,717.480,792.000,683.040" lineWidth="0.000" fill.color="57671,57671,57671"  stroke.color="0,0,0" />
+<rect bbox="85.500,717.480,792.000,683.040" lineWidth="0.000" fill.color="57671,57671,57671"  stroke.color="0,0,0" />
+<rect bbox="85.500,854.880,792.000,717.180" lineWidth="0.000" fill.color="0,0,0"  stroke.color="0,0,0" />
+<rect bbox="447.300,854.880,566.100,717.180" lineWidth="0.000" fill.color="0,0,0"  stroke.color="0,0,0" />
+<rect bbox="566.220,854.880,684.000,717.180" lineWidth="0.000" fill.color="0,0,0"  stroke.color="0,0,0" />
+<rect bbox="207.900,854.940,325.800,717.240" lineWidth="0.000" fill.color="0,0,0"  stroke.color="0,0,0" />
+<line bbox="86.400,745.440,792.000,745.440" lineWidth="0.000" fill.color="0,0,0"  stroke.color="0,0,0"  />
+<line bbox="86.400,772.575,792.000,772.575" lineWidth="0.000" fill.color="0,0,0"  stroke.color="0,0,0"  />
+<line bbox="86.400,799.620,792.000,799.620" lineWidth="0.000" fill.color="0,0,0"  stroke.color="0,0,0"  />
+<line bbox="85.500,826.740,789.300,826.740" lineWidth="0.000" fill.color="0,0,0"  stroke.color="0,0,0"  />
+<line bbox="566.160,725.880,566.160,683.040" lineWidth="0.000" fill.color="0,0,0"  stroke.color="0,0,0"  />
+<line bbox="447.300,726.480,447.300,683.640" lineWidth="0.000" fill.color="0,0,0"  stroke.color="0,0,0"  />
+<line bbox="684.120,725.880,684.120,683.040" lineWidth="0.000" fill.color="0,0,0"  stroke.color="0,0,0"  />
+<line bbox="207.840,683.040,207.840,854.940" lineWidth="0.000" fill.color="0,0,0"  stroke.color="0,0,0"  />
+<line bbox="325.800,683.040,325.800,718.140" lineWidth="0.000" fill.color="0,0,0"  stroke.color="0,0,0"  />
+<rect bbox="378.900,715.740,424.860,700.080" lineWidth="0.000" fill.color="57671,57671,57671"  stroke.color="0,0,0" />
+<rect bbox="83.700,930.420,791.100,894.060" lineWidth="0.000" fill.color="57671,57671,57671"  stroke.color="0,0,0" />
+<rect bbox="83.700,930.420,791.100,894.060" lineWidth="0.000" fill.color="57671,57671,57671"  stroke.color="0,0,0" />
+<rect bbox="83.700,1129.620,791.100,930.600" lineWidth="0.000" fill.color="0,0,0"  stroke.color="0,0,0" />
+<rect bbox="403.260,1129.620,504.000,930.600" lineWidth="0.000" fill.color="0,0,0"  stroke.color="0,0,0" />
+<rect bbox="694.440,1129.620,791.100,930.600" lineWidth="0.000" fill.color="0,0,0"  stroke.color="0,0,0" />
+<line bbox="84.600,969.660,790.185,969.660" lineWidth="0.000" fill.color="0,0,0"  stroke.color="0,0,0"  />
+<line bbox="83.700,1009.320,790.185,1009.320" lineWidth="0.000" fill.color="0,0,0"  stroke.color="0,0,0"  />
+<line bbox="83.700,1050.840,790.185,1050.840" lineWidth="0.000" fill.color="0,0,0"  stroke.color="0,0,0"  />
+<line bbox="84.600,1090.860,790.185,1090.860" lineWidth="0.000" fill.color="0,0,0"  stroke.color="0,0,0"  />
+<line bbox="603.960,928.680,603.960,894.000" lineWidth="0.000" fill.color="0,0,0"  stroke.color="0,0,0"  />
+<line bbox="403.260,928.740,403.260,894.660" lineWidth="0.000" fill.color="0,0,0"  stroke.color="0,0,0"  />
+<line bbox="694.560,929.640,694.560,894.060" lineWidth="0.000" fill.color="0,0,0"  stroke.color="0,0,0"  />
+<line bbox="209.400,894.540,209.400,929.640" lineWidth="0.000" fill.color="0,0,0"  stroke.color="0,0,0"  />
+<line bbox="306.780,894.540,306.780,928.740" lineWidth="0.000" fill.color="0,0,0"  stroke.color="0,0,0"  />
+<rect bbox="346.980,928.260,392.580,912.720" lineWidth="0.000" fill.color="57671,57671,57671"  stroke.color="0,0,0" />
+<line bbox="504.120,893.640,504.120,928.740" lineWidth="0.000" fill.color="0,0,0"  stroke.color="0,0,0"  />
+<line bbox="604.020,929.820,604.020,1129.620" lineWidth="0.000" fill.color="0,0,0"  stroke.color="0,0,0"  />
+<rect bbox="325.800,854.940,447.300,717.240" lineWidth="0.000" fill.color="0,0,0"  stroke.color="0,0,0" />
+<rect bbox="306.900,1129.620,403.200,930.600" lineWidth="0.000" fill.color="0,0,0"  stroke.color="0,0,0" />
+<rect bbox="209.700,1129.620,306.900,930.600" lineWidth="0.000" fill.color="0,0,0"  stroke.color="0,0,0" />
+</page>
+</pdf2xml>
