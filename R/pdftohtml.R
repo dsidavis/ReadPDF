@@ -1,5 +1,6 @@
 
 convertPDF2XML =
+    # Convert a PDF document to XML using stdout
 function(file, pdftohtml = getOption("PDFTOHTML", Sys.getenv("PDFTOHTML", 'pdftohtml')))
 {
       # -q - quiet
@@ -16,6 +17,7 @@ function(file, pdftohtml = getOption("PDFTOHTML", Sys.getenv("PDFTOHTML", 'pdfto
 }
 
 xmlParsePDFTOTHML =
+    # Parse the pdftohtml document
 function(file, ...)
 {
     doc = xmlParse(file, ...)
