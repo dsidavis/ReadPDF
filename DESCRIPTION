@@ -1,0 +1,10 @@
+Package: ReadPDF
+Title: Extract Information from PDF Documents
+Version: 0.1-0
+Description: This is a package to read PDF documents
+Author: Duncan Temple Lang et al....
+Maintainer: Duncan Temple Lang <duncan@r-project.org>
+License: BSD_3_clause + file LICENSE
+Depends: XML (>= 3.99.0)
+System: Modified version of pdftohtml available at 
+   https://github.com:dsidavis/pdftohtml
