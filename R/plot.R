@@ -27,6 +27,8 @@ function(f, pageNum = 1, doc = xmlParse(f), page = getNodeSet(doc, "//page")[[pa
 {
   if(is(f, "XMLInternalDocument") && missing(doc))
       doc = f
+  else if(missing(pageNum) && is(f, "XMLInternalElementNode") && xmlName(f) == "page")
+      page = f
   
   renderPage(page, ...)
 }
@@ -102,13 +104,16 @@ getBBox =
     #
     # This bbox function expects an attribute named bbox
     #
-function(nodes)
+function(nodes, asDataFrame = FALSE)
 {   
     tmp = sapply(nodes, xmlGetAttr, "bbox")
     els = strsplit(tmp, ",")
     bb = matrix(as.numeric(unlist(els)), , 4, byrow = TRUE)
     colnames(bb) = c("x0", "y0", "x1", "y1")
-    bb
+    if(asDataFrame) 
+       as.data.frame(bb)
+    else
+       bb
 }
 
 

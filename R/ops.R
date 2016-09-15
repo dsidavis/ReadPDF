@@ -7,6 +7,10 @@ function(page)
 
 
 flattenPages =
+    #
+    # remove the <page> nodes and elevate the children of each page to the same level.
+    # This helps when we don't want to have to deal separately with content that flows across pages
+    #  However, the y coordinates are messed up in successive pages as they start from 0 again.
 function(doc)
 {
   pgs = getNodeSet(doc, "//page")

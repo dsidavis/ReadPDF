@@ -1,5 +1,3 @@
-library(ReadPDF)
-
 if(FALSE) {
 doc = xmlParsePDFTOTHML("2ColPaper.xml")
 

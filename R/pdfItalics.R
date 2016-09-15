@@ -1,8 +1,19 @@
 
 getItalics =
-function(doc = xmlParsePDFTOTHML("../../pdftohtml/examples/Italics.xml"))
+function(doc = xmlParsePDFTOTHML("../../pdftohtml/examples/Italics.xml"), useHeuristics = TRUE)
 {    
     italics = getNodeSet(doc, "//fontspec[@isItalic = '1']")
+    if(length(italics) == 0 && !useHeuristics)
+        return(NULL)
+
+    if(length(italics) == 0) {
+        # So using heuristics, i.e. the name of the font rather than the flags in the PDF for the font.
+       fonts = getNodeSet(doc, "//fontspec")
+       names = sapply(fonts, xmlGetAttr, "name")
+       w = grepl("I$|Italic|Itl", names)
+       italics = fonts[w]
+    }
+
     if(length(italics) == 0)
         return(NULL)
     
@@ -23,3 +34,5 @@ function(doc)
                             names(iids), iids, SIMPLIFY = FALSE)
    df
 }
+
+
