@@ -1,1 +1,10 @@
 exportPattern(".*")
+
+
+export(pdfText, pdf_text)
+
+export(getTextFonts, getFontInfo)
+
+
+export(bodyLine)
+    
