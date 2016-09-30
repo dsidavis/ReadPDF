@@ -26,7 +26,7 @@ pdfText = pdf_text =
 function(doc)
 {
    if(is.character(doc))
-      doc = xmlParsePDFTOTHML(doc)
+      doc = xmlParsePDFTOHTML(doc)
    
    lapply(getPages(doc), getTextByCols)
 }

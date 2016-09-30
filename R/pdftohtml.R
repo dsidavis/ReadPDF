@@ -12,7 +12,7 @@ function(file, pdftohtml = getOption("PDFTOHTML", Sys.getenv("PDFTOHTML", 'pdfto
       # -q - quiet
       # -xml - convert to xml
       # No -c with -stdout!!!
-    cmd = sprintf("%s -q -xml -stdout '%s'", pdftohtml, file)
+    cmd = sprintf("%s -q -xml -stdout '%s'", pdftohtml, path.expand(file))
 
     out = system(cmd, intern = TRUE)
     

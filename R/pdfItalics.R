@@ -1,7 +1,13 @@
 
 getItalics =
+    #
+    # get the text that are in italics.
+    #
 function(doc = xmlParsePDFTOTHML("../../pdftohtml/examples/Italics.xml"), useHeuristics = TRUE)
-{    
+{
+    if(is.character(doc))
+       doc = xmlParsePDFTOHTML(doc)
+    
     italics = getNodeSet(doc, "//fontspec[@isItalic = '1']")
     if(length(italics) == 0 && !useHeuristics)
         return(NULL)
