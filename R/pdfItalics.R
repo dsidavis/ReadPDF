@@ -1,4 +1,3 @@
-
 getItalics =
     #
     # get the text that are in italics.
@@ -42,3 +41,9 @@ function(doc)
 }
 
 
+
+textByFont =
+function(doc, font)
+{
+   getNodeSet(doc, sprintf("//text[@font = '%s']", font))
+}

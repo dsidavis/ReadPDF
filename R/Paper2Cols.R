@@ -1,3 +1,6 @@
+#3 column example /Users/duncan/DSIProjects/Zoonotics/NewData_Feb2017/Zoo_02_02_2017 Copy.Data/PDF/2586849323
+
+
 if(FALSE) {
 doc = xmlParsePDFTOTHML("2ColPaper.xml")
 
@@ -40,7 +43,10 @@ getTextByCols =
     #  The nodes that are a little further to the right of the majority are indenations of the
     # first line in a paragraph, like this sentence!
     #
-function(p, threshold = .1)
+    #  Need to identify blocks of text that span the entire page and those that are columnar.
+    #
+    #
+function(p, threshold = .1, asNodes = FALSE)
 {
     txtNodes = getNodeSet(p, ".//text")
     bb = getBBox2(txtNodes)
@@ -52,8 +58,12 @@ function(p, threshold = .1)
     # or change cut to be include.lowest = TRUE
     breaks = as.numeric(names(tt [ tt > nrow(bb)*threshold])) - 2
 
-    cols = split(bb, cut(bb$left, c(0, breaks[-1], Inf)))
-    cols = sapply(cols, function(x) paste(x$text[ order(x$top) ], collapse = "\n"))
+    if(asNodes) {
+        split(txtNodes, cut(bb$left, c(0, breaks[-1], Inf)))
+    } else {
+        cols = split(bb, cut(bb$left, c(0, breaks[-1], Inf)))
+        cols = sapply(cols, function(x) paste(x$text[ order(x$top) ], collapse = "\n"))
+    }
 }
 
 
@@ -100,4 +110,32 @@ function(doc)
 
    # is there the same y0 (or y1) on each page for these lines
    table(hll[, "y1"])
+}
+
+
+
+
+# See ~/Davis/UCDSISR/R/ for getTranscriptCourses2
+
+getPageLines =
+function(page, center = 465, nodes = getNodeSet(page, "./text"), bbox = getBBox2(nodes))
+{
+    cols = rev(split(as.data.frame(bbox), bbox[,"left"] < center))
+    tmp = lapply(cols, reassembleLines)
+    tmp = lapply(cols, reassembleLines)
+    colLines = lapply(tmp, function(x) sapply(x, function(x) paste(rownames(x), collapse = " ")))    
+}
+
+reassembleLines =
+function(box)
+{    
+   by(box, box$top, assembleLine)
+}
+
+
+assembleLine =
+function(els)
+{
+   o = order(els$left)
+   els[o,]
 }

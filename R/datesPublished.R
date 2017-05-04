@@ -1,3 +1,4 @@
+#  See  ~/DSIProjects/Zoonotics/PublicationDate.R for a better version.
 getDatePublished =
 function(doc)
 {    
@@ -5,7 +6,6 @@ function(doc)
    if(length(nodes) == 0)
        return(NULL)
 
-#   browser()
    txt = sapply(nodes, xmlValue)
    e = strsplit(unlist(strsplit(txt, " / ")), ":")
    structure(XML:::trim(sapply(e, `[[`, 2)), names = XML:::trim(sapply(e, `[[`, 1)))
