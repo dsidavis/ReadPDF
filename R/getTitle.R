@@ -2,12 +2,23 @@
 # There is a 43 point font. That is one character that starts the text and spans 2 lines of text.
 #
 
+getDocTitleString =
+function(f)
+   paste(sapply(getDocTitle(f), function(x) if(is.character(x)) x else xmlValue(x)), collapse = " ")
+
 getDocTitle =
 function(file, page = 1, doc = xmlParse(file))
 {
   if(missing(doc) && is(file, "XMLInternalDocument"))
       doc = file
 
+  meta = getNodeSet(doc, "//docinfo/META[@name = 'title']")
+  if(length(meta)) {
+     ti = xmlGetAttr(meta[[1]], "content") 
+     if(!grepl("^doi:", ti))
+        return( ti )
+  }
+  
   if(missing(page) && length(getNodeSet(doc, "//ulink[starts-with(@url, 'http://www.researchgate.net')]")) > 0)
       page = 2
   
@@ -20,7 +31,7 @@ function(file, page = 1, doc = xmlParse(file))
   fonts = getFontInfo(p1)
   if(is.null(fonts))
      return(NULL)
-  m = which.max(fonts$size)
+  m = which(fonts$size == max(fonts$size))
   mx = fonts$size[m]
   id = fonts[m, "id"]
   txt = getFontText(p1, id)
@@ -49,8 +60,9 @@ function(file, page = 1, doc = xmlParse(file))
 isTitleBad =
     # Takes 
 function(txtNodes, minWords = 3)
-{    
-   length(strsplit(paste(sapply(txtNodes, xmlValue), collapse = ""), " ")[[1]]) < minWords     
+{
+   txt = paste(sapply(txtNodes, xmlValue), collapse = "")
+   grepl("Journal of", txt) || length(strsplit(txt, " ")[[1]]) < minWords     
 }
 
 getFontText =
