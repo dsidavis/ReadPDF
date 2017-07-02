@@ -8,3 +8,10 @@ export(getTextFonts, getFontInfo)
 
 export(bodyLine)
     
+
+
+export(getPageFooter)
+
+
+export(getDocTitle, getDocTitleString)
+

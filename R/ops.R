@@ -1,3 +1,8 @@
+getPageHeight =
+function(page)
+{
+   as.integer( xmlGetAttr(page, "height") )
+}
 
 getPageWidth =
 function(page)
