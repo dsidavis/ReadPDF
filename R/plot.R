@@ -46,13 +46,13 @@ function(page, cex.text = 1, adj = c(0, 1), showText = TRUE)
     h = psize[1]
 
     plot(0, type = "n", xlab = "", ylab = "", xlim = c(0, psize[2]), ylim = c(0, psize[1]))
-    title(sprintf("%s, page %s", docName(page), xmlGetAttr(page, "number")))
+    title(sprintf("%s, page %s", URLdecode(docName(page)), xmlGetAttr(page, "number")))
     
     rr = getNodeSet(page, ".//rect ")
     if(length(rr)) {
         bb = getBBox(rr)
-        col = sapply(rr, function(x) mkColor(xmlGetAttr(x, "fill.color"), isFill = TRUE))
-        lwd = max(1, as.numeric(sapply(rr, function(x) xmlGetAttr(x, "lineWidth"))))
+        col = sapply(rr, function(x) mkColor(xmlGetAttr(x, "fill.color", "0,0,0"), isFill = TRUE))
+        lwd = max(1, as.numeric(sapply(rr, function(x) xmlGetAttr(x, "lineWidth", "1.0"))))
         rect(bb[,1], h - bb[,2], bb[,3], h - bb[,4], border = "green", col = col, lwd = lwd)
     }
 
@@ -62,7 +62,7 @@ function(page, cex.text = 1, adj = c(0, 1), showText = TRUE)
                 function(i) {
                      at = xmlAttrs(lines[[i]])
                      lines(bb[i, c(1,3)], h - bb[i, c(2, 4)], col = mkColor(at["stroke.color"]),
-                               lwd = max(1, as.numeric(at["lineWidth"])))
+                               lwd = max(1, as.numeric(at["lineWidth"], na.rm = TRUE)))
                 })
         # lines(bb[,1], h - bb[,2], bb[,3], h-bb[,4], col = "red")
     }
@@ -93,6 +93,9 @@ mkColor =
     # This could be, but is not vectorized.
 function(x, alpha = maxColorValue, maxColorValue = 2^16,  isFill = FALSE)
 {
+   if(is.null(x) || x == "" || is.na(x))
+       return(rgb(0, 0, 0))
+    
    els = as.integer(strsplit(x, ",")[[1]])
    if(isFill && all(els == 0))
        NA
