@@ -1,4 +1,5 @@
 exportPattern(".*")
+import(XML)
 
 
 export(pdfText, pdf_text)
