@@ -15,7 +15,7 @@ function(file, page = 1, doc = xmlParse(file))
   meta = getNodeSet(doc, "//docinfo/META[@name = 'title']")
   if(length(meta)) {
      ti = xmlGetAttr(meta[[1]], "content") 
-     if(!grepl("^doi:", ti))
+     if(!grepl("^doi:", ti) && !isTitleBad(ti))
         return( ti )
   }
   
@@ -39,6 +39,13 @@ function(file, page = 1, doc = xmlParse(file))
   if(all(nchar(sapply(txt, xmlValue)) == 1)) {
     # XXX Need to deal with the first letter in each word being different.
   }
+
+
+#
+# getFontText() should reassemble text across lines, etc. and return
+# the elements that are separate.
+#
+
       
   while( (length(txt) == 1 && nchar(names(txt)) == 1) ||
           isTitleBad(txt)) {  
@@ -58,12 +65,27 @@ function(file, page = 1, doc = xmlParse(file))
 }
 
 isTitleBad =
-    # Takes 
+function(txtNodes, minWords = 3)
+ UseMethod("isTitleBad")
+
+isTitleBad.list =  isTitleBad.XMLNodeSet =
 function(txtNodes, minWords = 3)
 {
    txt = paste(sapply(txtNodes, xmlValue), collapse = "")
-   grepl("Journal of", txt) || length(strsplit(txt, " ")[[1]]) < minWords     
+   isTitleBad(txtNodes, minWords)
 }
+
+isTitleBad.XMLInternalNode =
+function(txtNodes, minWords = 3)
+  isTitleBad(xmlValue(txtNodes), minWords)
+
+isTitleBad.character =
+function(txtNodes, minWords = 3)
+   grepl("Journal of", txt) || length(strsplit(txt, " ")[[1]]) < minWords     
+
+
+
+#################
 
 getFontText =
 function(page, fontID)
