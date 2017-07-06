@@ -34,7 +34,7 @@ function(file, page = 1, doc = xmlParse(file), meta = TRUE)
       }
   }
   
-  if(missing(page) && length(getNodeSet(doc, "//ulink[starts-with(@url, 'http://www.researchgate.net')]")) > 0)
+  if(missing(page) && length(getNodeSet(doc, "//ulink[starts-with(@url, 'https://www.researchgate.net')]")) > 0)
       page = 2
   
      # handle case where the first page is a cover sheet
@@ -62,9 +62,22 @@ function(file, page = 1, doc = xmlParse(file), meta = TRUE)
 # the elements that are separate.
 #
 
-  ctr = 1L    
-  while( (length(txt) == 1 && nchar(names(txt)) == 1) ||
-          isTitleBad(txt)) {  
+  isElsevier = isElsevierDoc(doc)
+  if(isElsevier) {
+      tt = names(txt)
+      if(grepl("Journal", tt[1]))
+          tt = tt[-1]
+      return(paste(tt, collapse = " "))
+  }
+  
+  ctr = 1L
+
+  if(!all(w <- isTitleBad(txt))) {
+      return(paste(names(txt[!w]), collapse = " "))
+  }
+      
+  
+  while( (length(txt) == 1 && nchar(names(txt)) == 1) || all(w <- isTitleBad(txt))) {  
       # then a single character that is very large
       # get second largest font and
 
@@ -81,6 +94,19 @@ function(file, page = 1, doc = xmlParse(file), meta = TRUE)
   txt
 }
 
+isElsevierDoc =
+function(doc)
+{
+    length(getNodeSet(doc, "//text[ contains(lower-case(.), 'elsevier')]")) > 0
+}
+
+isResearchGate =
+function(doc)
+{
+    length(getNodeSet(doc, "//text[contains(., 'www.researchgate.net')]")) > 0
+}
+
+
 isMetaTitleFilename =
 function(ti)
 {
@@ -95,6 +121,11 @@ function(txtNodes, minWords = 3, filename = "")
 isTitleBad.list = isTitleBad.XMLNodeSet =
 function(txtNodes, minWords = 3, filename = "")
 {
+   w = sapply(txtNodes, isTitleBad, minWords, filename)
+   if(!all(w))
+       return(w)
+       
+# Maybe put these back in if the above doesn't discriminate well.   
    txt = paste(sapply(txtNodes, xmlValue), collapse = "")
    isTitleBad(txt, minWords)
 }
@@ -106,7 +137,7 @@ function(txtNodes, minWords = 3, filename = "")
 isTitleBad.character =
 function(txtNodes, minWords = 3, filename = "")
 {    
-   grepl("Journal of|Science Journals", txtNodes) || length(strsplit(txtNodes, " ")[[1]]) < minWords
+   grepl("Volume [0-9]+|ournal of|Science Journals", txtNodes) || length(strsplit(txtNodes, " ")[[1]]) < minWords
 }
 
 
