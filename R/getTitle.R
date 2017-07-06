@@ -28,7 +28,7 @@ function(file, page = 1, doc = xmlParse(file), meta = TRUE)
           ti = xmlGetAttr(meta[[1]], "content")
              # The first grepl() detects the name of the file. Should compare with docName(doc)
              #  !grepl("PDF/[0-9]+/", ti)          
-          if(!grepl("PDF/PDF", ti) && gsub("\\.xml", "", basename(URLdecode(ti))) != basename(ti) &&
+          if(!grepl("PDF/PDF", ti) && !isMetaTitleFilename(ti) &&
                !grepl("^doi:", ti) && !isTitleBad(ti))
               return( ti )
       }
@@ -79,6 +79,13 @@ function(file, page = 1, doc = xmlParse(file), meta = TRUE)
   }
 
   txt
+}
+
+isMetaTitleFilename =
+function(ti)
+{
+  length(gregexpr("/", ti)[[1]]) >= 3 && 
+      gsub("\\.xml", "", basename(URLdecode(ti))) != basename(ti) 
 }
 
 isTitleBad =
