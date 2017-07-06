@@ -3,20 +3,35 @@
 #
 
 getDocTitleString =
-function(f)
-   paste(sapply(getDocTitle(f), function(x) if(is.character(x)) x else xmlValue(x)), collapse = " ")
+function(f, nodes = getDocTitle(f))
+   paste(sapply(nodes, function(x) if(is.character(x)) x else xmlValue(x)), collapse = " ")
 
 getDocTitle =
-function(file, page = 1, doc = xmlParse(file))
+    #
+    # We may want to determine if this is scanned, and if so, does it have a cover page.
+    #
+    #  Identify a journal name and discard this from the results (after the meta)
+    # e.g. "LatestDocs/PDF/2143276081/Kamhieh-2006-Borna disease virus (BDV) infect1.xml" - Veterinary Quaterly.
+    # We can hard code these, but let's try to learn from the headers and footers.
+    # 
+    #
+    #  See 1599857215/Learned-2005-Extended interhuman transmission.xml for a title in the meta that is just the name of the file.
+    #
+function(file, page = 1, doc = xmlParse(file), meta = TRUE)
 {
   if(missing(doc) && is(file, "XMLInternalDocument"))
       doc = file
 
-  meta = getNodeSet(doc, "//docinfo/META[@name = 'title']")
-  if(length(meta)) {
-     ti = xmlGetAttr(meta[[1]], "content") 
-     if(!grepl("^doi:", ti) && !isTitleBad(ti))
-        return( ti )
+  if(meta) {
+      meta = getNodeSet(doc, "//docinfo/META[@name = 'title']")
+      if(length(meta)) {
+          ti = xmlGetAttr(meta[[1]], "content")
+             # The first grepl() detects the name of the file. Should compare with docName(doc)
+             #  !grepl("PDF/[0-9]+/", ti)          
+          if(!grepl("PDF/PDF", ti) && gsub("\\.xml", "", basename(URLdecode(ti))) != basename(ti) &&
+               !grepl("^doi:", ti) && !isTitleBad(ti))
+              return( ti )
+      }
   }
   
   if(missing(page) && length(getNodeSet(doc, "//ulink[starts-with(@url, 'http://www.researchgate.net')]")) > 0)
@@ -34,6 +49,7 @@ function(file, page = 1, doc = xmlParse(file))
   m = which(fonts$size == max(fonts$size))
   mx = fonts$size[m]
   id = fonts[m, "id"]
+  
   txt = getFontText(p1, id)
 
   if(all(nchar(sapply(txt, xmlValue)) == 1)) {
@@ -46,7 +62,7 @@ function(file, page = 1, doc = xmlParse(file))
 # the elements that are separate.
 #
 
-      
+  ctr = 1L    
   while( (length(txt) == 1 && nchar(names(txt)) == 1) ||
           isTitleBad(txt)) {  
       # then a single character that is very large
@@ -59,29 +75,32 @@ function(file, page = 1, doc = xmlParse(file))
       if(length(id) > 1 & any(fonts$isBold[w]))
           id = id[fonts$isBold[w]]
       txt = getFontText(p1, id)
+      ctr = ctr + 1L
   }
 
   txt
 }
 
 isTitleBad =
-function(txtNodes, minWords = 3)
+function(txtNodes, minWords = 3, filename = "")
  UseMethod("isTitleBad")
 
-isTitleBad.list =  isTitleBad.XMLNodeSet =
-function(txtNodes, minWords = 3)
+isTitleBad.list = isTitleBad.XMLNodeSet =
+function(txtNodes, minWords = 3, filename = "")
 {
    txt = paste(sapply(txtNodes, xmlValue), collapse = "")
-   isTitleBad(txtNodes, minWords)
+   isTitleBad(txt, minWords)
 }
 
 isTitleBad.XMLInternalNode =
-function(txtNodes, minWords = 3)
+function(txtNodes, minWords = 3, filename = "")
   isTitleBad(xmlValue(txtNodes), minWords)
 
 isTitleBad.character =
-function(txtNodes, minWords = 3)
-   grepl("Journal of", txt) || length(strsplit(txt, " ")[[1]]) < minWords     
+function(txtNodes, minWords = 3, filename = "")
+{    
+   grepl("Journal of|Science Journals", txtNodes) || length(strsplit(txtNodes, " ")[[1]]) < minWords
+}
 
 
 
