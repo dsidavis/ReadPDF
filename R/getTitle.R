@@ -17,7 +17,7 @@ getDocTitle =
     #
     #  See 1599857215/Learned-2005-Extended interhuman transmission.xml for a title in the meta that is just the name of the file.
     #
-function(file, page = 1, doc = xmlParse(file), meta = TRUE, minWords = 3)
+function(file, page = 1, doc = xmlParse(file), meta = TRUE, minWords = 1)
 {
   if(missing(doc) && is(file, "XMLInternalDocument"))
       doc = file
@@ -28,7 +28,7 @@ function(file, page = 1, doc = xmlParse(file), meta = TRUE, minWords = 3)
           ti = xmlGetAttr(meta[[1]], "content")
              # The first grepl() detects the name of the file. Should compare with docName(doc)
              #  !grepl("PDF/[0-9]+/", ti)          
-          if(!grepl("$$", ti, fixed = TRUE) && !grepl("PDF/PDF", ti) && !isMetaTitleFilename(ti, docName(doc)) &&
+          if(!grepl("$$", ti, fixed = TRUE) && !grepl("Microsoft", ti) && !grepl("PDF/PDF", ti) && !isMetaTitleFilename(ti, docName(doc)) &&
                !grepl("^doi:", ti) && !isTitleBad(ti))
               return( ti )
       }
@@ -37,7 +37,10 @@ function(file, page = 1, doc = xmlParse(file), meta = TRUE, minWords = 3)
   if(missing(page) && length(getNodeSet(doc, "//ulink[starts-with(@url, 'https://www.researchgate.net')]")) > 0)
       page = 2
 
-  if(length(getNodeSet(doc, "//text[contains(., 'www.eurosurveillance.org')]")))
+    # For what documents is this necessary - e.g. Puzelli et al
+    # But need to be more specific for this cover page as other docs, e.g., A case of Crimean-Congo Ham.... .xml doesn't
+    # have the cover page but does have the www.euro...org link.
+  if(length(getNodeSet(doc, "//page[1][./text[contains(., 'www.eurosurveillance.org')] and ./text[contains(., 'Weekly')] ]")))
       page = 2
   
      # handle case where the first page is a cover sheet
@@ -58,7 +61,7 @@ function(file, page = 1, doc = xmlParse(file), meta = TRUE, minWords = 3)
   
   txt = getFontText(p1, id)
 
-  if(all(nchar(sapply(txt, xmlValue)) == 1)) {
+  if(all(nchar(sapply(txt, xmlValue, trim = TRUE)) == 1)) {
     # XXX Need to deal with the first letter in each word being different.
   }
 
@@ -103,41 +106,6 @@ function(file, page = 1, doc = xmlParse(file), meta = TRUE, minWords = 3)
   orderByLine(txt)
 }
 
-orderByLine =
-function(nodes)
-{
-    o = order(as.numeric(sapply(nodes, xmlGetAttr, "top")))
-    nodes[o]
-}
-
-isElsevierDoc =
-function(doc)
-{
-    length(getNodeSet(doc, "//page[1]//text[ contains(lower-case(.), 'elsevier')]")) > 0
-}
-
-isResearchGate =
-function(doc)
-{
-    length(getNodeSet(doc, "//text[contains(., 'www.researchgate.net')]")) > 0
-}
-
-
-isMetaTitleFilename =
-function(ti, docName = NA)
-{
-  # return(grepl(ti, URLdecode(docName), fixed = TRUE))
-  els = strsplit(ti, "/")[[1]]
-  dels = strsplit(gsub("\\.xml$", "", URLdecode(docName)), "/")[[1]]
-  return ( all (dels[seq(length(dels) - 1, length = 2)] == els[ seq(length(els) - 1, length = 2) ] ) )
-
-          
- return (  gsub("\\.xml", "", basename(URLdecode(ti))) == els[ length(els) ] )  # ...
-         
-      
-  length(gregexpr("/", ti)[[1]]) >= 3 && 
-      gsub("\\.xml", "", basename(URLdecode(ti))) != basename(ti) 
-}
 
 isTitleBad =
 function(txtNodes, minWords = 3, filename = "")
@@ -146,8 +114,26 @@ function(txtNodes, minWords = 3, filename = "")
 isTitleBad.list = isTitleBad.XMLNodeSet =
 function(txtNodes, minWords = 3, filename = "")
 {
-  if(any( as.numeric(sapply(txtNodes, xmlGetAttr, "rotation", 0.)) != 0.0))
+     # One document (  o0628126814/Chochlakis-2010-Human%20anaplasmosis%20and%20anaplas.xml)
+     # uses rotation as a form of italics. So we don't check for non-zero rotation, but > 16
+  if(any( as.numeric(sapply(txtNodes, xmlGetAttr, "rotation", 0.)) > 16))
       return(TRUE)
+
+    # Check to see if this is really a watermark, etc. at the extreme of  a page, e.g.
+    # 3364361467/Majumder-2016-Utilizing Nontraditional Data So.xml
+#  browser()
+  pos = as.numeric(sapply(txtNodes, xmlGetAttr, "top"))
+  names(pos) = sapply(txtNodes, xmlValue)
+  
+  opos = as.numeric(unlist(getNodeSet(xmlParent(txtNodes[[1]]), ".//text/@top")))
+  names(opos) = xpathSApply(xmlParent(txtNodes[[1]]), ".//text", xmlValue)
+  i = match(names(pos), names(opos))
+#  w = pos <= max(opos[ - i ])
+# how many text nodes are below the txtNodes.
+  w = opos[-i] > min(pos)
+  if(sum(w) < 5)
+     return(TRUE)
+  
     
 if(FALSE) {    
    w = sapply(txtNodes, isTitleBad, minWords, filename)
@@ -166,7 +152,8 @@ function(txtNodes, minWords = 3, filename = "")
 
 isTitleBad.character =
 function(txtNodes, minWords = 3, filename = "")
-{    
+{
+  txtNodes = XML:::trim(txtNodes)
   nchar(txtNodes) < 6 || txtNodes %in% c("NIH Public Access", "Letter to the Editor", "Special Report  Rapport spÃ©cial", "W J C C") ||
      grepl("Rapid Communications|Research Articles|Weekly issue|Vol\\.[0-9]+|Volume [0-9]+|ournal of|Science Journals", txtNodes) || length(strsplit(txtNodes, " ")[[1]]) < minWords
 }
@@ -202,11 +189,18 @@ function(page)
 
 
 splitElsevierTitle =
+    #
+    # For an elsevier document, we want to find the
+    #     heavy black line above the title
+    # or  the large grey box at the top of the page that contains the name of the journal
+    # e.g. Kelly-2008-NIH
+    #  Lau-2007 has no grey box and no line.  So we have to do further checks on the shaded box  to see it is large enough.
+    #
 function(nodes, page)
 {
     y = as.numeric(sapply(nodes, xmlGetAttr, "top"))
     lines = getNodeSet(page, ".//line")
-    lw = as.numeric(sapply(lines, xmlGetAttr, "lineWidth"))
+    lw = as.numeric(sapply(lines, xmlGetAttr, "lineWidth", 0))
     yl = 0
     if(any(lw > 10)) {
         i = which.max(lw)
@@ -215,21 +209,69 @@ function(nodes, page)
 
         r = getNodeSet(page, ".//rect[@fill.color != '0,0,0']")
         if(length(r) > 0) {
-            yl = as.numeric(strsplit(xmlGetAttr(r[[1]], "bbox"), ",")[[1]])[2]            
+                # check the height of these rectangles to ensure they aren't just thin lines.
+            bb = t(sapply(r, function(x) as.numeric(strsplit(xmlGetAttr(x, "bbox"), ",")[[1]])))
+            i = which(abs(bb[,2] - bb[,4]) > 10)
+            if(length(i)) {
+               left = min(as.numeric(unlist(getNodeSet(page, "./text/@left"))))
+               if(bb[i[1],1] - left > 20)
+                   yl = bb[i,2][1]
+            }
         }
         
 #           # get the two images.
 #        img.dims = xpathSApply(page, ".//img", function(x) as.numeric(xmlAttrs[c("y", "width", "height")]))
         
     }
-    nodes = nodes[y > yl]
+       # if none of the nodes are above the line, don't filter. See 0809541268/Kitajima-2009-First%20detection%20of%20genotype%203%20he.xml"
+    if(any(y > yl))
+        nodes = nodes[y > yl]
     
     paste(names(nodes), collapse = " ")
 
 }
 
+
 notWord =
 function(x)
 {
   grep
+}
+
+
+
+orderByLine =
+function(nodes)
+{
+    o = order(as.numeric(sapply(nodes, xmlGetAttr, "top")))
+    nodes[o]
+}
+
+isElsevierDoc =
+function(doc)
+{
+    length(getNodeSet(doc, "//page[1]//text[ contains(lower-case(.), 'elsevier')]")) > 0
+}
+
+isResearchGate =
+function(doc)
+{
+    length(getNodeSet(doc, "//text[contains(., 'www.researchgate.net')]")) > 0
+}
+
+
+isMetaTitleFilename =
+function(ti, docName = NA)
+{
+  # return(grepl(ti, URLdecode(docName), fixed = TRUE))
+  els = strsplit(ti, "/")[[1]]
+  dels = strsplit(gsub("\\.xml$", "", URLdecode(docName)), "/")[[1]]
+  return ( all (dels[seq(length(dels) - 1, length = 2)] == els[ seq(length(els) - 1, length = 2) ] ) )
+
+          
+ return (  gsub("\\.xml", "", basename(URLdecode(ti))) == els[ length(els) ] )  # ...
+         
+      
+  length(gregexpr("/", ti)[[1]]) >= 3 && 
+      gsub("\\.xml", "", basename(URLdecode(ti))) != basename(ti) 
 }
