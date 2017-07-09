@@ -53,6 +53,6 @@ function(rects, horiz = getHorizRects(rects), width = getPageWidth(xmlParent(rec
 findNearestVerticalLine =
 function(txtPos, linePos, threshold = 10)
 {
-     abs(txtPos[2] - linePos[,2]) < threashold
+     abs(txtPos[2] - linePos[,2]) < threshold
 }
     
