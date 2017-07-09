@@ -2,7 +2,7 @@
 
 
 if(FALSE) {
-doc = xmlParsePDFTOTHML("2ColPaper.xml")
+doc = xmlParsePDFTOHTML("2ColPaper.xml")
 
 # Deal with the second page.
 p = doc[[2]]
@@ -139,3 +139,6 @@ function(els)
    o = order(els$left)
    els[o,]
 }
+
+
+
