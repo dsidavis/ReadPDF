@@ -1,4 +1,4 @@
-#  See  ~/DSIProjects/Zoonotics/PublicationDate.R for a better version.
+#  See  ~/DSIProjects/Zoonotics-shared/PublicationDate.R for a better version.
 getDatePublished =
 function(doc)
 {    
