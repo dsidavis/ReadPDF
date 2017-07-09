@@ -16,3 +16,4 @@ export(getPageFooter)
 
 export(getDocTitle, getDocTitleString)
 
+export(isScanned, isScanned2)

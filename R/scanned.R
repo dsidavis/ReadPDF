@@ -110,7 +110,7 @@ function(doc, textNodeThreshold = 10)
       return(BioOneScanned = TRUE)
 
 
-  if(length(pg) > 2 &&  length(unique(txt[-1])) == 1)
+   if(length(pg) > 2 &&  length(unique(txt[-1])) == 1)
      return(SameTextOnAllPagesExceptFirst = TRUE)
 
     # <img> nodes on each pages and put the page number as a name so we can group them by page.

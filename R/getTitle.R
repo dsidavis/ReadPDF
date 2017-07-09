@@ -17,7 +17,7 @@ getDocTitle =
     #
     #  See 1599857215/Learned-2005-Extended interhuman transmission.xml for a title in the meta that is just the name of the file.
     #
-function(file, page = 1, doc = xmlParse(file), meta = TRUE)
+function(file, page = 1, doc = xmlParse(file), meta = TRUE, minWords = 3)
 {
   if(missing(doc) && is(file, "XMLInternalDocument"))
       doc = file
@@ -28,7 +28,7 @@ function(file, page = 1, doc = xmlParse(file), meta = TRUE)
           ti = xmlGetAttr(meta[[1]], "content")
              # The first grepl() detects the name of the file. Should compare with docName(doc)
              #  !grepl("PDF/[0-9]+/", ti)          
-          if(!grepl("PDF/PDF", ti) && !isMetaTitleFilename(ti) &&
+          if(!grepl("$$", ti, fixed = TRUE) && !grepl("PDF/PDF", ti) && !isMetaTitleFilename(ti, docName(doc)) &&
                !grepl("^doi:", ti) && !isTitleBad(ti))
               return( ti )
       }
@@ -36,12 +36,18 @@ function(file, page = 1, doc = xmlParse(file), meta = TRUE)
   
   if(missing(page) && length(getNodeSet(doc, "//ulink[starts-with(@url, 'https://www.researchgate.net')]")) > 0)
       page = 2
+
+  if(length(getNodeSet(doc, "//text[contains(., 'www.eurosurveillance.org')]")))
+      page = 2
   
      # handle case where the first page is a cover sheet
   p1 = getNodeSet(doc, "//page")[[page]]
 
   if(length(getNodeSet(p1, ".//text")) == 0)
       return(list())
+
+  if(isScanned2(doc))
+      return(NA_character_)
   
   fonts = getFontInfo(p1)
   if(is.null(fonts))
@@ -64,6 +70,7 @@ function(file, page = 1, doc = xmlParse(file), meta = TRUE)
 
   isElsevier = isElsevierDoc(doc)
   if(isElsevier) {
+      return(splitElsevierTitle(txt, p1))
       tt = names(txt)
       if(grepl("Journal", tt[1]))
           tt = tt[-1]
@@ -72,12 +79,14 @@ function(file, page = 1, doc = xmlParse(file), meta = TRUE)
   
   ctr = 1L
 
-  if(!all(w <- isTitleBad(txt))) {
-      return(paste(names(txt[!w]), collapse = " "))
+  if(!all(w <- isTitleBad(txt, if(length(txt) > 1) 0 else 3))) {
+      # order them by line. They may be upside down.
+      # See 1834853125/394.full.xml
+      return(paste(names(orderByLine(txt[!w])), collapse = " "))
   }
       
   
-  while( (length(txt) == 1 && nchar(names(txt)) == 1) || all(w <- isTitleBad(txt))) {  
+  while( (length(txt) == 1 && nchar(names(txt)) == 1) || all(w <- isTitleBad(txt, minWords = minWords))) {  
       # then a single character that is very large
       # get second largest font and
 
@@ -91,13 +100,20 @@ function(file, page = 1, doc = xmlParse(file), meta = TRUE)
       ctr = ctr + 1L
   }
 
-  txt
+  orderByLine(txt)
+}
+
+orderByLine =
+function(nodes)
+{
+    o = order(as.numeric(sapply(nodes, xmlGetAttr, "top")))
+    nodes[o]
 }
 
 isElsevierDoc =
 function(doc)
 {
-    length(getNodeSet(doc, "//text[ contains(lower-case(.), 'elsevier')]")) > 0
+    length(getNodeSet(doc, "//page[1]//text[ contains(lower-case(.), 'elsevier')]")) > 0
 }
 
 isResearchGate =
@@ -108,8 +124,17 @@ function(doc)
 
 
 isMetaTitleFilename =
-function(ti)
+function(ti, docName = NA)
 {
+  # return(grepl(ti, URLdecode(docName), fixed = TRUE))
+  els = strsplit(ti, "/")[[1]]
+  dels = strsplit(gsub("\\.xml$", "", URLdecode(docName)), "/")[[1]]
+  return ( all (dels[seq(length(dels) - 1, length = 2)] == els[ seq(length(els) - 1, length = 2) ] ) )
+
+          
+ return (  gsub("\\.xml", "", basename(URLdecode(ti))) == els[ length(els) ] )  # ...
+         
+      
   length(gregexpr("/", ti)[[1]]) >= 3 && 
       gsub("\\.xml", "", basename(URLdecode(ti))) != basename(ti) 
 }
@@ -121,12 +146,17 @@ function(txtNodes, minWords = 3, filename = "")
 isTitleBad.list = isTitleBad.XMLNodeSet =
 function(txtNodes, minWords = 3, filename = "")
 {
+  if(any( as.numeric(sapply(txtNodes, xmlGetAttr, "rotation", 0.)) != 0.0))
+      return(TRUE)
+    
+if(FALSE) {    
    w = sapply(txtNodes, isTitleBad, minWords, filename)
    if(!all(w))
        return(w)
+}
        
 # Maybe put these back in if the above doesn't discriminate well.   
-   txt = paste(sapply(txtNodes, xmlValue), collapse = "")
+   txt = paste(sapply(txtNodes, xmlValue), collapse = " ")
    isTitleBad(txt, minWords)
 }
 
@@ -137,7 +167,8 @@ function(txtNodes, minWords = 3, filename = "")
 isTitleBad.character =
 function(txtNodes, minWords = 3, filename = "")
 {    
-   grepl("Volume [0-9]+|ournal of|Science Journals", txtNodes) || length(strsplit(txtNodes, " ")[[1]]) < minWords
+  nchar(txtNodes) < 6 || txtNodes %in% c("NIH Public Access", "Letter to the Editor", "Special Report  Rapport spÃ©cial", "W J C C") ||
+     grepl("Rapid Communications|Research Articles|Weekly issue|Vol\\.[0-9]+|Volume [0-9]+|ournal of|Science Journals", txtNodes) || length(strsplit(txtNodes, " ")[[1]]) < minWords
 }
 
 
@@ -145,7 +176,7 @@ function(txtNodes, minWords = 3, filename = "")
 #################
 
 getFontText =
-function(page, fontID)
+function(page, fontID, rotation = 0)
 {
   xp = sprintf(".//text[ %s ]", paste(sprintf("@font = '%s'", fontID), collapse = " or "))
   txt = getNodeSet(page, xp)
@@ -166,4 +197,39 @@ function(page)
    d[c("isItalic", "isBold", "isOblique")] = lapply(d[c("isItalic", "isBold", "isOblique")], function(x) as.logical(as.integer(x)))
 
    d
+}
+
+
+
+splitElsevierTitle =
+function(nodes, page)
+{
+    y = as.numeric(sapply(nodes, xmlGetAttr, "top"))
+    lines = getNodeSet(page, ".//line")
+    lw = as.numeric(sapply(lines, xmlGetAttr, "lineWidth"))
+    yl = 0
+    if(any(lw > 10)) {
+        i = which.max(lw)
+        yl = as.numeric(strsplit(xmlGetAttr(lines[[i]], "bbox"), ",")[[1]])[2]
+    } else {
+
+        r = getNodeSet(page, ".//rect[@fill.color != '0,0,0']")
+        if(length(r) > 0) {
+            yl = as.numeric(strsplit(xmlGetAttr(r[[1]], "bbox"), ",")[[1]])[2]            
+        }
+        
+#           # get the two images.
+#        img.dims = xpathSApply(page, ".//img", function(x) as.numeric(xmlAttrs[c("y", "width", "height")]))
+        
+    }
+    nodes = nodes[y > yl]
+    
+    paste(names(nodes), collapse = " ")
+
+}
+
+notWord =
+function(x)
+{
+  grep
 }
