@@ -2,7 +2,7 @@ getItalics =
     #
     # get the text that are in italics.
     #
-function(doc = xmlParsePDFTOTHML("../../pdftohtml/examples/Italics.xml"), useHeuristics = TRUE)
+function(doc = xmlParsePDFTOHTML("../../pdftohtml/examples/Italics.xml"), useHeuristics = TRUE)
 {
     if(is.character(doc))
        doc = xmlParsePDFTOHTML(doc)
