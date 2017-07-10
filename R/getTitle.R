@@ -3,7 +3,7 @@
 #
 
 getDocTitleString =
-function(f, nodes = getDocTitle(f))
+function(f, nodes = getDocTitle(f, ...), ...)
    paste(sapply(nodes, function(x) if(is.character(x)) x else xmlValue(x)), collapse = " ")
 
 getDocTitle =
@@ -17,7 +17,7 @@ getDocTitle =
     #
     #  See 1599857215/Learned-2005-Extended interhuman transmission.xml for a title in the meta that is just the name of the file.
     #
-function(file, page = 1, doc = xmlParse(file), meta = TRUE, minWords = 1)
+function(file, page = 1, doc = xmlParse(file), meta = FALSE, minWords = 1)
 {
   if(missing(doc) && is(file, "XMLInternalDocument"))
       doc = file
@@ -34,7 +34,8 @@ function(file, page = 1, doc = xmlParse(file), meta = TRUE, minWords = 1)
       }
   }
   
-  if(missing(page) && length(getNodeSet(doc, "//ulink[starts-with(@url, 'https://www.researchgate.net')]")) > 0)
+  if(missing(page) && (length(getNodeSet(doc, "//ulink[starts-with(@url, 'https://www.researchgate.net')]")) > 0  ||
+                        length(getNodeSet(doc, "//page[1]//text[. = 'PLEASE SCROLL DOWN FOR ARTICLE']")) > 0 ))
       page = 2
 
     # For what documents is this necessary - e.g. Puzelli et al
@@ -72,12 +73,12 @@ function(file, page = 1, doc = xmlParse(file), meta = TRUE, minWords = 1)
 #
 
   isElsevier = isElsevierDoc(doc)
-  if(isElsevier) {
+  if(isElsevier && !isTitleBad(txt)) {
       return(splitElsevierTitle(txt, p1))
-      tt = names(txt)
-      if(grepl("Journal", tt[1]))
-          tt = tt[-1]
-      return(paste(tt, collapse = " "))
+#     tt = names(txt)
+#     if(grepl("Journal", tt[1]))
+#         tt = tt[-1]
+#     return(paste(tt, collapse = " "))
   }
   
   ctr = 1L
@@ -85,7 +86,14 @@ function(file, page = 1, doc = xmlParse(file), meta = TRUE, minWords = 1)
   if(!all(w <- isTitleBad(txt, if(length(txt) > 1) 0 else 3))) {
       # order them by line. They may be upside down.
       # See 1834853125/394.full.xml
-      return(paste(names(orderByLine(txt[!w])), collapse = " "))
+      txt = orderByLine(txt[!w])
+        # Make certain to get the rest of the text in the tile that may be in a different font.
+        # See why we are doing this in 4214927259/A case of Crimean-Congo haemorrhagic fever in.xml
+        # 
+      tmp = mkLines(txt, p1)
+      title = paste(sapply(tmp, function(x) paste(if(is.list(x)) sapply(x, xmlValue) else xmlValue(x), collapse = " ")), collapse = "\n")
+      return(title)
+#      return(paste(names(txt), collapse = " "))
   }
       
   
@@ -99,6 +107,10 @@ function(file, page = 1, doc = xmlParse(file), meta = TRUE, minWords = 1)
          # if multiple ones, see if any are bold and restrict to that.
       if(length(id) > 1 & any(fonts$isBold[w]))
           id = id[fonts$isBold[w]]
+
+      if(length(id) == 0)
+          break  #XXXX
+         
       txt = getFontText(p1, id)
       ctr = ctr + 1L
   }
@@ -151,11 +163,16 @@ function(txtNodes, minWords = 3, filename = "")
   isTitleBad(xmlValue(txtNodes), minWords)
 
 isTitleBad.character =
-function(txtNodes, minWords = 3, filename = "")
+function(txtNodes, minWords = 3, filename = "", lowerCase = TRUE)
 {
+#  txtNodes = tolower(txtNodes)
   txtNodes = XML:::trim(txtNodes)
-  nchar(txtNodes) < 6 || txtNodes %in% c("NIH Public Access", "Letter to the Editor", "Special Report  Rapport spÃ©cial", "W J C C") ||
-     grepl("Rapid Communications|Research Articles|Weekly issue|Vol\\.[0-9]+|Volume [0-9]+|ournal of|Science Journals", txtNodes) || length(strsplit(txtNodes, " ")[[1]]) < minWords
+  nchar(txtNodes) < 6 ||
+  grepl("Letters? to the Editor", txtNodes, ignore.case = lowerCase) ||
+  grepl("table of contents", txtNodes) ||
+  txtNodes %in% c("KEYWORDS", "ScienceDirect", "Occasional Papers", "HHS Public Access", "Newsdesk", "Case Report", "LETTERS", "No Job Name", "NIH Public Access", "Special Report  Rapport spÃ©cial", "W J C C") ||
+  grepl("Rapid Communications|Research Articles|Weekly issue|Vol\\.[0-9]+|Volume [0-9]+|ournal of|Science Journals", txtNodes) ||
+  length(strsplit(txtNodes, " ")[[1]]) < minWords
 }
 
 
@@ -274,4 +291,39 @@ function(ti, docName = NA)
       
   length(gregexpr("/", ti)[[1]]) >= 3 && 
       gsub("\\.xml", "", basename(URLdecode(ti))) != basename(ti) 
+}
+
+
+###########################
+#
+#XXX
+#
+#  These functions look for text at approximately the same line and includes them.
+#
+# These are a little too liberal. They don't check the content is close to the original txt nodes.
+#  So we can have text on one side of the page at the same "height" be connected to that on the right.
+#  See 0007787963/Ko-2010-Prevalence of tick-borne encephalitis.xml
+#
+mkLines =
+function(txt, page)
+{
+    pos = unique(as.numeric(sapply(txt, xmlGetAttr, "top")))
+    h = max(as.numeric(sapply(txt, xmlGetAttr, "height")))    
+    sapply(pos, mkLine, page, h)
+}
+
+mkLine =
+  # getDocTitle("4214927259/A case of Crimean-Congo haemorrhagic fever in.xml")
+function(pos, page, height)
+{
+# Could do this in XPath, but don't have abs() there.    
+#   getNodeSet(page, sprintf("./text[@top = %f]", pos))
+# So get the Bounding boxes for all text nodes.
+#
+    
+    textNodes = getNodeSet(page, "./text")
+    bb = getBBox2(textNodes)
+              # added test that the height of any matching element is at least 70% of the original title node.
+    w = abs(pos - bb[, "top"]) < .33*height & bb[, "height"]/height > .7
+    textNodes[w]
 }
