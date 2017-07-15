@@ -17,7 +17,7 @@ getDocTitle =
     #
     #  See 1599857215/Learned-2005-Extended interhuman transmission.xml for a title in the meta that is just the name of the file.
     #
-function(file, page = 1, doc = xmlParse(file), meta = FALSE, minWords = 1)
+function(file, page = 1, doc = xmlParse(file), meta = FALSE, minWords = 1, ...)
 {
   if(missing(doc) && is(file, "XMLInternalDocument"))
       doc = file
@@ -126,7 +126,7 @@ function(txtNodes, minWords = 3, filename = "")
 isTitleBad.list = isTitleBad.XMLNodeSet =
 function(txtNodes, minWords = 3, filename = "")
 {
-     # One document (  o0628126814/Chochlakis-2010-Human%20anaplasmosis%20and%20anaplas.xml)
+     # One document (  0628126814/Chochlakis-2010-Human%20anaplasmosis%20and%20anaplas.xml)
      # uses rotation as a form of italics. So we don't check for non-zero rotation, but > 16
   if(any( as.numeric(sapply(txtNodes, xmlGetAttr, "rotation", 0.)) > 16))
       return(TRUE)
