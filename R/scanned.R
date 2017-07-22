@@ -74,7 +74,7 @@ isScanned =
     # See /Users/duncan/DSIProjects/Zoonotics-shared/NewData_Feb2017/Zoo_02_02_2017 Copy.Data/PDF/0201749332/Aviles-1992-Transmission of western equine enc.xml
     #  Scanned but there is text on the side rotated 270 degrees.
     # XXpdftohtml doesn't seem to have the rotation. Add this.
-function(doc, textNodeThreshold = 10)
+function(doc, checkFuns = NULL, textNodeThreshold = 10)
 {
   if(is.character(doc))
      doc = xmlParse(doc)
@@ -106,9 +106,22 @@ function(doc, textNodeThreshold = 10)
    if(length(unique(unlist(txt))) == 1)
       return(SameTextOnAllPages = TRUE)
 
-   if(isBioOne(doc) && all(sapply(txt[-1], length) == 0))
-      return(BioOneScanned = TRUE)
-
+  # Run the user specified check functions that handle specific
+  # documents, e.g., BioOne, ResearchGate, etc.
+   if(!is.null(checkFuns)) {
+       if(is.function(checkFuns))
+           ans = checkFuns(doc)
+       else
+           for(f in checkFuns) {
+               ans = f(doc)
+               if(ans)
+                  break
+           }
+       if(ans)
+         return(ans)
+#     if(isBioOne(doc) && all(sapply(txt[-1], length) == 0))
+#      return(BioOneScanned = TRUE)
+   }
 
    if(length(pg) > 2 &&  length(unique(txt[-1])) == 1)
      return(SameTextOnAllPagesExceptFirst = TRUE)
