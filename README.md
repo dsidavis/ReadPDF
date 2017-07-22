@@ -7,8 +7,14 @@ The functionality includes
 + parsing the document with an associated class
 + easy access to pages as if the document were a list, e.g. doc[[1]]
 + loop over the pages with lapply()/sapply()
-+ display the contents of a page, including lines, rectangles, image boxes, 
 + extract the title of the document
 + extract the dates an academic article was submitted, revised, published
 + determine if the PDF  document was scanned
++ get the header and footer for pages
++ get the text or words for a page or entire document
++ get the text arranged by column
++ get the location for each text segment
++ get font information for each piece of text
++ display the contents of a page, including lines, rectangles, image boxes, 
+
 
