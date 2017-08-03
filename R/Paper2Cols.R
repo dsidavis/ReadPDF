@@ -49,21 +49,27 @@ getTextByCols =
 function(p, threshold = .1, asNodes = FALSE)
 {
     txtNodes = getNodeSet(p, ".//text")
-    bb = getBBox2(txtNodes)
-    bb = as.data.frame(bb)
+    bb = as.data.frame(getBBox2(txtNodes))
     bb$text = sapply(txtNodes, xmlValue)
-
-    tt = table(bb$left)
-    # Subtract 2 so that we start slightly to the left of the second column to include those starting points
-    # or change cut to be include.lowest = TRUE
-    breaks = as.numeric(names(tt [ tt > nrow(bb)*threshold])) - 2
-
+    breaks = getColPositions( threshold = threshold, bbox = bb)
+    
     if(asNodes) {
         split(txtNodes, cut(bb$left, c(0, breaks[-1], Inf)))
     } else {
         cols = split(bb, cut(bb$left, c(0, breaks[-1], Inf)))
         cols = sapply(cols, function(x) paste(x$text[ order(x$top) ], collapse = "\n"))
     }
+}
+
+getColPositions =
+function(p, threshold = .1, txtNodes = getNodeSet(p, ".//text"), bbox = getBBox2(txtNodes))
+{
+    bbox = as.data.frame(bbox)
+
+    tt = table(bbox$left)
+    # Subtract 2 so that we start slightly to the left of the second column to include those starting points
+    # or change cut to be include.lowest = TRUE
+    as.numeric(names(tt [ tt > nrow(bbox)*threshold])) - 2
 }
 
 
