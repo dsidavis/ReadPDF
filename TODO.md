@@ -8,3 +8,24 @@
   the lines.
   Have to deal with spanning 2 columns and may not be part of the title and many other issues.
   e.g. 1834853125/394.full.xml  
+
+
++ getColPositions:  when first line of paragraph is indented, we don't get the critical mass at the
+  same point.
+  See 0337534517/Andriamandimby-2011-Crimean-Congo%20hemorrhagic.xml
+
++ Reassemble the elements of a word, line, paragraph from the different <text> elements
+  See code we had in an earlier package for this.
+  
++ Identify section starts and ends, i.e. section titles.
+
++ For 2 or more columns, detect the part which is only one column spanning the entire page.
+
++ Detect 2 columns when one is mostly a figure and not words.
+  Figure out columns for all pages and correct if one or two pages seems to be single column.
+
+
+
+# Done
+
++ [Done] Find font for the majority of the text.

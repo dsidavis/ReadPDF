@@ -18,3 +18,28 @@ export(getDocTitle, getDocTitleString)
 
 export(isScanned, isScanned2)
 export(getColPositions)
+
+export(lapply, sapply)
+exportMethods(lapply)
+exportMethods(sapply)
+
+export(length)
+exportMethods(length)
+
+export(dim)
+exportMethods(dim)
+
+export(plot)
+S3method(plot, PDFToXMLPage)
+
+
+export(getNumCols)
+S3method(getNumCols,character)
+S3method(getNumCols,PDFToXMLPage)
+S3method(getNumCols,PDFToXMLDoc)
+
+
+export(getColPositions)
+S3method(getColPositions,character)
+S3method(getColPositions,PDFToXMLPage)
+S3method(getColPositions,PDFToXMLDoc)
