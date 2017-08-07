@@ -63,6 +63,21 @@ function(p, threshold = .1, asNodes = FALSE)
 
 getColPositions =
 function(p, threshold = .1, txtNodes = getNodeSet(p, ".//text"), bbox = getBBox2(txtNodes))
+    UseMethod("getColPositions")
+
+getColPositions.character = 
+function(p, threshold = .1, txtNodes = getNodeSet(p, ".//text"), bbox = getBBox2(txtNodes))    
+    getColPositions(readPDFXML(p), threshold)
+
+getColPositions.PDFToXMLDoc = 
+function(p, threshold = .1, txtNodes = getNodeSet(p, ".//text"), bbox = getBBox2(txtNodes))    
+{
+  lapply(p, getColPositions, threshold)
+}
+
+
+getColPositions.PDFToXMLPage = 
+function(p, threshold = .1, txtNodes = getNodeSet(p, ".//text"), bbox = getBBox2(txtNodes))    
 {
     bbox = as.data.frame(bbox)
 
@@ -72,30 +87,26 @@ function(p, threshold = .1, txtNodes = getNodeSet(p, ".//text"), bbox = getBBox2
     as.numeric(names(tt [ tt > nrow(bbox)*threshold])) - 2
 }
 
+getNumCols =
+function(p, threshold = .1, txtNodes = getNodeSet(p, ".//text"), bbox = getBBox2(txtNodes))
+    UseMethod("getNumCols")
 
+getNumCols.character =
+function(p, threshold = .1, txtNodes = getNodeSet(p, ".//text"), bbox = getBBox2(txtNodes))
+  getNumCols(  readPDFXML(p), threshold)
 
-getTextFonts =
-function(page, fontInfo = getFontInfo(page))
-{
-   txtNodes = xpathSApply(page, ".//text")
-   fid = sapply(txtNodes, xmlGetAttr, "font")
+getNumCols.PDFToXMLPage =
+function(p, threshold = .1, txtNodes = getNodeSet(p, ".//text"), bbox = getBBox2(txtNodes))
+    length(getColPositions(p, threshold, txtNodes, bbox))
 
-   ans = fontInfo[fid, ]
-   ans$text = sapply(txtNodes, xmlValue)
-   ans
+getNumCols.PDFToXMLDoc =
+function(p, threshold = .1, txtNodes = getNodeSet(p, ".//text"), bbox = getBBox2(txtNodes))
+{    
+    ncols = sapply(getPages(p), getNumCols, threshold, txtNodes, bbox)
+    tt = table(ncols)
+    as.integer(names(tt)[which.max(tt)])
 }
 
-getFontInfo =
-function(page)
-{
-   fonts = getNodeSet(page, ".//fontspec")
-   fids = sapply(fonts, xmlGetAttr, "id")
-   df = do.call(rbind, lapply(fonts, function(x) xmlAttrs(x)[c("size", "family", "color")]))
-   rownames(df) = fids
-   df = as.data.frame(df, stringsAsFactors = FALSE)
-   df$size = as.integer(df$size)
-   df
-}
 
 
 bodyLine =
@@ -134,8 +145,8 @@ function(page, center = 465, nodes = getNodeSet(page, "./text"), bbox = getBBox2
 
 reassembleLines =
 function(box)
-{    
-   by(box, box$top, assembleLine)
+{
+   by(box, box[, "top"], assembleLine)
 }
 
 
