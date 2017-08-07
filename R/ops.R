@@ -1,3 +1,8 @@
+setGeneric("dim")
+setMethod("dim", "PDFToXMLPage",
+          function(x)
+            c(getPageHeight(x), getPageWidth(x)))
+
 getPageHeight =
 function(page)
 {
