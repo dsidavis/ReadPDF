@@ -10,21 +10,29 @@ function(x, i, j, ...)
     getPages(x)[i, ...]
 }
 
+setGeneric("lapply")
 
-lapply.ConvertedPDFDoc =  # PDFMinerDoc =
+lapply.ConvertedPDFDoc  =  lapply.PDFToXMLDoc = # PDFMinerDoc =
 function(X, FUN, ...)
-  lapply(getPages(X), FUN, ...)
+    lapply(getPages(X), FUN, ...)
+setMethod("lapply", "ConvertedPDFDoc", lapply.ConvertedPDFDoc)
 
-sapply.ConvertedPDFDoc = # PDFMinerDoc =
+sapply.ConvertedPDFDoc = sapply.PDFToXMLDoc = # PDFMinerDoc =
 function(X, FUN, ...)
   sapply(getPages(X), FUN, ...)
 
+setMethod("sapply", "ConvertedPDFDoc", sapply.ConvertedPDFDoc)
 
 getNumPages =
 function(doc)
 {
     length(getNodeSet(doc, "//page"))
 }
+
+setGeneric("length")
+setMethod("length", "ConvertedPDFDoc",
+          function(x)
+           getNumPages(x))
 
 getPages = 
 function(doc)
