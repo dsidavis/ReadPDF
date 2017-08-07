@@ -1,0 +1,176 @@
+This provides a brief overview of some of the ideas and functionality in
+the ReadPDF package.
+
+Firstly, this version of the package does not read the PDF directly.
+Instead, we use our enhanced pdftohtml executable to convert the PDF
+to XML.  Then we read the XML document into R and work with that
+representation of the contents of the PDF documents.  This XML
+representation contains the text and their positions on each page, the
+font, color, etc.  It also contains the regions for images, rectangles
+and lines.
+
+
+# Basic Data Structure
+```
+library(ReadPDF)
+```
+
+We use the function readPDFXML() to load
+the contents of a PDF document into an R session as an XML document.
+If given the name of a PDF file, readPDFXML() will convert that PDF document to an XML document
+using our enhanced version of pdftohtml which is assumed to be on the search path or the path explicitly specified.
+
+```
+readPDFXML()
+```
+Alternatively, we can pre-process the PDF document and convert it to XML just once
+rather than each time we load it into R.
+We do this when we are repeatedly processing the same file(s).
+
+
+The result from readPDFXML() is an object of class
+```
+class(p)
+```
+
+This is an XML document and we can manipulate it using
+functions in the XML package, e.g., getNodeSet(), xmlRoot(), xmlChildren(), xmlGetAttr().
+However, we can also treat the document as a list in which each  element is a page.
+We can get the he number  of pages via `length(d)` or `getNumPages(d)`.
+
+We can acces a specific page via, e.g.
+```
+d[[2]]
+```
+
+We can also use lapply() and sapply() to loop over the pages.
+
+All of these are syntactic conveniences for the equivalent of
+`getPages()` and then working with this list.
+
+
+# Functionality
+
+
+## Text
+Often we just want the text.
+pdfText() will do this.  It attempts to organize the text
+by columns and put it in the correct order.
+
+
+## Displaying the Elements
+It is often convenient to visualize the elements of a page.
+Of course, we can do this in a PDF viewer, but we can also plot the elements
+within R with showPage() or plot(page).
+
+The display does not (currently) try to use the font (name or size) for each element or
+stretch the text to fill the width. Accordingly, the display is not the same as
+in a PDF viewer. However, it is useful as we can add annotations, e.g. vertical lines
+identifying column boundaries, etc.
+
+One can control the size of the text within the plot with cex.text, typically
+making it smaller.
+
+
+## Locations
+Typically,  we want to work with the elements based on their locations.
+getBBox2() returns a matrix or a data.frame.
+(The rownames on the matrix are the text for each element.
+Since a data.frame has to have unique rownames, the text is added as a separate column.)
+For each row in the matrix/data.frame, we have the left, top, width and height of each element.
+Recall that the vertical coordinates in a PDF page start at the top and increase down the page.
+getBBox2() allows the caller to specify whether they want a data.frame or a matrix.
+
+For a given page, we can query its width and/or height in its user coordinates
+with either dim() or getPageWidth() and getPageHeight().
+
+There is also a related but different getBBox() function. This takes a list of XML nodes
+(e.g. from a call to getNodeSet()), each of which has a bbox attribute. It collates these into a matrix.
+This is useful for rect and line elements
+
+## Font Information
+
+getTextFont() returns the font information for the most common font in the document.
+This is expected to be the font for the actual text of the document.
+
+getFontInfo() provides a data frame describing the 
+
+## Columns
+getColumnPositions() uses a heuristic to identify the locations of text columns on a page
+or across the entire document.
+
+getNumCols() tells us the estimate/guess of how many columns are on a single
+page or inferred across all pages within a document.
+
+
+## Scanned Documents
+
+Some PDFs are scans of original documents.
+Often, these have little or no actual text on each page,
+but just an image that covers most or the entire area of each page.
+Some have text along the side of the page detailing the provenance of the
+scanned PDF.
+Other scanned documents actually contain a lot of text but are still scanned
+and contain an image for each page. This happens when a PDF tool uses OCR
+(optical character recognition) to infer the text and then includes that in the document.
+However, the paper is still scanned and it can be important to know this,
+e.g., when the text is not correct.
+
+The two functions isScanned() and isScanned2() take a document and return a
+logical value indicating whether it is scanned or not.
+The first goes through a sequence of heuristics.
+isScanned2() uses a statistical approach, comparing the number of words
+in the documents per page to a threshold we determined from a corpus
+of 2000 scholarly articles.  (This had perfect accuracy for that corpus.)
+
+## MetaData
+getMetaData() returns a character vector of the metadata extracted from the PDF.
+This includes the file name and size of the original PDF file and the date the XML date was generated.
+It also includes some of the metadata within the PDF document, e.g., a title,
+the software used to create the PDF (generator), the date the PDF was created.
+
+
+## Links
+getLinks() returns all of the hyperlinks within the PDF document.
+There is an option (internal = TRUE/FALSE) to include/exclude
+internal links.
+
+## Images
+The getImages() function returns a data frame describing each image in a document.
+The result contains the bounding box of the image, and optionally the page number on
+which each image is located.
+
+# Scholarly Articles
+
+One of the motivations for developing this package was
+to extract information from  scholarly papers.
+Amongst other things,
+we want to get the title, the publication data, when the paper was submitted.
+
+
+
+## Title of Article
+The function getDocTitle() uses heuristics to determine the title of
+an article.
+It checks the metadata of the PDF document for a meaningful title.
+Otherwise, it looks for text with a large font on the first page.
+It tries to skip cover pages and also the name of the journal.
+
+getDocTitleString() returns the string containing the title rather than the XML nodes.
+
+
+## Date Submitted/Published
+getDatePublished() attempts to extract information in the paper
+about when the paper was submitted, accepted, or published,
+returning the earliest of these.
+
+
+## Text in Italics
+We process articles that refer to species which are typically in italics.
+The function getItalics() gets all text with any font that is known to be italics.
+
+<!--
+There are times where we want to deal with the text nodes
+for all pages a single list.  For example, ...
+flattenPages
+-->
