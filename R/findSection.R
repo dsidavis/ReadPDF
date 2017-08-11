@@ -1,4 +1,19 @@
-#
+getSectionText =
+function(doc, asNodes = FALSE, secHeaders = findSectionHeaders(doc))
+{
+    if(is.character(doc))
+        doc = readPDFXML(doc)
+
+    idx = seq(1, length = length(secHeaders) - 1)
+    secs = lapply(idx, function(i) getNodesBetween(secHeaders[[i]], secHeaders[[i+1]]))
+    names(secs) = sapply(secHeaders[idx], xmlValue)
+    if(asNodes)
+       return(secs)
+    
+    txt = sapply(secs, xmlValue)    
+}
+
+
 #
 # Find lines that
 #  is one of the regular section header text
@@ -110,24 +125,52 @@ function(x, y)
 {
     s = pageOf(x)
     e = pageOf(y)
+
     if(e > s) {
         # get all the nodes on each page up to e
         p1 = getTextAfter(x)
+        if(e - s > 1) {
+            pgs = getPages(as(x, "XMLInternalDocument"))[ seq(s + 1, e - 1)]
+            pgs = lapply(pgs, getTextByCols, asNodes = TRUE)
+        } else
+            pgs = NULL
+        pe = getTextAfter(, y)
+        c(p1, unlist(pgs, recursive = FALSE), pe)
+    } else {
+        getTextAfter(x, y)
     }
-
 }
 
 getTextAfter =
-function(x, to = NULL, before = FALSE)
+    #
+    # This is a somewhat brute-force approach to getting the <text> nodes
+    # between one start node and an optional end node ON THE SAME <PAGE>!
+    # getNodesBetween() is for multiple pages and calls this function
+    # so can handle single pages also.
+    # The name of this function is not entirely correct. We can
+    # specify either x OR to so it can get the nodes before the to node.
+    # One can specify x and not to, x and to, or just to.
+    #
+    #
+    
+function(x = NULL, to = NULL, before = FALSE)
 {
-    cols = getTextByCols(xmlParent(x), asNodes = TRUE)
-      # find the column and the index of the node matching x
-    i = lapply(cols, function(n) which(sapply(n, identical,  x)))
-    colNum = which(sapply(i, length) > 0)
+    page = xmlParent(if(!is.null(x)) x else to)
+    cols = getTextByCols(page, asNodes = TRUE)
+    
+    if(!is.null(x)) {
+          # find the column and the index of the node matching x
+        i = lapply(cols, function(n) which(sapply(n, identical,  x)))
+        colNum = which(sapply(i, length) > 0)
+    }
 
     if(!is.null(to)) {
         j = lapply(cols, function(n) which(sapply(n, identical,  to)))
-        to.colNum = which(sapply(j, length) > 0)        
+        to.colNum = which(sapply(j, length) > 0)
+
+        if(is.null(x))
+           return( c(cols[ seq(1, length = to.colNum - 1) ],
+                     cols[[to.colNum]][ seq(1, length = j[[to.colNum]] - 1) ]))
     }
 
     if(is.null(to)) {
@@ -147,5 +190,5 @@ function(x, to = NULL, before = FALSE)
         }
     }
 
-    nodes
+    unlist(nodes, recursive = FALSE)
 }
