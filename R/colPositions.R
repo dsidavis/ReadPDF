@@ -21,7 +21,13 @@ function(p, threshold = .1, txtNodes = getNodeSet(p, ".//text"), bbox = getBBox2
     tt = table(bbox$left)
     # Subtract 2 so that we start slightly to the left of the second column to include those starting points
     # or change cut to be include.lowest = TRUE
-    as.numeric(names(tt [ tt > nrow(bbox)*threshold])) - 2
+    ans = as.numeric(names(tt [ tt > nrow(bbox)*threshold])) - 2
+
+    w = which(diff(ans) < 5)
+    if(length(w))
+       ans = ans[ - (w+1)]
+    
+    ans
 }
 
 getNumCols =
