@@ -1,10 +1,7 @@
-library(XML)
-library(ReadPDF)
-
-
 #
 #
-# Find lines that 
+# Find lines that
+#  is one of the regular section header text
 #  have a larger font than others on the page
 #  shorter than most in the same column
 #  have a larger font than most text nodes in the column
@@ -37,21 +34,19 @@ function(doc, sectionName = c('introduction', 'conclusions',
          )
 {
     if(is.character(doc))
-       doc = readPDFXML(doc)
+        doc = readPDFXML(doc)
 
-    filter = paste(sprintf("lower-case(normalize-space(.)) = '%s'", sectionName), collapse = " or ")
+       # Find section titles with numbers
+    hasNum = FALSE    
+    filter = paste(sprintf("(contains(lower-case(normalize-space(.)), '%s') and isNum(normalize-space(.)))", sectionName), collapse = " or ")
     xp = sprintf("//text[%s]", filter)
-    intro = getNodeSet(doc, xp)
+    intro = getNodeSet(doc, xp, xpathFuns = list(isNum = isSectionNum))
+    hasNum = length(intro) > 0
 
-
-    hasNum = FALSE
-browser()    
-    if(!length(intro)) {
-              # Find section titles with numbers    
-        filter = paste(sprintf("(contains(lower-case(normalize-space(.)), '%s') and isNum(normalize-space(.)))", sectionName), collapse = " or ")
-        xp = sprintf("//text[%s]", filter)
-        intro = getNodeSet(lm, xp, xpathFuns = list(isNum = isSectionNum))
-        hasNum = length(intro)
+    if(!hasNum) {
+       filter = paste(sprintf("lower-case(normalize-space(.)) = '%s'", sectionName), collapse = " or ")
+       xp = sprintf("//text[%s]", filter)
+       intro = getNodeSet(doc, xp)
     }
     
     #    cols = getColPositions(doc[[1]])
@@ -61,10 +56,10 @@ browser()
 
     if(length(intro)) {
         if(hasNum)
-           return(getNodeSet(doc, "//text[isNum(string(.))]", xpathFuns = list(isNum = isSectionNum)))
+           return(getNodeSet(doc, "//text[isNum(normalize-space(.))]", xpathFuns = list(isNum = isSectionNum)))
         
         fontID = xmlGetAttr(intro[[1]], "font")
-         # Check on line by itself and not just a word.        
+         # Check if on line by itself and not just a word.        
         return(getNodesWithFont(doc, fontID = fontID))
     }
 }
@@ -73,8 +68,8 @@ isSectionNum =
     #
     # For use in XPath test.
     #
-function(x)    
-   grepl("^[0-9](\\.[0-9](\\.[0-9])?)?\\. ", x)    
+function(x)
+    grepl("^[0-9](\\.[0-9](\\.[0-9])?)?\\. ", x)
 
 
 getNodesWithFont =
@@ -106,4 +101,51 @@ function(page, nodes = getNodeSet(page, ".//text"), bb = getBBox2(nodes, TRUE),
 {    
     b = split(bb, cut(bb$left, c(0, cols[-1], Inf) -2))
     k = lapply(b, function(x) x[order(x$top),])
+}
+
+
+
+getNodesBetween =
+function(x, y)
+{
+    s = pageOf(x)
+    e = pageOf(y)
+    if(e > s) {
+        # get all the nodes on each page up to e
+        p1 = getTextAfter(x)
+    }
+
+}
+
+getTextAfter =
+function(x, to = NULL, before = FALSE)
+{
+    cols = getTextByCols(xmlParent(x), asNodes = TRUE)
+      # find the column and the index of the node matching x
+    i = lapply(cols, function(n) which(sapply(n, identical,  x)))
+    colNum = which(sapply(i, length) > 0)
+
+    if(!is.null(to)) {
+        j = lapply(cols, function(n) which(sapply(n, identical,  to)))
+        to.colNum = which(sapply(j, length) > 0)        
+    }
+
+    if(is.null(to)) {
+        nodes = cols[[colNum]][ - (1:(i[[colNum]]-1)) ]
+        if(colNum < length(cols))
+            nodes = c(nodes, cols[(colNum+1):length(cols)])
+    } else {
+        if(colNum == to.colNum) {
+           nn = cols[[ colNum ]]
+           nodes = nn[  seq(i[[colNum]], j[[to.colNum]] - 1) ] 
+        } else {
+              # nodes in x's column
+            nodes = cols[[colNum]][ - (1:(i[[colNum]]-1)) ]
+            btwn = seq(colNum + 1, length = to.colNum  - colNum - 1)
+            nodes =  c(nodes, cols[btwn],
+                        cols[[to.colNum]][ seq(1, length = j[[to.colNum]] - 1) ])
+        }
+    }
+
+    nodes
 }
