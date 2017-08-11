@@ -4,9 +4,10 @@ function(doc, asNodes = FALSE, secHeaders = findSectionHeaders(doc))
     if(is.character(doc))
         doc = readPDFXML(doc)
 
-    idx = seq(1, length = length(secHeaders) - 1)
-    secs = lapply(idx, function(i) getNodesBetween(secHeaders[[i]], secHeaders[[i+1]]))
-    names(secs) = sapply(secHeaders[idx], xmlValue)
+    secs = lapply(seq(along = secHeaders),
+                  function(i)
+                    getNodesBetween(secHeaders[[i]], if(i == length(secHeaders)) NULL else secHeaders[[i+1]]))
+    names(secs) = sapply(secHeaders, xmlValue)
     if(asNodes)
        return(secs)
     
@@ -121,8 +122,10 @@ function(page, nodes = getNodeSet(page, ".//text"), bb = getBBox2(nodes, TRUE),
 
 
 getNodesBetween =
-function(x, y)
+function(x, y = NULL)
 {
+    if(is.null(y))
+       y = getLastNode(as(x, "XMLInternalDocument"))    
     s = pageOf(x)
     e = pageOf(y)
 
@@ -191,4 +194,11 @@ function(x = NULL, to = NULL, before = FALSE)
     }
 
     unlist(nodes, recursive = FALSE)
+}
+
+
+getLastNode =
+function(doc)
+{
+  getNodeSet(doc, "//page[last()]/text[last()]")[[1]]
 }
