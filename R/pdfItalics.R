@@ -28,56 +28,6 @@ function(doc = xmlParsePDFTOHTML("../../pdftohtml/examples/Italics.xml"), useHeu
     getNodeSet(doc, xpq)
 }
 
-fontInfo =
-function(doc)
-{
-   df = as.data.frame(t(xpathSApply(doc, "//fontspec", xmlAttrs)), stringsAsFactors = FALSE)
-   iids = c("size" = 'integer',  isItalic = 'logical', isBold = 'logical', isOblique = 'logical')
-
-   df[names(iids)] = mapply(function(var, to)
-                              as(as.integer(df[[var]]), to),
-                            names(iids), iids, SIMPLIFY = FALSE)
-   df
-}
-
-
-
-textByFont =
-    # Get all the text nodes for a single font identifier
-function(doc, font)
-{
-   getNodeSet(doc, sprintf("//text[@font = '%s']", font))
-}
-
-
-textByFonts =
-    # Get all the text strings for each font in the document.
-function(doc)
-{
-    if(is.character(doc))
-        doc = readPDFXML(doc)
-
-    fontIds = unlist(getNodeSet(doc, "//fontspec/@id"))
-    txt = lapply(fontIds, function(id) sapply(textByFont(doc, id), xmlValue))
-    names(txt) = fontIds
-    txt
-}
-
-getDocFont = getTextFont =
-    #
-    # Get the font information for the most commonly used font in the document,
-    # which is assumed to be that of the text.
-    # There are cases in which the most common font may not be that of the text.
-    # 
-function(doc)
-{
-    txt = textByFonts(doc)
-    ctr = sapply(txt, function(x) sum(nchar(x)))
-    info = fontInfo(doc)
-    id = names(ctr)[which.max(ctr)]
-    info[id, ]
-} 
-
 
 f = 
 function(p, bbox = getBBox2(p), cols = getColPositions(p))
