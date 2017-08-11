@@ -47,3 +47,13 @@ function(doc)
 
 
 
+pageOf =
+function(node, asNode = FALSE)
+{
+    p = getNodeSet(node, ".//ancestor::page")[[1]]
+    if(asNode)
+        p
+    else
+        xmlGetAttr(p, "number", converter = as.integer)
+}
+
