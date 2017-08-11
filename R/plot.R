@@ -44,7 +44,7 @@ renderPage =
     #
     # No color information on the text nodes at this point.
     #
-function(page, cex.text = .5, adj = c(0, 1), showText = TRUE) # , showColors = TRUE)
+function(page, cex.text = .5, adj = c(0, 1), showText = TRUE, showBoxes = FALSE) # , showColors = TRUE)
 {    
     p = page
     psize = as.integer(xmlAttrs(p)[c("height", "width")])
@@ -75,8 +75,11 @@ function(page, cex.text = .5, adj = c(0, 1), showText = TRUE) # , showColors = T
     
     imgs = getNodeSet(page, ".//img")
     if(length(imgs)) {
-        bb = getBBox2(imgs)
-        rect(bb[,1], bb[,2], bb[,3], bb[,4], col = "blue", lty = 3)
+        bb = getBBox2(imgs, attrs = c("x", "y"))
+browser()        
+        #XXX??? Should these y values be subtracted from h???
+        # And are these widths and heights that need to be added!
+        rect(bb[,1], h - bb[,2], bb[,1] + bb[,3], h - bb[,4] - bb[,4], border = "blue", lty = 3)
     }    
 
     if(showText) {
@@ -88,6 +91,13 @@ function(page, cex.text = .5, adj = c(0, 1), showText = TRUE) # , showColors = T
             colors = getNodeColors(txt)
             text(bb[,2], h - bb[,1], sapply(txt, xmlValue), cex = cex.text, adj = adj, col = colors)
         }
+    }
+
+    if(showBoxes) {
+        txt = getNodeSet(page, ".//text")
+        bb = getBBox2(txt)
+
+        rect(bb[,1], h - bb[,2], bb[,1] + bb[,3], h - bb[,2] - bb[,4], border = "lightgreen")
     }
 
     TRUE
@@ -117,21 +127,6 @@ function(x, alpha = maxColorValue, maxColorValue = 2^16,  isFill = FALSE)
        rgb(els[1], els[2], els[3], alpha, maxColorValue = maxColorValue)
 }
 
-getBBox =
-    #
-    # This bbox function expects an attribute named bbox
-    #
-function(nodes, asDataFrame = FALSE)
-{   
-    tmp = sapply(nodes, xmlGetAttr, "bbox")
-    els = strsplit(tmp, ",")
-    bb = matrix(as.numeric(unlist(els)), , 4, byrow = TRUE)
-    colnames(bb) = c("x0", "y0", "x1", "y1")
-    if(asDataFrame) 
-       as.data.frame(bb)
-    else
-       bb
-}
 
 
 
