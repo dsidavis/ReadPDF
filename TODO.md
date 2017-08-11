@@ -1,3 +1,16 @@
++ Find tables and figures
+
++ Find text within shaded region.
+
++ For getColPositions() take the entire document into account and take the most common.
+  Give the parts after References/Bibliography less weight. These are often indented due to the
+  number so we don't get much text starting at that point
+    See 3618741902/Armien-2004-High seroprevalence of hantavirus.xml
+	
++ When finding section headers, check if the templates we find are centered and check others that
+  have the same font are also centered.
+    See 3618741902/Armien-2004-High seroprevalence of hantavirus.xml   
+
 + The box in the left side of the page doesn't appear to be as wide as in the PDF.
   This is the keyword box.
   "Zoonotics/...PDF/0809541268/Kitajima-2009-First detection of genotype 3 he.xml"
