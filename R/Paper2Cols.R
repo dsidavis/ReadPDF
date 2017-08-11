@@ -42,9 +42,34 @@ isCentered =
     # If we find a title that is centered and the find other text
     # with the same font but that is not centered, then that
     # additional text not a section title.
-function(node, cols = getColPositions(xmlParent(node)))
+function(node, cols = getTextByCols(xmlParent(node), asNodes = TRUE),
+         threshold = .2)
 {
+     # find out which column the node is in and get those columns and
+     # their bounding boxes
+  col = inColumn(node, cols)
+  bb = getBBox2(cols[[ col ]] )
 
+     # assemble the lines from these nodes and the horizontal bounding box for
+     # each line and then the median position of each of these x1 x2
+     # positions for the start and end of the line.
+  byLine = by(bb, bb[, "top"], function(x) c(min(x[, "left"]),max(x[,"left"] + x[, "width"])))
+  pos = apply(do.call(rbind, byLine), 2, median)
+
+      # and now the median middle of the lines
+  mid = median(pos)
+
+  top = xmlGetAttr(node, "top")
+  lw = byLine[[ top ]]
+  if((lw[1] - pos[1] < 5) || diff(pos) - diff(lw) < 40)
+      return(FALSE)
+  
+  
+     # now compute the middle of the string itself.
+  textPos = as.numeric(xmlAttrs(node)[c("left", "width")])
+  textMid = textPos[1] + textPos[2]/2
+  
+  textPos[1] - pos[1] > .1*diff(pos) & abs(textMid - mid) <  threshold *  median(bb[, "width"])
 }
 
 getTextByCols =

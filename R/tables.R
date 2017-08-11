@@ -1,4 +1,3 @@
-
 getTables =
 function(doc)
 {

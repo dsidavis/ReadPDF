@@ -40,7 +40,7 @@ findSectionHeaders =
     #  "../LatestDocs/PDF/2636860725/Růžek-2010-Omsk haemorrhagic fever.xml"
     #  "../LatestDocs/PDF/3757461900/Matsuzaki-2002-Antigenic and genetic characte1.xml"
     #
-function(doc, sectionName = c('introduction', 'conclusions',
+function(doc, sectionName = c('introduction', 'background', 'conclusions',
                   'results', 'methods'),
             # For, e.g., Lahm-2007-Morbidity, with these 2 extra section names, we
             # match References and Ackno..  and these don't have
@@ -65,18 +65,23 @@ function(doc, sectionName = c('introduction', 'conclusions',
        intro = getNodeSet(doc, xp)
     }
     
-    #    cols = getColPositions(doc[[1]])
 
-    # Check if these are centered on a column or on the page. If so,
-    # other nodes we think are titles also better be centered.
+
 
     if(length(intro)) {
         if(hasNum)
            return(getNodeSet(doc, "//text[isNum(normalize-space(.))]", xpathFuns = list(isNum = isSectionNum)))
-        
+
+
         fontID = xmlGetAttr(intro[[1]], "font")
-         # Check if on line by itself and not just a word.        
-        return(getNodesWithFont(doc, fontID = fontID))
+        #XX Check if on line by itself and not just a word.
+        # Check if these are centered on a column or on the page. If so,
+        # other nodes we think are titles also better be centered.
+        secs = getNodesWithFont(doc, fontID = fontID)
+        if(isCentered(intro[[1]]))
+           secs = secs[ sapply(secs, isCentered) ]
+            
+        return(secs)
     }
 }
 
@@ -102,12 +107,18 @@ function(node, pos = getColPositions(doc),
 {
     colNodes = getTextByCols(pageOf(node, TRUE), asNodes = TRUE)
     # determine which column this is in
-    colNum = which(sapply(colNodes, function(x) any(sapply(x, identical, node))))
+    colNum = inColumn(node, colNodes)
     col = colNodes[[colNum]]
 #    lines = split(col, as.integer(sapply(col, xmlGetAttr, "top")))
     h = as.integer(xmlGetAttr(node, "top"))
     npos = as.integer(sapply(col, xmlGetAttr, "top"))
     sum(npos == h) == 1
+}
+
+inColumn =
+function(node, cols = getTextByCols(xmlParent(node), asNodes = TRUE))
+{
+   which(sapply(cols, function(x) any(sapply(x, identical, node))))
 }
 
 #XXX give proper name.
