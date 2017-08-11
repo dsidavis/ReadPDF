@@ -35,6 +35,17 @@ function(doc)
 }
 
 
+isCentered =
+    #
+    # Determine if the node is centered within a column
+    # This is for use in determining section titles
+    # If we find a title that is centered and the find other text
+    # with the same font but that is not centered, then that
+    # additional text not a section title.
+function(node, cols = getColPositions(xmlParent(node)))
+{
+
+}
 
 getTextByCols =
     #
@@ -51,7 +62,7 @@ function(p, threshold = .1, asNodes = FALSE)
     txtNodes = getNodeSet(p, ".//text")
     bb = as.data.frame(getBBox2(txtNodes))
     bb$text = sapply(txtNodes, xmlValue)
-    breaks = getColPositions( threshold = threshold, bbox = bb)
+    breaks = getColPositions(p, threshold = threshold, bbox = bb)
     
     if(asNodes) {
         split(txtNodes, cut(bb$left, c(0, breaks[-1], Inf)))
@@ -76,7 +87,7 @@ function(p, threshold = .1, txtNodes = getNodeSet(p, ".//text"), bbox = getBBox2
 }
 
 
-getColPositions.PDFToXMLPage = 
+getColPositions.PDFToXMLPage = getColPositions.XMLInternalNode =
 function(p, threshold = .1, txtNodes = getNodeSet(p, ".//text"), bbox = getBBox2(txtNodes))    
 {
     bbox = as.data.frame(bbox)
@@ -95,7 +106,7 @@ getNumCols.character =
 function(p, threshold = .1, txtNodes = getNodeSet(p, ".//text"), bbox = getBBox2(txtNodes))
   getNumCols(  readPDFXML(p), threshold)
 
-getNumCols.PDFToXMLPage =
+getNumCols.PDFToXMLPage = getNumCols.XMLInternalNode =
 function(p, threshold = .1, txtNodes = getNodeSet(p, ".//text"), bbox = getBBox2(txtNodes))
     length(getColPositions(p, threshold, txtNodes, bbox))
 
