@@ -27,7 +27,14 @@ findSectionHeaders =
     #  "../LatestDocs/PDF/2636860725/Růžek-2010-Omsk haemorrhagic fever.xml"
     #  "../LatestDocs/PDF/3757461900/Matsuzaki-2002-Antigenic and genetic characte1.xml"
     #
-function(doc, sectionName = c('introduction', 'conclusions', 'results', 'methods', 'references', 'acknowledgements'))
+function(doc, sectionName = c('introduction', 'conclusions',
+                  'results', 'methods'),
+            # For, e.g., Lahm-2007-Morbidity, with these 2 extra section names, we
+            # match References and Ackno..  and these don't have
+            # numbers.
+            # Maybe go for numbered section titles first?         
+          otherSectionNames = c('references', 'acknowledgements')
+         )
 {
     if(is.character(doc))
        doc = readPDFXML(doc)
@@ -38,6 +45,7 @@ function(doc, sectionName = c('introduction', 'conclusions', 'results', 'methods
 
 
     hasNum = FALSE
+browser()    
     if(!length(intro)) {
               # Find section titles with numbers    
         filter = paste(sprintf("(contains(lower-case(normalize-space(.)), '%s') and isNum(normalize-space(.)))", sectionName), collapse = " or ")
