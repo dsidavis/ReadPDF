@@ -40,13 +40,27 @@ findSectionHeaders =
     #  "../LatestDocs/PDF/2636860725/Růžek-2010-Omsk haemorrhagic fever.xml"
     #  "../LatestDocs/PDF/3757461900/Matsuzaki-2002-Antigenic and genetic characte1.xml"
     #
+    #
+    #
+    #'@param checkCentered  if the nodes we identify as section
+    #     using the "expected" names  are centered, then by default
+    #     when we look for other text with the same font, we only
+    #     include centered text.  However, if checkCentered = FALSE
+    #     we include all text with the same section header font.
+    #     Checking for centered is currently expensive.
+    #
+    #  See weaver-2001 for example of main section titles being
+    #  centered but sub-sections are in the same font and not centered.
+    #
+    
 function(doc, sectionName = c('introduction', 'background',
                   'conclusions', 'discussion', 'results', 'methods'),
             # For, e.g., Lahm-2007-Morbidity, with these 2 extra section names, we
             # match References and Ackno..  and these don't have
             # numbers.
             # Maybe go for numbered section titles first?         
-          otherSectionNames = c('references', 'acknowledgements')
+         otherSectionNames = c('references', 'acknowledgements'),
+         checkCentered = TRUE         
          )
 {
     if(is.character(doc))
@@ -82,7 +96,7 @@ function(doc, sectionName = c('introduction', 'background',
         # Check if these are centered on a column or on the page. If so,
         # other nodes we think are titles also better be centered.
         secs = getNodesWithFont(doc, fontID = fontID)
-        if(isCentered(intro[[1]]))
+        if(checkCentered && isCentered(intro[[1]]))
            secs = secs[ sapply(secs, isCentered) ]
             
         return(secs)
@@ -218,4 +232,24 @@ getLastNode =
 function(doc)
 {
   getNodeSet(doc, "//page[last()]/text[last()]")[[1]]
+}
+
+
+findShortSectionHeaders =
+function(colNodes, lines = nodesByLine(colNodes))
+{
+    short = which(findShortLines(colNodes, lines, asLogical = TRUE))
+
+    # Now check if there is a little but more space between this line
+    # relative to the others and/or is it in a different font/color
+    
+    tops = sapply(lines, function(x) min(as.numeric(sapply(x, xmlGetAttr, "top"))))
+    lineskip = median(diff(sort(tops)))
+
+    before = diff(tops)[short - 1]
+
+    isShort = short[ before > lineskip * 1.1]
+    lines[ isShort ]
+
+    # Check for fonts here or in a separate function.
 }
