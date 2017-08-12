@@ -22,8 +22,9 @@ browser()
     if(!centered) {
           # Check if centered in the page since not the column
         pwidth = xmlGetAttr(page, "width",, as.integer)
-        nwidth = xmlGetAttr(node, "width",, as.integer)        
-        if(abs(nwidth - pwidth/2) < .1*pwidth) 
+        nwidth = xmlGetAttr(node, "width",, as.integer)
+        nx = xmlGetAttr(node, "left",, as.integer)                
+        if(abs((nx + nwidth) - pwidth/2) < .1*pwidth) 
             centered = 2
     }
 
@@ -53,7 +54,17 @@ browser()
       doesSpan = apply(bb, 1, function(x) abs(ex[1] - x[1])  < 2 & abs(ex[2] - x[3]) < 2)
     } else if(centered == 2) {
 
-
+        # Get rid of any lines that are only within one column.
+        
+        colInfo = t(sapply(colNodes, function(x) {
+            ll = nodesByLine(x)
+            le = getLineEnds(ll)
+            ex = apply(le, 2, median)
+        }))
+        ex = range(colInfo)
+          # same as clause above so move out of both.
+        doesSpan = apply(bb, 1, function(x) abs(ex[1] - x[1])  < 2 & abs(ex[2] - x[3]) < 2)    
+        colLines = nodesByLine(getNodeSet(page, ".//text"))
     }
 
  
@@ -71,11 +82,11 @@ browser()
     }
  
 
-# Perhaps use getNodesBetween(). But no need.
+            # Perhaps use getNodesBetween(). But no need.
 
     b = max(spans[,2])
     ok = sapply(colLines, function(x) {
-                            tp = as.integer(xmlGetAttr(x[[1]], "top"))
+                            tp = as.numeric(xmlGetAttr(x[[1]], "top"))
                             tp <= b & tp >= nodeTop
                      })
 
