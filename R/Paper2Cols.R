@@ -50,7 +50,7 @@ function(node, cols = getTextByCols(xmlParent(node), asNodes = TRUE),
   col = inColumn(node, cols)
   bb = getBBox2(cols[[ col ]] )
 
-     # This is now also done in nodesByLine and getLineWidth(). Leave
+     # This is now also done in nodesByLine and getLineEnds(). Leave
      # this here for now but eventually use those.
      # assemble the lines from these nodes and the horizontal bounding box for
      # each line and then the median position of each of these x1 x2
@@ -80,10 +80,14 @@ nodesByLine =
     # Group a collection of nodes in a column by lines, allowing them
     # to have a slightly different 
     #
-function(nodes, asNodes = TRUE, bbox = getBBox2(nodes, TRUE), baseFont = getDocFont(as(nodes[[1]], "XMLInternalDocument")))
+function(nodes, asNodes = TRUE, bbox = getBBox2(nodes, TRUE),
+         baseFont = getDocFont(as(nodes[[1]], "XMLInternalDocument")),
+         addText = TRUE
+        )
 {
     topBins = cut(bbox$top, seq(0, max(bbox$top)+1, by = baseFont$size))
     byLine = tapply(nodes, topBins, arrangeLineNodes, asNodes)
+    names(byLine) = sapply(byLine, arrangeLineNodes, FALSE)
     byLine[ sapply(byLine, length) > 0]
 }    
 
@@ -100,17 +104,40 @@ function(nodes, asNodes = TRUE)
         paste(xmlValue(nodes[o]), collapse = " ")
 }
 
-getLineWidth =
-    #
+getLineEnds =
     # Takes a list with each element a collection of nodes for that line.
     # Returns left and right end points.
 function(lines)
 {
-    sapply(lines, function(x) {
+   t(sapply(lines, function(x) {
                      b = getBBox2(x, TRUE)
                      c(min(b$left), max(b$left + b$width))
-                  })
+                  }))
 }
+
+
+#######
+findShortLines =
+    #
+    # This finds lines that start at the left but are shorter than
+    # other lines in the columns. This is one criterion that may identify
+    # such a lines a section or sub-section header.
+    # It is also the case for the final line in a paragraph.
+    #
+function(nodes, lines = nodesByLine(nodes),
+         lw = getLineEnds(lines))            
+{
+    end = quantile(lw[, 2],  .75)
+    w = end - lw[,2] > .1*median(lw[,2] - lw[,1])
+    if(!missing(lines))
+        lines[w]
+    else
+        w
+}
+
+
+
+##################
 
 getTextByCols =
     #

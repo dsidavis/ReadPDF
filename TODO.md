@@ -1,24 +1,55 @@
-# Todo list for ReadPDF
-
-1. Find superscripts that are citations and remove them from the text.
+# pdftohtml
 
 1. Are the image locations (x, y) correct?  Do we need to transform them?
    See Klein-2011
-   
+
+1. Spaces within a string are getting lost in pdftohotml - e.g., Fulhorst-2002
+
+1. Check the links in pdftohtml. In Lahm, we only get 14 links to the bibliography items.
+  There are 519 /Link elements in the uncompressed PDF.
+  
+1. Are the dimensions for the shaded rectangles correct from pdftohtml. Is linewidth transformed also?
+   See Lahm[[ page 5]]  
+
+# Todo list for ReadPDF
+
+1. Section title: Look for text on a line on its own, a little separated from next line and not
+   taking up the entire column width.
+   ```r
+   findShortLines(getTextByCols(wv[[2]], asNodes = TRUE)[[1]])
+   ```
+   Then we see the lines that don't span the entire column and also the ones that start with an indentation.
+
+1. Compute document-wide interlineskip.
+
+1. identify abstract and put it in its own node.
+
+1. Find text within shaded region.  Put the text nodes in a <shaded> node.
+
+	 
+1. Remove header and footer material from getTextByCols()
+
+1. [check] Find superscripts that are citations and remove them from the text.
+   See findBibCites()
+
+1. [check] Group segments that have very close tops together.
+   Implemeted in nodesByLine().
+   See isCentered() where we combine segments into lines.  Move this code out to a separate function.
+
+
 1. identify tables and put the related nodes into a table node and then potentially write the result
   back to the original file so we have that information for subsequent reads of that document.
-  
+   + Look for lines separating rows in tables.
+
 1. Similarly, can add 1-column, 2-column, etc around the text, which column and where the columns
   start and end.  
+  
 
-1. Find text within shaded region.
-
-1. Group segments that have very close tops together.
-
-1. Are the dimensions for the shaded rectangles correct from pdftohtml. Is linewidth transformed also?
-   See Lahm[[ page 5]]
-
-1. Text on a line on its own, a little separated from next line and not taking up the entire column width.
+1. In getNodesBetween(), we should arrange the text by line and within line from left to right.
+  See
+   getTextByCols() should do this.
+   We do this for isCentered().
+   Need to deal with the top values being one or two units apart for segments on the same line.
 
 1. Identify section starts and ends, i.e. section titles. 
      + Got some extras and missed DISCUSSION in 3234834982/Fulhorst-2002-Natural host relationships
@@ -72,26 +103,18 @@
 	
 1. Make isCentered() faster.
 
-1. [probably fine when install package] Error from isScanned2("LatestDocs/PDF/2143276081/Kamhieh-2006-Borna disease virus (BDV) infect1.xml")
-
 1. Not picking up sub-section titles, intentionally.
    See 3133228518/Murphy-2006-Implications of simian retroviruse.xml for example.
 
-
-1. Include unnumbered sections in documents with numbered section headers, e.g. Lahm and
+1. ?Include unnumbered sections in documents with numbered section headers, e.g. Lahm and
    Acknowledgements, References.  Do we care?
 
 1. [manually check] For Weaver & Lahm, finish getting the text for sections.
-
-1. Remove header and footer material from getTextByCols()
 
 1.  When finding section headers, check if the templates we find are centered annd check others that
     have the same font are also centered.
     See 3618741902/Armien-2004-High seroprevalence of hantavirus.xml   
 	 Weaver and Klein also have centered sections.
-
-1. In getNodesBetween(), we should arrange the text by line and within line from left to right.
-   getTextByCols() should do this.
 
 1. [check works] in getColPositions() if values are too close together drop the right one.
     Weaver page 4.  470 and 471.
@@ -112,6 +135,8 @@
 1.  Implement getHeader and footer. See Lahm-2007 with lines at the top of the page.
 
 1.  Find abstract and if it spans the entire page, don't include it when computing columns.	
+
+1. For 2 or more columns, detect the part which is only one column spanning the entire page.
 	
 
 1.  For getColPositions() take the entire document into account and take the most common.
@@ -142,13 +167,21 @@
 1.  Reassemble the elements of a word, line, paragraph from the different <text> elements
   See code we had in an earlier package for this.
 
-1. For 2 or more columns, detect the part which is only one column spanning the entire page.
-
 1. Detect 2 columns when one is mostly a figure and not words.
-  Figure out columns for all pages and correct if one or two pages seems to be single column.
+   Figure out columns for all pages and correct if one or two pages seems to be single column.
 
 
 
 # Done
+
+1. [done] Rationalize getFontInfo() and fontInfo() functions.
+     fontInfo() gone. getFontInfo() now returns the full data frame and uses the font id as row
+     names.
+
+1. [done] Error from isScanned2("LatestDocs/PDF/2143276081/Kamhieh-2006-Borna disease virus (BDV)
+   infect1.xml")
+   
+1. [fixed] getDatePublished() for Aguilar-2007 gives NULL but info at the end - April 8, 2006
+    The version that was in Zoonotics-shared and now in ReadPDF works fine.
 
 1.  [Done] Find font for the majority of the text.
