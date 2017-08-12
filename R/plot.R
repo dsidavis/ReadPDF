@@ -76,7 +76,7 @@ function(page, cex.text = .5, adj = c(0, 1), showText = TRUE, showBoxes = FALSE)
     imgs = getNodeSet(page, ".//img")
     if(length(imgs)) {
         bb = getBBox2(imgs, attrs = c("x", "y"))
-browser()        
+
         #XXX??? Should these y values be subtracted from h???
         # And are these widths and heights that need to be added!
         rect(bb[,1], h - bb[,2], bb[,1] + bb[,3], h - bb[,4] - bb[,4], border = "blue", lty = 3)
