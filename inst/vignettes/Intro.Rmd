@@ -165,9 +165,32 @@ about when the paper was submitted, accepted, or published,
 returning the earliest of these.
 
 
+
 ## Text in Italics
 We process articles that refer to species which are typically in italics.
-The function getItalics() gets all text with any font that is known to be italics.
+The function getItalics() gets all text with any font that is known to
+be italics.
+
+
+## Font Information
+
+fontInfo()
+
+getDocFont()
+
+getTextFonts()
+
+getFontInfo()
+
+textByFonts()
+
+textByFont()
+
+
+
+# Section Headers
+
+findSectionHeaders()
 
 <!--
 There are times where we want to deal with the text nodes
