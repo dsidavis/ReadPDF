@@ -40,8 +40,8 @@ findSectionHeaders =
     #  "../LatestDocs/PDF/2636860725/Růžek-2010-Omsk haemorrhagic fever.xml"
     #  "../LatestDocs/PDF/3757461900/Matsuzaki-2002-Antigenic and genetic characte1.xml"
     #
-function(doc, sectionName = c('introduction', 'background', 'conclusions',
-                  'results', 'methods'),
+function(doc, sectionName = c('introduction', 'background',
+                  'conclusions', 'discussion', 'results', 'methods'),
             # For, e.g., Lahm-2007-Morbidity, with these 2 extra section names, we
             # match References and Ackno..  and these don't have
             # numbers.
@@ -66,7 +66,11 @@ function(doc, sectionName = c('introduction', 'background', 'conclusions',
     }
     
 
-
+    if(!length(intro)) {
+       filter = paste(sprintf("lower-case(normalize-space(.)) = '%s'", otherSectionNames), collapse = " or ")
+       xp = sprintf("//text[%s]", filter)
+       intro = getNodeSet(doc, xp)
+    }
 
     if(length(intro)) {
         if(hasNum)
