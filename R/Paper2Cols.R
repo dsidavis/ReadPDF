@@ -56,7 +56,8 @@ function(node, cols = getTextByCols(xmlParent(node), asNodes = TRUE),
      # each line and then the median position of each of these x1 x2
      # positions for the start and end of the line.
   byLine = by(bb, bb[, "top"], function(x) c(min(x[, "left"]),max(x[,"left"] + x[, "width"])))
-  pos = apply(do.call(rbind, byLine), 2, median)
+  byLine2 = do.call(rbind, byLine)
+  pos = apply(byLine2, 2, median)
 
       # and now the median middle of the lines
   mid = median(pos)
@@ -71,7 +72,7 @@ function(node, cols = getTextByCols(xmlParent(node), asNodes = TRUE),
   textPos = as.numeric(xmlAttrs(node)[c("left", "width")])
   textMid = textPos[1] + textPos[2]/2
   
-  textPos[1] - pos[1] > .1*diff(pos) & abs(textMid - mid) <  threshold *  median(bb[, "width"])
+  textPos[1] - pos[1] > .1*diff(pos) & abs(textMid - mid) <  threshold *  median(byLine2[, 2])
 }
 
 
@@ -85,7 +86,8 @@ function(nodes, asNodes = TRUE, bbox = getBBox2(nodes, TRUE),
          addText = TRUE
         )
 {
-    topBins = cut(bbox$top, seq(0, max(bbox$top)+1, by = baseFont$size))
+    intv = seq(0, max(bbox$top)+ baseFont$size - 1, by = baseFont$size)
+    topBins = cut(bbox$top, intv)
     byLine = tapply(nodes, topBins, arrangeLineNodes, asNodes)
     names(byLine) = sapply(byLine, arrangeLineNodes, FALSE)
     byLine[ sapply(byLine, length) > 0]
@@ -125,11 +127,11 @@ findShortLines =
     # It is also the case for the final line in a paragraph.
     #
 function(nodes, lines = nodesByLine(nodes),
-         lw = getLineEnds(lines))            
+         lw = getLineEnds(lines), asLogical = FALSE)            
 {
     end = quantile(lw[, 2],  .75)
     w = end - lw[,2] > .1*median(lw[,2] - lw[,1])
-    if(!missing(lines))
+    if(!asLogical && !missing(lines))
         lines[w]
     else
         w
@@ -217,3 +219,10 @@ function(els)
 
 
 
+
+foo = 
+function(page, nodes = getNodeSet(doc, ".//text"))
+{    
+    ll = nodesByLine(nodes)
+    pos = getLineEnds(ll)
+}
