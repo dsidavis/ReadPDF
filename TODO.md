@@ -1,19 +1,109 @@
+# Todo list for ReadPDF
+
+1. Find superscripts that are citations and remove them from the text.
+
+1. Are the image locations (x, y) correct?  Do we need to transform them?
+   See Klein-2011
+   
+1. identify tables and put the related nodes into a table node and then potentially write the result
+  back to the original file so we have that information for subsequent reads of that document.
+  
+1. Similarly, can add 1-column, 2-column, etc around the text, which column and where the columns
+  start and end.  
+
+1. Find text within shaded region.
+
+1. Group segments that have very close tops together.
+
 1. Are the dimensions for the shaded rectangles correct from pdftohtml. Is linewidth transformed also?
-  See Lahm[[ page 5]]
+   See Lahm[[ page 5]]
+
+1. Text on a line on its own, a little separated from next line and not taking up the entire column width.
+
+1. Identify section starts and ends, i.e. section titles. 
+     + Got some extras and missed DISCUSSION in 3234834982/Fulhorst-2002-Natural host relationships
+       and 1.xml
+	       Also the s of Merriam's is running into pocket mice.   Two itaclic segments on that line.
+		   The problem is that isCentered() is failing. The top for this text is 490. There is
+           another set of tops at 489 which are the italic parts. So we need group these properly.
+	    
+	 + Nothing in 2688324473/Beltrame-2006-Tickborne encephalitis virus, no.xml but makes sense -
+       letter to editor.
+	   Same with 4021195741/Shepherd-1987-Antibody to Crimean-Congo hemorr.xml
+	 + Extras we don't want in  2939921293/Holsomback-2009-Bayou virus detected in non-Or.xml
+	     GOt rid of many. Remaining ones are in table on page 5.
+	 + Not picking up The Study in LatestDocs/PDF/3574543168/Thoisy-2003-Mayaro virus in wild mammals, Fren.xml
+     + 0657742708/Lai-2007-Cost-effective real-time reverse tran.xml 
+	     pick up RESULTS and DISCUSSIONS.  MAterials and methods is smaller font both in section
+	     title and text of that section.
+	 + 3151144403/Luby-2006-Foodborne transmission of Nipah viru.xml
+	     picking up names of authors as well as section titles.  These names span the entire page
+	     but there are columns. So ignore these.
+	 + 2796096355/Aguilar-2007-Endemic Eastern equine encephalit.xml picking up sentence that is
+       first in paragraph and indented.  Same issue as with Fulhosrt above - two segments with very
+       close top values that are not considered part of the same line.
+	   So put them into the same line and all will be well.
+	 + 3932331692/Nitatpattana-2008-Change in Japanese encephali.xml picking up names which are
+       centered within the first column!
+	 + LatestDocs/PDF/2081396765/Neel-2010-Molecular epidemiology of simian imm.xml
+	     gets too much, some from the abstract which spans the two columns but is indented.
+	   
+     + LatestDocs/PDF/3385699523/Holzmann-2010-Impact of yellow fever outbreaks.xml
+	   Gets some extra parts, e.g. 2010 Wiley-Liss, ``
+	     Is the `` on page 2 on the line with a paragraph  indentation - "An outbreak has been
+	   defined"  col 1, halfway down.
+	     
+	   
+	 + 3136760279/Tauro-2012-Serological detection of St. Louis.xml" is correct, but there are also
+       paragraph titles that are interesting/useful, e.g. Study site, Sample collection which are
+       italics and followed by a - at the start of a paragraph.
+	   
+	 + 3982771992/Leroy-2004-Multiple Ebola virus transmission e.xml  - nothing and this is correct.
+
+     + Good: 2956441632/Cui-2008-Detection of Japanese encephalitis vi.xml
+	 
+	 + Numbered sections: 1347402211/Luis et al_2014_A comparison of bats and roden.xml
+	    Also has valuable sub-section titles.
+		
+		Numbered: 3512447895/Hara-2005-Isolation and characterization of a1.xml
+
+1. Look for text at the start of a paragraph that starts with italics or a font.
+    Aguilar-2007
+	
+1. Make isCentered() faster.
+
+1. [probably fine when install package] Error from isScanned2("LatestDocs/PDF/2143276081/Kamhieh-2006-Borna disease virus (BDV) infect1.xml")
+
+1. Not picking up sub-section titles, intentionally.
+   See 3133228518/Murphy-2006-Implications of simian retroviruse.xml for example.
+
+
+1. Include unnumbered sections in documents with numbered section headers, e.g. Lahm and
+   Acknowledgements, References.  Do we care?
+
+1. [manually check] For Weaver & Lahm, finish getting the text for sections.
+
+1. Remove header and footer material from getTextByCols()
+
+1.  When finding section headers, check if the templates we find are centered annd check others that
+    have the same font are also centered.
+    See 3618741902/Armien-2004-High seroprevalence of hantavirus.xml   
+	 Weaver and Klein also have centered sections.
+
+1. In getNodesBetween(), we should arrange the text by line and within line from left to right.
+   getTextByCols() should do this.
 
 1. [check works] in getColPositions() if values are too close together drop the right one.
     Weaver page 4.  470 and 471.
 	To do with indendented first line of paragraph.  Increase threshold.
 	But getTextByCols() has no nodes in the 470 one.
 
-1.  When getting nodes  in getTextAfter, recognize tables at the top or bottom of the page and skip
+1.  When getting nodes in getTextAfter, recognize tables at the top or bottom of the page and skip
   over them. Weaver p6
  ```r
      h = findSectionHeaders("LatestDocs/PDF/0629421650/Padula-2002-Andes virus and first case report1.xml")  
      sapply(getTextAfter(h[[10]], h[[11]]), xmlValue)
  ```
-
-1.  For Weaver & Lahm, finish getting the text for sections.
 
 1.  Find tables and figures
     1.  Captions, titles, etc.
@@ -23,24 +113,21 @@
 
 1.  Find abstract and if it spans the entire page, don't include it when computing columns.	
 	
-1.  Find text within shaded region.
 
 1.  For getColPositions() take the entire document into account and take the most common.
-  Give the parts after References/Bibliography less weight. These are often indented due to the
-  number so we don't get much text starting at that point
+    Give the parts after References/Bibliography less weight. These are often indented due to the
+    number so we don't get much text starting at that point
     See 3618741902/Armien-2004-High seroprevalence of hantavirus.xml
 	
 1.  exclude shaded boxes when computing column positions. And images. and tables.
-  See Lahm-2007
-	
-1.  When finding section headers, check if the templates we find are centered and check others that
-  have the same font are also centered.
-    See 3618741902/Armien-2004-High seroprevalence of hantavirus.xml   
+    See Lahm-2007
 
 1.  The box in the left side of the page doesn't appear to be as wide as in the PDF.
   This is the keyword box.
   "Zoonotics/...PDF/0809541268/Kitajima-2009-First detection of genotype 3 he.xml"
   This comes up in the splitElsevierTitle() and why we put the no filter of nodes if no y > yl.
+  
+  See 3569325249/Scherret-2001-The relationships between West N.xml for a good example.
   
 1.  Get all of the elements in the title even if changed font
   i.e. identify title and then find all the elements near these that make up 
@@ -48,19 +135,16 @@
   Have to deal with spanning 2 columns and may not be part of the title and many other issues.
   e.g. 1834853125/394.full.xml  
 
-
 1.  getColPositions:  when first line of paragraph is indented, we don't get the critical mass at the
   same point.
   See 0337534517/Andriamandimby-2011-Crimean-Congo%20hemorrhagic.xml
 
 1.  Reassemble the elements of a word, line, paragraph from the different <text> elements
   See code we had in an earlier package for this.
-  
-1.  Identify section starts and ends, i.e. section titles.
 
-1.  For 2 or more columns, detect the part which is only one column spanning the entire page.
+1. For 2 or more columns, detect the part which is only one column spanning the entire page.
 
-1.  Detect 2 columns when one is mostly a figure and not words.
+1. Detect 2 columns when one is mostly a figure and not words.
   Figure out columns for all pages and correct if one or two pages seems to be single column.
 
 
