@@ -13,9 +13,32 @@ function(page, fontInfo = getFontInfo(page),
    ans
 }
 
+
+# Use getFontInfo
 getFontInfo =
-function(page,
-         fonts = getNodeSet(page, xpathQ("//fontspec", page)))
+    # used to be fontInfo
+function(doc)
+{
+   df = as.data.frame(t(xpathSApply(doc, xpathQ("//fontspec", doc), xmlAttrs)), stringsAsFactors = FALSE)
+   iids = c("size" = 'integer',  isItalic = 'logical', isBold = 'logical', isOblique = 'logical')
+
+   df[names(iids)] = mapply(function(var, to)
+                              as(as.integer(df[[var]]), to),
+                            names(iids), iids, SIMPLIFY = FALSE)
+   
+   rownames(df) = df$id
+   df
+}
+
+
+if(FALSE)
+getFontInfo =
+    #
+    # Works for a document or an individual page.
+    #
+    # rownames are the font identifiers, not 1:nrow()
+    #
+function(page, fonts = getNodeSet(page, xpathQ("//fontspec", page)))
 {
    fids = sapply(fonts, xmlGetAttr, "id")
    df = do.call(rbind, lapply(fonts, function(x) xmlAttrs(x)[c("size", "family", "color")]))
@@ -23,6 +46,20 @@ function(page,
    df = as.data.frame(df, stringsAsFactors = FALSE)
    df$size = as.integer(df$size)
    df
+}
+
+getNodeFontInfo =
+function(page, nodes = getNodeSet(page, ".//fontspec"))    
+{
+   if(length(nodes) == 0)
+       return(NULL)
+   a = t(sapply(nodes, xmlAttrs))
+   d = as.data.frame(a, stringsAsFactors = FALSE)
+
+   d$size = as.integer(d$size)
+   d[c("isItalic", "isBold", "isOblique")] = lapply(d[c("isItalic", "isBold", "isOblique")], function(x) as.logical(as.integer(x)))
+
+   d
 }
 
 xpathQ =
@@ -35,21 +72,17 @@ function(xpath, obj)
 }
 
 
+###########################################
 
 
-fontInfo =
-function(doc)
+getText =
+function(page, fontID, rotation = 0)
 {
-   df = as.data.frame(t(xpathSApply(doc, "//fontspec", xmlAttrs)), stringsAsFactors = FALSE)
-   iids = c("size" = 'integer',  isItalic = 'logical', isBold = 'logical', isOblique = 'logical')
-
-   df[names(iids)] = mapply(function(var, to)
-                              as(as.integer(df[[var]]), to),
-                            names(iids), iids, SIMPLIFY = FALSE)
-   df
+  xp = sprintf(".//text[ %s ]", paste(sprintf("@font = '%s'", fontID), collapse = " or "))
+  txt = getNodeSet(page, xp)
+  names(txt) = sapply(txt, xmlValue)
+  txt
 }
-
-
 
 textByFont =
     # Get all the text nodes for a single font identifier
@@ -84,8 +117,12 @@ function(doc)
       #   sort(table(unlist(getNodeSet(doc, "//text/@font"))))
     txt = textByFonts(doc)
     ctr = sapply(txt, function(x) sum(nchar(x)))
-    info = fontInfo(doc)
+    info = getFontInfo(doc)
     id = names(ctr)[which.max(ctr)]
     info[info[,"id"] == id, ]
 } 
+
+
+
+
 

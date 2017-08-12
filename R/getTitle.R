@@ -179,32 +179,6 @@ function(txtNodes, minWords = 3, filename = "", lowerCase = TRUE)
 
 #################
 
-getFontText =
-function(page, fontID, rotation = 0)
-{
-  xp = sprintf(".//text[ %s ]", paste(sprintf("@font = '%s'", fontID), collapse = " or "))
-  txt = getNodeSet(page, xp)
-  names(txt) = sapply(txt, xmlValue)
-  txt
-}
-
-getFontInfo =
-function(page)    
-{
-   nodes = getNodeSet(page, ".//fontspec")
-   if(length(nodes) == 0)
-       return(NULL)
-   a = t(sapply(nodes, xmlAttrs))
-   d = as.data.frame(a, stringsAsFactors = FALSE)
-
-   d$size = as.integer(d$size)
-   d[c("isItalic", "isBold", "isOblique")] = lapply(d[c("isItalic", "isBold", "isOblique")], function(x) as.logical(as.integer(x)))
-
-   d
-}
-
-
-
 splitElsevierTitle =
     #
     # For an elsevier document, we want to find the
