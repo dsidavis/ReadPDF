@@ -213,6 +213,8 @@ function(x = NULL, to = NULL, before = FALSE)
 
 
 getLastNode =
+    # get the final node in the document - last node in last page
+    # Use this when getting the content for the last section
 function(doc)
 {
   getNodeSet(doc, "//page[last()]/text[last()]")[[1]]
