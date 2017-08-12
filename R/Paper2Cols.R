@@ -50,6 +50,8 @@ function(node, cols = getTextByCols(xmlParent(node), asNodes = TRUE),
   col = inColumn(node, cols)
   bb = getBBox2(cols[[ col ]] )
 
+     # This is now also done in nodesByLine and getLineWidth(). Leave
+     # this here for now but eventually use those.
      # assemble the lines from these nodes and the horizontal bounding box for
      # each line and then the median position of each of these x1 x2
      # positions for the start and end of the line.
@@ -70,6 +72,44 @@ function(node, cols = getTextByCols(xmlParent(node), asNodes = TRUE),
   textMid = textPos[1] + textPos[2]/2
   
   textPos[1] - pos[1] > .1*diff(pos) & abs(textMid - mid) <  threshold *  median(bb[, "width"])
+}
+
+
+nodesByLine =
+    #
+    # Group a collection of nodes in a column by lines, allowing them
+    # to have a slightly different 
+    #
+function(nodes, asNodes = TRUE, bbox = getBBox2(nodes, TRUE), baseFont = getDocFont(as(nodes[[1]], "XMLInternalDocument")))
+{
+    topBins = cut(bbox$top, seq(0, max(bbox$top)+1, by = baseFont$size))
+    byLine = tapply(nodes, topBins, arrangeLineNodes, asNodes)
+    byLine[ sapply(byLine, length) > 0]
+}    
+
+arrangeLineNodes =
+    #
+    # given the lines with the same top bin, arrange them from left to right.
+    #
+function(nodes, asNodes = TRUE)
+{
+    o = order(as.numeric(sapply(nodes, xmlGetAttr, "left")))
+    if(asNodes)
+        nodes[o]
+    else
+        paste(xmlValue(nodes[o]), collapse = " ")
+}
+
+getLineWidth =
+    #
+    # Takes a list with each element a collection of nodes for that line.
+    # Returns left and right end points.
+function(lines)
+{
+    sapply(lines, function(x) {
+                     b = getBBox2(x, TRUE)
+                     c(min(b$left), max(b$left + b$width))
+                  })
 }
 
 getTextByCols =
