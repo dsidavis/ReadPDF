@@ -54,14 +54,16 @@ browser()
       doesSpan = apply(bb, 1, function(x) abs(ex[1] - x[1])  < 2 & abs(ex[2] - x[3]) < 2)
     } else if(centered == 2) {
 
+        # need the margins.
+#        xpathSApply(page, ".//text")
         # Get rid of any lines that are only within one column.
-        
-        colInfo = t(sapply(colNodes, function(x) {
+         colInfo = t(sapply(colNodes, function(x) {
             ll = nodesByLine(x)
             le = getLineEnds(ll)
-            ex = apply(le, 2, median)
-        }))
-        ex = range(colInfo)
+            ex = mapply(function(i, q) quantile(le[,i], q),
+                         1:2, c(.2, .75))
+         }))
+         ex = range(colInfo)
           # same as clause above so move out of both.
         doesSpan = apply(bb, 1, function(x) abs(ex[1] - x[1])  < 2 & abs(ex[2] - x[3]) < 2)    
         colLines = nodesByLine(getNodeSet(page, ".//text"))
