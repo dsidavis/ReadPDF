@@ -1,3 +1,6 @@
+# Look at Buckley-2003  Rectangle around the table 1. Are these lines
+# or a rectangle?
+
 getTables =
 function(doc)
 {
@@ -5,7 +8,8 @@ function(doc)
         doc = readPDFXML(doc)
 
       # Some docs have T able as two separate text elements
-    tableNodes = getNodeSet(doc, "//text[. = 'Table' or . = 'TABLE' or (. = 'T' and following-sibling::text[1] ='ABLE')]")
+    tableNodes = getNodeSet(doc,
+        "//text[. = 'Table' or . = 'TABLE' or starts-with(., 'TABLE') or starts-with(., 'Table') or (. = 'T' and following-sibling::text[1] ='ABLE')]")
 
       # Now find those that are in text and not part of a separate block
 
@@ -18,7 +22,8 @@ function(node, page = xmlParent(node), colNodes = getTextByCols(page, asNodes = 
 {
     colNum = inColumn(node, colNodes)
     centered = isCentered(node, colNodes)
-browser()                 
+
+    
     if(!centered) {
           # Check if centered in the page since not the column
         pwidth = xmlGetAttr(page, "width",, as.integer)
