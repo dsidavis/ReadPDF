@@ -117,7 +117,7 @@ function(doc)
       #   sort(table(unlist(getNodeSet(doc, "//text/@font"))))
     txt = textByFonts(doc)
     ctr = sapply(txt, function(x) sum(nchar(x)))
-    info = getFontInfo(doc)
+    info = getFontInfo(as(doc, "XMLInternalDocument"))
     id = names(ctr)[which.max(ctr)]
     info[info[,"id"] == id, ]
 } 
@@ -126,3 +126,9 @@ function(doc)
 
 
 
+
+isBold =
+function(obj)
+{
+
+}
