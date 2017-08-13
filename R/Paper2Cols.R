@@ -88,7 +88,8 @@ function(nodes, asNodes = TRUE, bbox = getBBox2(nodes, TRUE),
 {
     intv = seq(0, max(bbox$top)+ baseFont$size - 1, by = baseFont$size)
     topBins = cut(bbox$top, intv)
-    byLine = tapply(nodes, topBins, arrangeLineNodes, asNodes)
+    byLine = tapply(nodes, topBins, arrangeLineNodes, asNodes, simplify = FALSE)
+
     names(byLine) = sapply(byLine, arrangeLineNodes, FALSE)
     byLine[ sapply(byLine, length) > 0]
 }    
@@ -151,10 +152,9 @@ getTextByCols =
     #  Need to identify blocks of text that span the entire page and those that are columnar.
     #
     #
-function(p, threshold = .1, asNodes = FALSE)
+function(p, threshold = .1, asNodes = FALSE, txtNodes = getNodeSet(p, ".//text"))
 {
-    txtNodes = getNodeSet(p, ".//text")
-    bb = as.data.frame(getBBox2(txtNodes))
+    bb = getBBox2(txtNodes, TRUE)
     bb$text = sapply(txtNodes, xmlValue)
     breaks = getColPositions(p, threshold = threshold, bbox = bb)
     

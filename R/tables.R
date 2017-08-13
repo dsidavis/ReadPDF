@@ -13,7 +13,7 @@ function(doc)
 
       # Now find those that are in text and not part of a separate block
 
-    tbls = lapply(tableNodes, findTable)
+#    tbls = lapply(tableNodes, findTable)
     
 }
 
@@ -23,7 +23,7 @@ function(node, page = xmlParent(node), colNodes = getTextByCols(page, asNodes = 
     colNum = inColumn(node, colNodes)
     centered = isCentered(node, colNodes)
 
-    
+browser()    
     if(!centered) {
           # Check if centered in the page since not the column
         pwidth = xmlGetAttr(page, "width",, as.integer)
@@ -70,8 +70,11 @@ function(node, page = xmlParent(node), colNodes = getTextByCols(page, asNodes = 
          }))
          ex = range(colInfo)
           # same as clause above so move out of both.
-        doesSpan = apply(bb, 1, function(x) abs(ex[1] - x[1])  < 2 & abs(ex[2] - x[3]) < 2)    
-        colLines = nodesByLine(getNodeSet(page, ".//text"))
+         doesSpan = apply(bb, 1, function(x) abs(ex[1] - x[1])  < 2 & abs(ex[2] - x[3]) < 2)
+         if(!any(doesSpan)) {
+             # Are there are text nodes to the right
+         }
+         colLines = nodesByLine(getNodeSet(page, ".//text"))
     }
 
  
