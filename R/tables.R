@@ -35,6 +35,7 @@ function(node, page = xmlParent(node),
             centered = 2
     }
 
+browser()        
       # also look at rectangles.  J Infect Dis. 2015 has no lines, just rect.
     lines = getNodeSet(page, ".//line | .//rect")
     bb = getBBox(lines, TRUE)
@@ -43,14 +44,13 @@ function(node, page = xmlParent(node),
     
     nodeTop = as.numeric(xmlGetAttr(node, "top"))
        # recall we are going from top to bottom so these are below the node.
-    bb = bb[bb$y0 >= nodeTop, ]
+    bb = bb[pmin(bb$y0, bb$y1) >= nodeTop, ]
 
     colNum = inColumn(node, colNodes)    
 
-browser()    
     
 #    doesSpan = rep(FALSE, nrow(bb))    
-    if(centered == 1) {
+    if(centered == 1 || (colNum == length(colNodes))) {
        # Could span all columns.
       colLines = nodesByLine(colNodes[[colNum]])
       le = getLineEnds(colLines)
@@ -81,6 +81,10 @@ browser()
 
            # same line as in earlier if() clause so should centralize. But may need it here now.
          doesSpan = spansWidth(bb, ex)
+
+         # This may be a little cavalier and we may need to check.
+         spansCols = seq(along = colNodes)
+         
          if(!any(doesSpan)) {
              # Are there are text nodes to the right???  CHECK.
              # Example where the table doesn't span the entire page, but there is no text to the right of it.
@@ -94,11 +98,11 @@ browser()
                     doesSpan = spansWidth(bb, c(colInfo[2,1], colInfo[3, 2]))
                     if(any(doesSpan))
                         spansCols = c(2, 3)
+                    # If we don't define spansCols above, then we need to do it here as an else or else won't necessarily be defined.
                 } else
                     spansCols = c(1,2)
              }
-         } else
-             spansCols = seq(along = colNodes)
+         }
 
          colLines = nodesByLine(unlist(colNodes[spansCols], recursive = FALSE))
          # colLines = nodesByLine(getNodeSet(page, ".//text"))
@@ -149,5 +153,5 @@ browser()
 }
 
 spansWidth =
-function(bbox, locs, within = 2)
+function(bbox, locs, within = 4) # within was 2 but somewhat arbitrary. Needed 4 for Padula-2002
    apply(bbox, 1, function(x) abs(locs[1] - x[1]) < within & abs(locs[2] - x[3]) < within)
