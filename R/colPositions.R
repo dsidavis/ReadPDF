@@ -74,3 +74,13 @@ function(p, threshold = .1, txtNodes = getNodeSet(p, ".//text"), bbox = getBBox2
     tt = table(ncols)
     as.integer(names(tt)[which.max(tt)])
 }
+
+
+
+
+
+getHorizExtremes =
+function(node)
+{
+  
+}
