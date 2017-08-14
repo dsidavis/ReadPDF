@@ -1,5 +1,12 @@
 # pdftohtml
 
+1. Beta character in Wong et al  supplement.  See BadXML in pdftohtml for analysis. 
+
+1. The + characters in table3 of Leroy-2004 are not present in the XML. No <text> node for them at
+   all.
+   
+1. Also in Leroy-2004 words are put together LossiDec 2002 when should be 
+
 1. findTable().  FOr Aguilar-2007, missing the >= in table 3. Not in XML. This is not just > but a
    symbol in  font. And it is getting ignored/dropped!
    
@@ -21,19 +28,26 @@
 
 ## Tables
 
+1.  Recognize Table XX  in the text as not a table identifier.  See Leroy-2004 - "Table S1" at the
+    very end of the article that refers to supporting online material.
+
 1. identify tables and put the related nodes into a table node and then potentially write the result
   back to the original file so we have that information for subsequent reads of that document.
 
 1. Look for lines separating rows in tables.
 
 1. Neel-2010 - a rotated table.
-   Also, Nelson-2010
+   + Also, Nelson-2010
+   + "LatestDocs/PDF/2999137579/Wong et al 2007 supplement.xml" - 6 pages of rotated tables and no text.
    For Neel, page 5:   all the text is rotated 90 except 5 nodes which are the header for that page.
    Can we detect this and then change the bbox to treat  x0 as y0 and x1 as y1 and reorder the
    dimensions of the page.
    
-1. 3 columns:  3982771992/Leroy-2004-Multiple Ebola virus transmission e.xml
    
+1. 3 columns:  3982771992/Leroy-2004-Multiple Ebola virus transmission e.xml
+    [works] Table 2 and 3 span 2 columns.
+    [works] table 1 - spans entire page.
+	
 1. Nitatpattana-2008, 
 
 1. NipahAsia
