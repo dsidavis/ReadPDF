@@ -25,7 +25,7 @@ function(node, page = xmlParent(node),
     colNum = inColumn(node, colNodes)
     centered = isCentered(node, colNodes)
 
-browser()    
+
     if(!centered) {
           # Check if centered in the page since not the column
         pwidth = xmlGetAttr(page, "width",, as.integer)
@@ -38,13 +38,18 @@ browser()
       # also look at rectangles.  J Infect Dis. 2015 has no lines, just rect.
     lines = getNodeSet(page, ".//line | .//rect")
     bb = getBBox(lines, TRUE)
-      # discard rectangles that are probably 
+      # discard rectangles that are probably too tall to be lines, i.e. span more than half a letter.
     bb = bb[ abs(bb$y1 - bb$y0) < docFont$size * .5, ]
     
     nodeTop = as.numeric(xmlGetAttr(node, "top"))
+       # recall we are going from top to bottom so these are below the node.
     bb = bb[bb$y0 >= nodeTop, ]
+
+    colNum = inColumn(node, colNodes)    
+
+browser()    
     
-    doesSpan = rep(FALSE, nrow(bb))    
+#    doesSpan = rep(FALSE, nrow(bb))    
     if(centered == 1) {
        # Could span all columns.
       colLines = nodesByLine(colNodes[[colNum]])
@@ -53,14 +58,14 @@ browser()
 
       # if column 1, then x1 of line has to be <= ex[2]
       # if column 2, then x0 >= ex[1]
-      colNum = inColumn(node, colNodes)
 
       if(colNum == 1) 
          bb = bb[bb$x1 <= ex[2]*1.05, ]
       else
          bb = bb[bb$x0 >= ex[1]*.95, ]
 
-      doesSpan = apply(bb, 1, function(x) abs(ex[1] - x[1])  < 2 & abs(ex[2] - x[3]) < 2)
+      doesSpan = spansWidth(bb, ex)
+      spansCols = colNum
     } else if(centered == 2 || centered == 0) {
 
         # need the margins.
@@ -73,14 +78,38 @@ browser()
                          1:2, c(.2, .75))
          }))
          ex = range(colInfo)
-          # same as clause above so move out of both.
-         doesSpan = apply(bb, 1, function(x) abs(ex[1] - x[1])  < 2 & abs(ex[2] - x[3]) < 2)
-         if(!any(doesSpan)) {
-             # Are there are text nodes to the right
-         }
-         colLines = nodesByLine(getNodeSet(page, ".//text"))
-    }
 
+           # same line as in earlier if() clause so should centralize. But may need it here now.
+         doesSpan = spansWidth(bb, ex)
+         if(!any(doesSpan)) {
+             # Are there are text nodes to the right???  CHECK.
+             # Example where the table doesn't span the entire page, but there is no text to the right of it.
+             #  Table is on same page as image and there is nothing else so no text (other than figure caption).
+
+#XX Fix this.  Far too specific to 2 columns.             
+             if(length(colNodes) > 2) {
+                 # do any of the lines span 2 or more contiguous columns
+                doesSpan = spansWidth(bb, c(colInfo[1,1], colInfo[2, 2]))
+                if(!any(doesSpan)) {
+                    doesSpan = spansWidth(bb, c(colInfo[2,1], colInfo[3, 2]))
+                    if(any(doesSpan))
+                        spansCols = c(2, 3)
+                } else
+                    spansCols = c(1,2)
+             }
+         } else
+             spansCols = seq(along = colNodes)
+
+         colLines = nodesByLine(unlist(colNodes[spansCols], recursive = FALSE))
+         # colLines = nodesByLine(getNodeSet(page, ".//text"))
+     }
+
+
+    # Handle more than 2 columns
+    # Then also find the lines that come after another table in the same column.
+    # See Leroy-2004 - tables 2 and 3 in same column (1) (and spans 2 columns)
+
+    
  
     # Only the lines that are close.
     # Aguilar-2007 has two tables in column 1 page 3 and we are merging
@@ -99,15 +128,16 @@ browser()
         ii = seq(nodeTop, max(spans$y0, spans$y1) + docFont$size, by = docFont$size)
         tmp = unlist(tapply(spans$y0, cut(spans$y0, ii), min))
         tmp = tmp[!is.na(tmp)]
-#        if(length(tmp) > 3)
-#           tmp = tmp[1:3]        
+
         spans = spans[spans$y0 %in% tmp, ]
         
         spans = spans[ order(spans[,"y0"])[1:3], ]
-        # we should now have the start, header and footer lines.
     }
 
-            # Perhaps use getNodesBetween(). But no need.
+    # we should now have the start, header and footer lines.    
+
+    # Perhaps use getNodesBetween(). But no need.
+    # But for 3 columns, maybe we need to be using that to avoid repeating all the code.
     b = max(spans[,2])
     ok = sapply(colLines, function(x) {
                             tp = as.numeric(xmlGetAttr(x[[1]], "top"))
@@ -117,3 +147,7 @@ browser()
     colLines[ok]
     # Find any text associated with the table as foonotes
 }
+
+spansWidth =
+function(bbox, locs, within = 2)
+   apply(bbox, 1, function(x) abs(locs[1] - x[1]) < within & abs(locs[2] - x[3]) < within)
