@@ -174,13 +174,11 @@ be italics.
 
 ## Font Information
 
-fontInfo()
+getFontInfo()
 
 getDocFont()
 
 getTextFonts()
-
-getFontInfo()
 
 textByFonts()
 
@@ -191,6 +189,13 @@ textByFont()
 # Section Headers
 
 findSectionHeaders()
+  checkCentered or not.
+
+
+## findShortSectionHeaders()
+  Uses findShortLines()
+
+
 
 <!--
 There are times where we want to deal with the text nodes

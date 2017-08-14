@@ -1,0 +1,45 @@
+
+# Finding Tables.
+
+Tables can take many forms.
+However, tables in a given document often have the same basic
+structure and appearance.
+
+In several papers,
++ tables have "Table number" either as a centered title or start of a sentence,
++ some text underneath this which servese as a caption
++ a line that spans the entire column or page
++ some column header information, potentially  with  smaller lines
++ another column/page-wide line separating the header and body
++ body content
++ a line that ends the table
++ possibly some text coresponding to footnotes from the table.
+
+The content is also separated into columns.
+We can use any lines in the header or the positions of the
+text within the header to try to identify the column start and ends.
+
+See the PDFTables package for how to read the tables.
+Our goal here is to find the tables. These two are related.
+
+
+So how do we find a table corresponding to the description above.
+
+First we find the word Table.
+This might be Table, TABLE, or actually separated into T and then ABLE
+with different fonts.
+```r
+getNodeSet(ag, "//text[. = 'Table' or . = 'TABLE' or (. = 'T' and following-sibling::text[1] ='ABLE')]")
+```
+
+getTables() does this.
+
+For each of these nodes, we
++ check to see if it is in the center of a column or the center of a
+page. It could also be at the start of the line.
+
++ Find the lines and see if 
++
+
+Next we look for lines near by.
+We also find the text
