@@ -1,20 +1,41 @@
+getXPathDocFontQuery =
+function(node, docFont = TRUE, fontId = getDocFont(node)$id)
+{
+    xp = if(docFont)
+            sprintf("//text[@font = '%s']", fontId)
+         else
+            "//text"
+    
+    xpathQ(xp, node)
+}
+
+##########
+
 getColPositions =
-function(p, threshold = .1, txtNodes = getNodeSet(p, ".//text"), bbox = getBBox2(txtNodes))
+function(p, threshold = .1,
+         txtNodes = getNodeSet(p, getXPathDocFontQuery(p, docFont)),
+         bbox = getBBox2(txtNodes), docFont = TRUE)
     UseMethod("getColPositions")
 
+
 getColPositions.character = 
-function(p, threshold = .1, txtNodes = getNodeSet(p, ".//text"), bbox = getBBox2(txtNodes))    
-    getColPositions(readPDFXML(p), threshold)
+function(p, threshold = .1,
+         txtNodes = getNodeSet(p, getXPathDocFontQuery(p, docFont)),
+         bbox = getBBox2(txtNodes), docFont = TRUE)    
+   getColPositions(readPDFXML(p), threshold)
+
 
 getColPositions.PDFToXMLDoc = 
-function(p, threshold = .1, txtNodes = getNodeSet(p, ".//text"), bbox = getBBox2(txtNodes))    
-{
-  lapply(p, getColPositions, threshold)
-}
+function(p, threshold = .1,
+         txtNodes = getNodeSet(p, getXPathDocFontQuery(p, docFont)),
+         bbox = getBBox2(txtNodes), docFont = TRUE)    
+   lapply(p, getColPositions, threshold)
 
 
 getColPositions.PDFToXMLPage = getColPositions.XMLInternalNode =
-function(p, threshold = .1, txtNodes = getNodeSet(p, ".//text"), bbox = getBBox2(txtNodes))    
+function(p, threshold = .1,
+         txtNodes = getNodeSet(p, getXPathDocFontQuery(p, docFont)),
+         bbox = getBBox2(txtNodes), docFont = TRUE)    
 {
     bbox = as.data.frame(bbox)
 
@@ -30,17 +51,21 @@ function(p, threshold = .1, txtNodes = getNodeSet(p, ".//text"), bbox = getBBox2
     ans
 }
 
+#########
+
 getNumCols =
 function(p, threshold = .1, txtNodes = getNodeSet(p, ".//text"), bbox = getBBox2(txtNodes))
     UseMethod("getNumCols")
 
 getNumCols.character =
 function(p, threshold = .1, txtNodes = getNodeSet(p, ".//text"), bbox = getBBox2(txtNodes))
-  getNumCols(  readPDFXML(p), threshold)
+  getNumCols(  readPDFXML(p), threshold, txtNodes, bbox)
+
 
 getNumCols.PDFToXMLPage = getNumCols.XMLInternalNode =
 function(p, threshold = .1, txtNodes = getNodeSet(p, ".//text"), bbox = getBBox2(txtNodes))
     length(getColPositions(p, threshold, txtNodes, bbox))
+
 
 getNumCols.PDFToXMLDoc =
 function(p, threshold = .1, txtNodes = getNodeSet(p, ".//text"), bbox = getBBox2(txtNodes))
