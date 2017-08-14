@@ -1,9 +1,14 @@
 # pdftohtml
 
-1. Are the image locations (x, y) correct?  Do we need to transform them?
+1. findTable().  FOr Aguilar-2007, missing the >= in table 3. Not in XML. This is not just > but a
+   symbol in  font. And it is getting ignored/dropped!
+   
+1. spaces in Table 2 of Aguilar-2007  The 5 and 80 run together.
+
+1. Are the image locations and dimensions (x, y) correct?  Do we need to transform them?
    See Klein-2011
 
-1. Spaces within a string are getting lost in pdftohotml - e.g., Fulhorst-2002
+1. Spaces within a string are getting lost in pdftohotml - e.g., Fulhorst-2002  - page 1 - 'TexasParksand'
 
 1. Check the links in pdftohtml. In Lahm, we only get 14 links to the bibliography items.
   There are 519 /Link elements in the uncompressed PDF.
@@ -13,19 +18,97 @@
 
 # Todo list for ReadPDF
 
+
+## Tables
+
+1. identify tables and put the related nodes into a table node and then potentially write the result
+  back to the original file so we have that information for subsequent reads of that document.
+
+1. Look for lines separating rows in tables.
+
+1. Neel-2010 - a rotated table.
+   Also, Nelson-2010
+   For Neel, page 5:   all the text is rotated 90 except 5 nodes which are the header for that page.
+   Can we detect this and then change the bbox to treat  x0 as y0 and x1 as y1 and reorder the
+   dimensions of the page.
+   
+1. 3 columns:  3982771992/Leroy-2004-Multiple Ebola virus transmission e.xml
+   
+1. Nitatpattana-2008, 
+
+1. NipahAsia
+
+1.  "1351986620/J Infect Dis.-2015-Ogawa-infdis-jiv063.xml" - tables with rows with alternating  colors.
+    + Table 1  (which comes second)
+	    Gets the header but not the rows.
+    + [works] Table 2.  Has <rect> not <line>
+   	  Now gets more than we want. Includes line from other column from Figure 3 and much f the caption
+      and then from the 2nd  column below the table and the "Downloaded from " which is rotated text.
+		
+1. ** Remove any footer line that spans the entire page on all pages before looking for tables.
+
+1. Schmajohn-1997 - 2 complex tables. one which spans 1 1/4 columns.
+
+1. Brauburger-2012 - single column long paper.  Tables continued across pages.
+   Kariwa-2007 also continued.
+
+1. Armien-2004 - good example of table
+     ** Table 2.  Tabl2 is not considered centered. getColPositions() returns only 1. This is because
+     References are in the second colun and are numbered and indented so very few in.
+	 
+    [works]  Table 1 
+
+
+1. [works] Weaver-2001  - table 2 - getColPositions() has 5 columns because the table dominates.
+      [this part fixed now.]  getColPositions() uses the id of the most common font (getDocFont()) to find the
+      relevant text, and so excludes the tables, etc.
+
+1. Can't detect Klein-2011 - lines don't span all the way across the page. But no text to the right.
+    But many additional lines.
+     `findTable(getNodeSet(k, "//text[contains(., 'Table 1')]")[[2]])`
+	 
+1.  [Works] table 3 in Fulhorst - spans width of page.
+     Thinks there is only one column. So getColPositions() needs work because of the image in the
+     second column. 
+	 
+     ```r
+	 tt = getNodeSet(fu, "//text[. = 'Table' or . = 'TABLE' or (. = 'T' and following-sibling::text[1] ='ABLE')]")
+	 findTable(tt[[3]])
+     ```
+
+1. Padula-2002 - 1 table spans 2 columns
+
+### No tables - Correct
+1. [and none found by getTables() - correct] No tables,  Kang-2010, Halpin-2000, Culley-2003
+	 
+## General
+
+1. getColPositions() - see Armien-2004 p5.
+
 1. Section title: Look for text on a line on its own, a little separated from next line and not
    taking up the entire column width.
    ```r
    findShortLines(getTextByCols(wv[[2]], asNodes = TRUE)[[1]])
    ```
-   Then we see the lines that don't span the entire column and also the ones that start with an indentation.
+   Then we see the lines that don't span the entire column and also the ones that start with an
+   indentation.
+   See also findShortSectionHeaders()
 
 1. Compute document-wide interlineskip.
+   Get all the @top from the text nodes on a page.
+   Group them by line
+   order the lines
+   compute difference 
+   ```r
+   ptops = as.numeric(unlist(getNodeSet(wv[[2]], "//text/@top")))   
+   pcut = split(ptops, cut(ptops, seq(0, 1200,by=13)))   
+   pcut = pcut[ sapply(pcut, length) > 0]
+   diff(sapply(pcut, min))
+   ```
 
 1. identify abstract and put it in its own node.
 
 1. Find text within shaded region.  Put the text nodes in a <shaded> node.
-
 	 
 1. Remove header and footer material from getTextByCols()
 
@@ -36,11 +119,9 @@
    Implemeted in nodesByLine().
    See isCentered() where we combine segments into lines.  Move this code out to a separate function.
 
-
-1. identify tables and put the related nodes into a table node and then potentially write the result
-  back to the original file so we have that information for subsequent reads of that document.
-   + Look for lines separating rows in tables.
-
+1.  So getColPositions() needs work because of the image in the
+     second column.  See Fulhorst-2002 age 4.
+	 ```
 1. Similarly, can add 1-column, 2-column, etc around the text, which column and where the columns
   start and end.  
   
@@ -165,7 +246,8 @@
   See 0337534517/Andriamandimby-2011-Crimean-Congo%20hemorrhagic.xml
 
 1.  Reassemble the elements of a word, line, paragraph from the different <text> elements
-  See code we had in an earlier package for this.
+    ** See nodesByLine()
+     See code we had in an earlier package for this.
 
 1. Detect 2 columns when one is mostly a figure and not words.
    Figure out columns for all pages and correct if one or two pages seems to be single column.

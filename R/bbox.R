@@ -28,7 +28,14 @@ getBBox =
     # This bbox function expects an attribute named bbox
     #
 function(nodes, asDataFrame = FALSE)
-{   
+{
+    if(length(nodes) == 0) {
+        if(asDataFrame)
+            return(data.frame(x0 = numeric(), y0 = numeric(), x1 = numeric(), y1 = numeric()))
+        else
+            return(matrix(0, nrow = 0, ncol = 4))
+    }
+    
     tmp = sapply(nodes, xmlGetAttr, "bbox")
     els = strsplit(tmp, ",")
     bb = matrix(as.numeric(unlist(els)), , 4, byrow = TRUE)

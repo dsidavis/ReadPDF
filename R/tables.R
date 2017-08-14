@@ -64,7 +64,7 @@ browser()
     } else if(centered == 2 || centered == 0) {
 
         # need the margins.
-#        xpathSApply(page, ".//text")
+#        xpathSApply(page, ".//text")        
         # Get rid of any lines that are only within one column.
          colInfo = t(sapply(colNodes, function(x) {
             ll = nodesByLine(x)
@@ -87,7 +87,6 @@ browser()
     # them both with all the text in between.
     spans =  bb[doesSpan,]
     if(nrow(spans) > 3) {
-
                 # need the ones "close" to node.
         # under node but closest to it.
         # For, e.g. J Infect. Dist-2015, we have <rect> nodes and two of these are very close together. 866 and 868
@@ -107,10 +106,8 @@ browser()
         spans = spans[ order(spans[,"y0"])[1:3], ]
         # we should now have the start, header and footer lines.
     }
- 
 
             # Perhaps use getNodesBetween(). But no need.
-
     b = max(spans[,2])
     ok = sapply(colLines, function(x) {
                             tp = as.numeric(xmlGetAttr(x[[1]], "top"))
@@ -118,11 +115,5 @@ browser()
                      })
 
     colLines[ok]
-
-
     # Find any text associated with the table as foonotes
-
 }
-
-
-
