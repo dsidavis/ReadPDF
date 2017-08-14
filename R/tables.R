@@ -18,7 +18,9 @@ function(doc)
 }
 
 findTable =
-function(node, page = xmlParent(node), colNodes = getTextByCols(page, asNodes = TRUE))
+function(node, page = xmlParent(node),
+         colNodes = getTextByCols(page, asNodes = TRUE),
+         docFont = getDocFont(node))
 {
     colNum = inColumn(node, colNodes)
     centered = isCentered(node, colNodes)
@@ -33,14 +35,16 @@ browser()
             centered = 2
     }
 
-    lines = getNodeSet(page, ".//line")
+      # also look at rectangles.  J Infect Dis. 2015 has no lines, just rect.
+    lines = getNodeSet(page, ".//line | .//rect")
     bb = getBBox(lines, TRUE)
-    doesSpan = rep(FALSE, nrow(bb))
+      # discard rectangles that are probably 
+    bb = bb[ abs(bb$y1 - bb$y0) < docFont$size * .5, ]
     
-
     nodeTop = as.numeric(xmlGetAttr(node, "top"))
-    bb = bb[bb$y0 >= nodeTop, ]    
+    bb = bb[bb$y0 >= nodeTop, ]
     
+    doesSpan = rep(FALSE, nrow(bb))    
     if(centered == 1) {
        # Could span all columns.
       colLines = nodesByLine(colNodes[[colNum]])
@@ -57,7 +61,7 @@ browser()
          bb = bb[bb$x0 >= ex[1]*.95, ]
 
       doesSpan = apply(bb, 1, function(x) abs(ex[1] - x[1])  < 2 & abs(ex[2] - x[3]) < 2)
-    } else if(centered == 2) {
+    } else if(centered == 2 || centered == 0) {
 
         # need the margins.
 #        xpathSApply(page, ".//text")
@@ -84,11 +88,24 @@ browser()
     spans =  bb[doesSpan,]
     if(nrow(spans) > 3) {
 
-        # need the ones "close" to node.
+                # need the ones "close" to node.
         # under node but closest to it.
+        # For, e.g. J Infect. Dist-2015, we have <rect> nodes and two of these are very close together. 866 and 868
+        # So looking at the first 3 is too simplistic.
+        # We need the next one which is the bottom of the table.
+        # And there is another line across the page but that is the footer that is on each page - and only 5 units above the text of the footer.
 
-       spans = spans[ order(spans[,"y0"])[1:3], ]
-        # we have the start, header and footer lines.
+        # so now group the "lines/rects" based on their y0 value into groups based on the document font size.
+        # Take the min from each group.
+        ii = seq(nodeTop, max(spans$y0, spans$y1) + docFont$size, by = docFont$size)
+        tmp = unlist(tapply(spans$y0, cut(spans$y0, ii), min))
+        tmp = tmp[!is.na(tmp)]
+#        if(length(tmp) > 3)
+#           tmp = tmp[1:3]        
+        spans = spans[spans$y0 %in% tmp, ]
+        
+        spans = spans[ order(spans[,"y0"])[1:3], ]
+        # we should now have the start, header and footer lines.
     }
  
 
