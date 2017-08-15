@@ -35,7 +35,7 @@ function(node, page = xmlParent(node),
             centered = 2
     }
 
-browser()        
+#browser()        
       # also look at rectangles.  J Infect Dis. 2015 has no lines, just rect.
     lines = getNodeSet(page, ".//line | .//rect")
     bb = getBBox(lines, TRUE)
@@ -45,6 +45,8 @@ browser()
     nodeTop = as.numeric(xmlGetAttr(node, "top"))
        # recall we are going from top to bottom so these are below the node.
     bb = bb[pmin(bb$y0, bb$y1) >= nodeTop, ]
+
+    bb = combineBBoxLines(bb)    
 
     colNum = inColumn(node, colNodes)    
 
@@ -66,6 +68,26 @@ browser()
 
       doesSpan = spansWidth(bb, ex)
       spansCols = colNum
+
+      if(!any(doesSpan)) {
+          # See if there are any text nodes to the right
+          browser()
+          # get the widest lines
+          m = max(bb$x1 - bb$x0)
+          i = (bb$x1 - bb$x0 == m)
+          wd = bb[i, ]
+          right = max(wd$x1)
+          ys = max(bb$y1)
+          tor = sapply(unlist(colNodes),
+                       function(x) {
+                           b = getBBox2(list(x), TRUE)
+                           b$left > right & b$top > nodeTop & b$top < ys
+                       })
+          if(!any(tor)) {
+              # nothing to the right
+              doesSpan[i] = TRUE
+          }
+      }
     } else if(centered == 2 || centered == 0) {
 
         # need the margins.

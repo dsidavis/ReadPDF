@@ -228,3 +228,22 @@ function(page, nodes = getNodeSet(doc, ".//text"))
     ll = nodesByLine(nodes)
     pos = getLineEnds(ll)
 }
+
+
+combineBBoxLines =
+function(bbox, by = "y1")
+{
+  do.call(rbind, by(bbox, bbox[[by]], combineLines))
+}
+
+combineLines =
+function(bbox)
+{
+  ok = length(unique(unlist(bbox[,c("y0", "y1")]))) == 1 && all((bbox$x0[-1] - bbox$x1[-nrow(bbox)]) == 0)
+  if(ok) {
+      ans = bbox[1,]
+      ans[c("x0", "x1")] = c(min(bbox$x0), max(bbox$x1))
+      return(ans)
+  } else
+     bbox
+}
