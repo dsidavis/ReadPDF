@@ -155,7 +155,8 @@ getTextByCols =
 function(p, threshold = .1, asNodes = FALSE,
          txtNodes = getNodeSet(p, ".//text"),
          bbox = getBBox2(txtNodes, TRUE),
-         breaks = getColPositions(as(p, "XMLInternalDocument"), threshold = threshold, bbox = bbox, ...), ...)         
+         breaks = getColPositions(if(perPage) p else as(p, "XMLInternalDocument"), threshold = threshold, bbox = bbox, perPage = perPage, ...),
+         perPage = FALSE, ...)         
 {
     bb = bbox
     bb$text = sapply(txtNodes, xmlValue)
@@ -237,10 +238,15 @@ function(bbox, by = "y1")
 }
 
 combineLines =
-function(bbox)
+function(bbox, sameY = FALSE)
 {
-  ok = length(unique(unlist(bbox[,c("y0", "y1")]))) == 1 && all((bbox$x0[-1] - bbox$x1[-nrow(bbox)]) == 0)
-  if(ok) {
+
+  sameHeight = length(unique(unlist(bbox[,c("y0", "y1")]))) == 1
+     # This allows the right end of a line to go beyond the left part of the next line, i.e. overlap.     
+     # Not simply meeting at the same point.  See Nittapatana-2008 paper.
+  ok =  all((bbox$x0[-1] - bbox$x1[-nrow(bbox)]) < 0)
+  
+  if(ok && (!sameY || sameHeight)) {
       ans = bbox[1,]
       ans[c("x0", "x1")] = c(min(bbox$x0), max(bbox$x1))
       return(ans)
