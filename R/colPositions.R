@@ -32,13 +32,17 @@ function(p, threshold = .1,
          perPage = TRUE, ...
         )    
 {
+
        # getPages() call here since could be called with an XMLInternalDocument, not a PDFToXMLDoc.
     ans = lapply(getPages(p), getColPositions, threshold)
-    if(perPage)
+    if(is.logical(perPage) && perPage)
         return(ans)
 
-    tt = table(unlist(ans))/6
-    as.integer(names(tt))[ tt >= .666]
+    if(is.logical(perPage))
+       perPage = .66
+
+    tt = table(unlist(ans))/getNumPages(p)
+    as.numeric(names(tt))[ tt >= perPage ]
 }
 
 
