@@ -14,28 +14,38 @@ function(node, docFont = TRUE, fontId = getDocFont(node)$id)
 getColPositions =
 function(p, threshold = .1,
          txtNodes = getNodeSet(p, getXPathDocFontQuery(p, docFont)),
-         bbox = getBBox2(txtNodes), docFont = TRUE)
+         bbox = getBBox2(txtNodes), docFont = TRUE, ...)
     UseMethod("getColPositions")
 
 
 getColPositions.character = 
 function(p, threshold = .1,
          txtNodes = getNodeSet(p, getXPathDocFontQuery(p, docFont)),
-         bbox = getBBox2(txtNodes), docFont = TRUE)    
+         bbox = getBBox2(txtNodes), docFont = TRUE, ...)    
    getColPositions(readPDFXML(p), threshold)
 
 
-getColPositions.PDFToXMLDoc = 
+getColPositions.PDFToXMLDoc = getColPositions.XMLInternalDocument =
 function(p, threshold = .1,
          txtNodes = getNodeSet(p, getXPathDocFontQuery(p, docFont)),
-         bbox = getBBox2(txtNodes), docFont = TRUE)    
-   lapply(p, getColPositions, threshold)
+         bbox = getBBox2(txtNodes), docFont = TRUE,
+         perPage = TRUE, ...
+        )    
+{
+       # getPages() call here since could be called with an XMLInternalDocument, not a PDFToXMLDoc.
+    ans = lapply(getPages(p), getColPositions, threshold)
+    if(perPage)
+        return(ans)
+
+    tt = table(unlist(ans))/6
+    as.integer(names(tt))[ tt >= .666]
+}
 
 
 getColPositions.PDFToXMLPage = getColPositions.XMLInternalNode =
 function(p, threshold = .1,
          txtNodes = getNodeSet(p, getXPathDocFontQuery(p, docFont)),
-         bbox = getBBox2(txtNodes), docFont = TRUE)    
+         bbox = getBBox2(txtNodes), docFont = TRUE, ...)    
 {
     bbox = as.data.frame(bbox)
 
