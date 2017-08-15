@@ -22,6 +22,10 @@ function(node, page = xmlParent(node),
          colNodes = getTextByCols(page, asNodes = TRUE, perPage = perPage),
          docFont = getDocFont(node), perPage = FALSE)
 {
+
+    if(!perPage && length(getColPositions(node, perPage)) < 2)
+        colNodes = getTextByCols(page, asNodes = TRUE, perPage = TRUE)
+    
     colNum = inColumn(node, colNodes)
     centered = isCentered(node, colNodes)
 
