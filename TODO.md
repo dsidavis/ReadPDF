@@ -1,6 +1,6 @@
 # pdftohtml
 
-1. Beta character in Wong et al  supplement.  See BadXML in pdftohtml for analysis. 
+1. Beta character in Wong et al  supplement.  See BadCharacters in pdftohtml for analysis. 
 
 1. The + characters in table3 of Leroy-2004 are not present in the XML. No <text> node for them at
    all.
@@ -10,11 +10,11 @@
 1. findTable().  FOr Aguilar-2007, missing the >= in table 3. Not in XML. This is not just > but a
    symbol in  font. And it is getting ignored/dropped!
    
-1. spaces in Table 2 of Aguilar-2007  The 5 and 80 run together.
 
 1. Are the image locations and dimensions (x, y) correct?  Do we need to transform them?
    See Klein-2011
 
+1. spaces in Table 2 of Aguilar-2007  The 5 and 80 run together.
 1. Spaces within a string are getting lost in pdftohotml - e.g., Fulhorst-2002  - page 1 - 'TexasParksand'
 
 1. Check the links in pdftohtml. In Lahm, we only get 14 links to the bibliography items.
@@ -28,6 +28,8 @@
 
 ## Tables
 
+1. ** Remove any footer line that spans the entire page on all pages before looking for tables.
+
 1.  Recognize Table XX  in the text as not a table identifier.  See Leroy-2004 - "Table S1" at the
     very end of the article that refers to supporting online material.
 
@@ -36,6 +38,15 @@
 
 1. Look for lines separating rows in tables.
 
+1. Schmaljohn-1997 - 2 complex tables. one which spans 1 1/4 columns.
+    Table 1 is on a page all by itself. Its contents are not in the doc font - not a single text element
+	with the doc font on that page. So getTextByCols() and getColPositions() fail to return anything.
+	We need getColPositions(, docFont = FALSE).
+	
+1. Brauburger-2012 - single column long paper.  Tables continued across pages.
+   Kariwa-2007 also continued.
+
+
 1. Neel-2010 - a rotated table.
    + Also, Nelson-2010
    + "LatestDocs/PDF/2999137579/Wong et al 2007 supplement.xml" - 6 pages of rotated tables and no text.
@@ -43,54 +54,64 @@
    Can we detect this and then change the bbox to treat  x0 as y0 and x1 as y1 and reorder the
    dimensions of the page.
    
-   
-1. 3 columns:  3982771992/Leroy-2004-Multiple Ebola virus transmission e.xml
-    [works] Table 2 and 3 span 2 columns.
-    [works] table 1 - spans entire page.
-	
-1. Nitatpattana-2008, 
 
-1. NipahAsia
+1. !!! Nitatpattana-2008, 
+     Table 1 - finds the table, but the bottom line is actually two half lines so the span code
+     doesn't find it since neither span the entire column.
+    [works] Table 2
 
-1.  "1351986620/J Infect Dis.-2015-Ogawa-infdis-jiv063.xml" - tables with rows with alternating  colors.
-    + Table 1  (which comes second)
-	    Gets the header but not the rows.
-    + [works] Table 2.  Has <rect> not <line>
-   	  Now gets more than we want. Includes line from other column from Figure 3 and much f the caption
+
+1.  !! "1351986620/J Infect Dis.-2015-Ogawa-infdis-jiv063.xml" - tables with rows with alternating  colors.
+
+    + [used to work, I think] Table 2.  Has <rect> not <line>
+	    Gets the header and first row, but not the remaining rows.
+		The rows have alternative colors. Can we exploit this to identify 
+   	  [previously] Now gets more than we want. Includes line from other column from Figure 3 and much f the caption
       and then from the 2nd  column below the table and the "Downloaded from " which is rotated text.
-		
-1. ** Remove any footer line that spans the entire page on all pages before looking for tables.
 
-1. Schmajohn-1997 - 2 complex tables. one which spans 1 1/4 columns.
+    + [works] Table 1  (which comes second)
 
-1. Brauburger-2012 - single column long paper.  Tables continued across pages.
-   Kariwa-2007 also continued.
-
-1. Armien-2004 - good example of table
-     ** Table 2.  Tabl2 is not considered centered. getColPositions() returns only 1. This is because
+1. [works] Armien-2004 - good example of table<br/>
+     [**works**]
+     [no caveats now afer adjusting getTextByCols(), etc. to compute getColPositions() across entire document.]
+     Table 2.  Table2 is not considered centered. getColPositions() returns only 1. This is because
      References are in the second colun and are numbered and indented so very few in.
-	 
+	 If we specify the column breaks ourself, based on page 4, it works <br/>
+   ```r
+     tt = getTables(ar)   
+	 names(findTable(tt[[2]], colNodes = getTextByCols(ar[[5]], breaks = c(79, 474), asNodes = TRUE)))
+	 names(findTable(tt[[2]]))
+   ```
     [works]  Table 1 
+
+
+1. [works] Can't detect Klein-2011 - lines don't span all the way across the page. But no text to the right.
+    But many additional lines.
+     `names(findTable(getNodeSet(k, "//text[contains(., 'Table 1')]")[[2]]))`
 
 
 1. [works] Weaver-2001  - table 2 - getColPositions() has 5 columns because the table dominates.
       [this part fixed now.]  getColPositions() uses the id of the most common font (getDocFont()) to find the
       relevant text, and so excludes the tables, etc.
 
-1. Can't detect Klein-2011 - lines don't span all the way across the page. But no text to the right.
-    But many additional lines.
-     `findTable(getNodeSet(k, "//text[contains(., 'Table 1')]")[[2]])`
-	 
+1. [works] Padula-2002 - 1 table spans 2 columns
+
 1.  [Works] table 3 in Fulhorst - spans width of page.
      Thinks there is only one column. So getColPositions() needs work because of the image in the
      second column. 
 	 
-     ```r
-	 tt = getNodeSet(fu, "//text[. = 'Table' or . = 'TABLE' or (. = 'T' and following-sibling::text[1] ='ABLE')]")
-	 findTable(tt[[3]])
-     ```
+   ```r
+     tt = getTables(fu)
+	 names(findTable(tt[[3]]))
+   ```
 
-1. Padula-2002 - 1 table spans 2 columns
+1. [works] 3 columns:  3982771992/Leroy-2004-Multiple Ebola virus transmission e.xml
+      [works] Table 2 and 3 span 2 columns.
+      [works] table 1 - spans entire page.
+
+1. [works] NipahAsia
+
+
 
 ### No tables - Correct
 1. [and none found by getTables() - correct] No tables,  Kang-2010, Halpin-2000, Culley-2003
