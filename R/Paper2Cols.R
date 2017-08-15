@@ -152,13 +152,13 @@ getTextByCols =
     #  Need to identify blocks of text that span the entire page and those that are columnar.
     #
     #
-function(p, threshold = .1, asNodes = FALSE, txtNodes = getNodeSet(p, ".//text"),
+function(p, threshold = .1, asNodes = FALSE,
+         txtNodes = getNodeSet(p, ".//text"),
          bbox = getBBox2(txtNodes, TRUE),
-         breaks = getColPositions(p, threshold = threshold, bbox = bbox))
+         breaks = getColPositions(as(p, "XMLInternalDocument"), threshold = threshold, bbox = bbox, ...), ...)         
 {
     bb = bbox
     bb$text = sapply(txtNodes, xmlValue)
-
     
     if(asNodes) {
         split(txtNodes, cut(bb$left, c(0, breaks[-1], Inf)))
