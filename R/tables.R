@@ -34,7 +34,7 @@ function(node, page = xmlParent(node),
             centered = 2
     }
 
-#browser()        
+browser()        
       # also look at rectangles.  J Infect Dis. 2015 has no lines, just rect.
     lines = getNodeSet(page, ".//line | .//rect")
     bb = getBBox(lines, TRUE)
@@ -70,7 +70,7 @@ function(node, page = xmlParent(node),
 
       if(!any(doesSpan)) {
           # See if there are any text nodes to the right
-          browser()
+
           # get the widest lines
           m = max(bb$x1 - bb$x0)
           i = (bb$x1 - bb$x0 == m)
