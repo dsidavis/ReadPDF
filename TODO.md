@@ -28,7 +28,7 @@
 
 ## Tables
 
-1. ** Remove any footer line that spans the entire page on all pages before looking for tables.
+1. **Remove** any footer line that spans the entire page on all pages before looking for tables.
 
 1.  Recognize Table XX  in the text as not a table identifier.  See Leroy-2004 - "Table S1" at the
     very end of the article that refers to supporting online material.
@@ -38,30 +38,36 @@
 
 1. Look for lines separating rows in tables.
 
+## Specific Tables
+
 1. Schmaljohn-1997 - 2 complex tables. one which spans 1 1/4 columns.
-    Table 1 is on a page all by itself. Its contents are not in the doc font - not a single text element
+    <br/>
+	Table 1 is on a page all by itself. Its contents are not in the doc font - not a single text element
 	with the doc font on that page. So getTextByCols() and getColPositions() fail to return anything.
-	We need getColPositions(, docFont = FALSE).
+	We need getColPositions(, docFont = FALSE).  **ADDED NOW**
 	
 1. Brauburger-2012 - single column long paper.  Tables continued across pages.
    Kariwa-2007 also continued.
 
-
 1. Neel-2010 - a rotated table.
    + Also, Nelson-2010
-   + "LatestDocs/PDF/2999137579/Wong et al 2007 supplement.xml" - 6 pages of rotated tables and no text.
-   For Neel, page 5:   all the text is rotated 90 except 5 nodes which are the header for that page.
+   + "LatestDocs/PDF/2999137579/Wong et al 2007 supplement.xml" - 6 pages of rotated tables and no
+   text. 
+   + For Neel, page 5:   all the text is rotated 90 except 5 nodes which are the header for that page.
    Can we detect this and then change the bbox to treat  x0 as y0 and x1 as y1 and reorder the
    dimensions of the page.
    
-
-1. !!! Nitatpattana-2008, 
+1.  Nitatpattana-2008, 
      Table 1 - finds the table, but the bottom line is actually two half lines so the span code
      doesn't find it since neither span the entire column.
+	 In fact, the two lines overlap and do not meet at the same point as in other document.s
+	 See combineLines and combineBBoxLines.
     [works] Table 2
+	 ```r
+     tt = getTables(nit); findTable(tt[[1]])
+      ```
 
-
-1.  !! "1351986620/J Infect Dis.-2015-Ogawa-infdis-jiv063.xml" - tables with rows with alternating  colors.
+1.  [**!!**] "1351986620/J Infect Dis.-2015-Ogawa-infdis-jiv063.xml" - tables with rows with alternating  colors.
 
     + [used to work, I think] Table 2.  Has <rect> not <line>
 	    Gets the header and first row, but not the remaining rows.
@@ -70,6 +76,8 @@
       and then from the 2nd  column below the table and the "Downloaded from " which is rotated text.
 
     + [works] Table 1  (which comes second)
+
+## Tables Work
 
 1. [works] Armien-2004 - good example of table<br/>
      [**works**]
@@ -84,11 +92,9 @@
    ```
     [works]  Table 1 
 
-
 1. [works] Can't detect Klein-2011 - lines don't span all the way across the page. But no text to the right.
     But many additional lines.
      `names(findTable(getNodeSet(k, "//text[contains(., 'Table 1')]")[[2]]))`
-
 
 1. [works] Weaver-2001  - table 2 - getColPositions() has 5 columns because the table dominates.
       [this part fixed now.]  getColPositions() uses the id of the most common font (getDocFont()) to find the
@@ -96,29 +102,28 @@
 
 1. [works] Padula-2002 - 1 table spans 2 columns
 
-1.  [Works] table 3 in Fulhorst - spans width of page.
+1. [Works] table 3 in Fulhorst - spans width of page.
      Thinks there is only one column. So getColPositions() needs work because of the image in the
      second column. 
-	 
    ```r
      tt = getTables(fu)
 	 names(findTable(tt[[3]]))
    ```
 
 1. [works] 3 columns:  3982771992/Leroy-2004-Multiple Ebola virus transmission e.xml
-      [works] Table 2 and 3 span 2 columns.
-      [works] table 1 - spans entire page.
+     + [works] Table 2 and 3 span 2 columns.
+     + [works] table 1 - spans entire page.
 
 1. [works] NipahAsia
 
 
 
-### No tables - Correct
+## No tables - Correct
 1. [and none found by getTables() - correct] No tables,  Kang-2010, Halpin-2000, Culley-2003
 	 
-## General
+# General
 
-1. getColPositions() - see Armien-2004 p5.
+1. [fixed with `perPage = FALSE`] getColPositions() - see Armien-2004 p5.
 
 1. Section title: Look for text on a line on its own, a little separated from next line and not
    taking up the entire column width.
@@ -156,7 +161,7 @@
 
 1.  So getColPositions() needs work because of the image in the
      second column.  See Fulhorst-2002 age 4.
-	 ```
+
 1. Similarly, can add 1-column, 2-column, etc around the text, which column and where the columns
   start and end.  
   
@@ -267,8 +272,7 @@
   This is the keyword box.
   "Zoonotics/...PDF/0809541268/Kitajima-2009-First detection of genotype 3 he.xml"
   This comes up in the splitElsevierTitle() and why we put the no filter of nodes if no y > yl.
-  
-  See 3569325249/Scherret-2001-The relationships between West N.xml for a good example.
+    +  See 3569325249/Scherret-2001-The relationships between West N.xml for a good example.
   
 1.  Get all of the elements in the title even if changed font
   i.e. identify title and then find all the elements near these that make up 
@@ -281,8 +285,8 @@
   See 0337534517/Andriamandimby-2011-Crimean-Congo%20hemorrhagic.xml
 
 1.  Reassemble the elements of a word, line, paragraph from the different <text> elements
-    ** See nodesByLine()
-     See code we had in an earlier package for this.
+    **See nodesByLine()**
+     + See code we had in an earlier package for this.
 
 1. Detect 2 columns when one is mostly a figure and not words.
    Figure out columns for all pages and correct if one or two pages seems to be single column.
