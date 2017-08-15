@@ -19,12 +19,11 @@ function(doc)
 
 findTable =
 function(node, page = xmlParent(node),
-         colNodes = getTextByCols(page, asNodes = TRUE),
-         docFont = getDocFont(node))
+         colNodes = getTextByCols(page, asNodes = TRUE, perPage = perPage),
+         docFont = getDocFont(node), perPage = FALSE)
 {
     colNum = inColumn(node, colNodes)
     centered = isCentered(node, colNodes)
-
 
     if(!centered) {
           # Check if centered in the page since not the column
