@@ -54,12 +54,12 @@ findSectionHeaders =
     #
     
 function(doc, sectionName = c('introduction', 'background',
-                  'conclusions', 'discussion', 'results', 'methods'),
+                  'conclusions', 'discussion', 'materials and methods'),
             # For, e.g., Lahm-2007-Morbidity, with these 2 extra section names, we
             # match References and Ackno..  and these don't have
             # numbers.
             # Maybe go for numbered section titles first?         
-         otherSectionNames = c('references', 'acknowledgements'),
+         otherSectionNames = c('references', 'acknowledgements', 'results', 'methods'),
          checkCentered = TRUE         
          )
 {
@@ -79,29 +79,48 @@ function(doc, sectionName = c('introduction', 'background',
        intro = getNodeSet(doc, xp)
     }
     
-
+#browser()
     if(!length(intro)) {
        filter = paste(sprintf("lower-case(normalize-space(.)) = '%s'", otherSectionNames), collapse = " or ")
        xp = sprintf("//text[%s]", filter)
        intro = getNodeSet(doc, xp)
     }
 
+    if(length(intro))
+        intro = intro[ ! isLowerCase(sapply(intro, xmlValue)) ]
+
     if(length(intro)) {
         if(hasNum)
            return(getNodeSet(doc, "//text[isNum(normalize-space(.))]", xpathFuns = list(isNum = isSectionNum)))
 
 
-        fontID = xmlGetAttr(intro[[1]], "font")
+        fontID = unique(sapply(intro, xmlGetAttr, "font"))
         #XX Check if on line by itself and not just a word.
         # Check if these are centered on a column or on the page. If so,
         # other nodes we think are titles also better be centered.
         secs = getNodesWithFont(doc, fontID = fontID)
+
+        if(all(isUpperCase(sapply(intro, xmlValue))))  {
+            txt = sapply(secs, xmlValue)
+            secs = secs[ i <- isUpperCase(txt)  ]
+            secs = secs[ !grepl("^[[:punct:]]+$", txt[i]) ]
+        }
+
+        
         if(checkCentered && isCentered(intro[[1]]))
            secs = secs[ sapply(secs, isCentered) ]
             
         return(secs)
     }
 }
+
+isUpperCase =
+function(x)
+    x == toupper(x)
+
+isLowerCase =
+function(x)
+     x == tolower(x)
 
 isSectionNum =
     #
@@ -114,7 +133,7 @@ function(x)
 getNodesWithFont =
 function(doc, fontID)
 {
-  getNodeSet(doc, sprintf("//text[@font = '%s']", fontID))        
+  getNodeSet(doc, sprintf("//text[%s]",  paste(sprintf("@font = %s", fontID), collapse = " or ")))
 }
 
 isOnLineBySelf =
@@ -136,7 +155,27 @@ function(node, pos = getColPositions(doc),
 inColumn =
 function(node, cols = getTextByCols(xmlParent(node), asNodes = TRUE))
 {
-   which(sapply(cols, function(x) any(sapply(x, identical, node))))
+    ans = which(sapply(cols, function(x) any(sapply(x, identical, node))))
+    if(length(ans))
+       return(ans)
+
+    # We may end up with an empty answer if the node has a different font
+    # than the docFont and getTextByCols() uses docFont.
+    # In this case, we'll compute the spans of the columns and then
+    # determine which one node falls in
+
+    sp = lapply(cols,
+           function(x) {
+               ll = nodesByLine(x)
+               le = getLineEnds(ll)
+               apply(le, 2, median)
+           })
+
+    bb = getBBox2(list(node))
+    start = bb[1, "left"]  
+    end = bb[1, "left"]  + bb[1, "width"]
+    w = sapply(sp, function(x) start >= x[1] || end >= x[1])
+    which(w)
 }
 
 #XXX give proper name.
