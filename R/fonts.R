@@ -75,7 +75,7 @@ function(xpath, obj)
 ###########################################
 
 
-getText =
+getFontText =
 function(page, fontID, rotation = 0)
 {
   xp = sprintf(".//text[ %s ]", paste(sprintf("@font = '%s'", fontID), collapse = " or "))
