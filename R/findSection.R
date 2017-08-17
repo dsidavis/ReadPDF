@@ -54,13 +54,16 @@ findSectionHeaders =
     #
     
 function(doc, sectionName = c('introduction', 'background',
-                  'conclusions', 'discussion', 'materials and methods'),
+                  'conclusions', 'discussion', 'materials and methods',
+                  'literature cited', 'references cited'),
             # For, e.g., Lahm-2007-Morbidity, with these 2 extra section names, we
             # match References and Ackno..  and these don't have
             # numbers.
             # Maybe go for numbered section titles first?         
-         otherSectionNames = c('references', 'acknowledgements', 'results', 'methods'),
-         checkCentered = TRUE         
+         otherSectionNames = c('references', 'acknowledgements', 'acknowledgments', 'results', 'methods'),
+         checkCentered = TRUE,
+         discardAfterReferences = TRUE,
+         allowRotated = FALSE
          )
 {
     if(is.character(doc))
@@ -71,7 +74,7 @@ function(doc, sectionName = c('introduction', 'background',
     filter = paste(sprintf("(contains(lower-case(normalize-space(.)), '%s') and isNum(normalize-space(.)))", sectionName), collapse = " or ")
     xp = sprintf("//text[%s]", filter)
     intro = getNodeSet(doc, xp, xpathFuns = list(isNum = isSectionNum))
-    hasNum = length(intro) > 0
+    hasNum = length(intro) > 0 
 
     if(!hasNum) {
        filter = paste(sprintf("lower-case(normalize-space(.)) = '%s'", sectionName), collapse = " or ")
@@ -94,29 +97,54 @@ function(doc, sectionName = c('introduction', 'background',
            return(getNodeSet(doc, "//text[isNum(normalize-space(.))]", xpathFuns = list(isNum = isSectionNum)))
 
 
+        i = sapply(intro, function(x) length(getNodeSet(x, "./preceding::text[ . = 'Supporting Online Material']"))) > 0
+        intro = intro[!i]
+        if(length(intro) == 0)
+           return(NULL)
+        
         fontID = unique(sapply(intro, xmlGetAttr, "font"))
         #XX Check if on line by itself and not just a word.
         # Check if these are centered on a column or on the page. If so,
         # other nodes we think are titles also better be centered.
         secs = getNodesWithFont(doc, fontID = fontID)
 
+           # Discard elements that are table of contents, ie. have leaders ..... page number
+        secs = secs[!grepl("\\.{5,}[[:space:]]*[0-9]+$", xmlValue(secs))]
+
+        if(!allowRotated)
+           secs = secs[as.numeric(sapply(secs, xmlGetAttr, "rotation")) == 0]
+        
+           # Discard elements that are table of contents, ie. have leaders ..... page number
+        secs = secs[!grepl("^[0-9]+$", xmlValue(secs))]            
+
+        w = sapply(secs, function(x) length(getNodeSet(x, ".//preceding::text[ lower-case(normalize-space(.)) = 'references' or lower-case(normalize-space(.)) = 'references cited' or lower-case(normalize-space(.)) = 'supporting online material']"))) > 0
+        secs = secs[!w]
+        
         if(all(isUpperCase(sapply(intro, xmlValue))))  {
             txt = sapply(secs, xmlValue)
             secs = secs[ i <- isUpperCase(txt)  ]
             secs = secs[ !grepl("^[[:punct:]]+$", txt[i]) ]
         }
 
+        # For isCentered and isOnLineBySelf, we should determine which pages
+        # we are dealing with and compute the getTextByCols() and
+        # nodesByLine() for each of these just once and pass them to these
+        # functions
         
         if(checkCentered && isCentered(intro[[1]]))
            secs = secs[ sapply(secs, isCentered) ]
-            
+
+        if(isOnLineBySelf(intro[[1]])) {
+            i = sapply(secs, isOnLineBySelf)
+            secs = secs[ i ]
+        }
         return(secs)
     }
 }
 
 isUpperCase =
-function(x)
-    x == toupper(x)
+function(x, hasChars = TRUE)
+    x == toupper(x) & grepl("[A-Z]", x)
 
 isLowerCase =
 function(x)
@@ -142,8 +170,9 @@ function(node, pos = getColPositions(doc),
          bbox = getBBox2(textNodes, TRUE))
     # doc = as(node, "XMLInternalDocument"),
 {
+#browser()    
     colNodes = getTextByCols(pageOf(node, TRUE), asNodes = TRUE)
-    # determine which column this is in
+       # determine which column this is in
     colNum = inColumn(node, colNodes)
     col = colNodes[[colNum]]
 #    lines = split(col, as.integer(sapply(col, xmlGetAttr, "top")))
