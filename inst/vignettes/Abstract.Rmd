@@ -17,6 +17,20 @@ be indented but spanning all columns but not to the margins.
 ## Examples - Manually Observed Patterns
 
 
+Biernat-2014
+ ABSTRACT ....
+ spans 2 columns
+ Followed by Key words:
+
+ [FIX] getColPositions ()  wrong for most of the pages.
+
+
+Barrette-2009
+ 3 columns on page,
+   abstract spans first two.
+ Under title and author list - these also span 2 columns.
+
+
 Switzer-2005
  Abstract on separate line centered
  Bold text spanning two columns.
@@ -64,38 +78,35 @@ Wernery-2015
   line underneath the abstract separating it from the text.
 
 
-1-s2.0-S1090023313005315-main
+[Works] 1-s2.0-S1090023313005315-main
  Like one above
   ABSTRACT
   ---------
    ....
   Spans last part of first column and second.
 
-Barbic-2013
+c("In October 2012, a 3-year-old bullfinch ( Pyrrhula pyrrhula ) held in captivity for its entire lifespan and a", 
+"wild adult great spotted woodpecker ( Dendrocopos major ), both with neurological signs, were found", 
+"4 km from each other and 5 days apart in the Meuse Valley, Belgium. Non-suppurative encephalitis", 
+"and mild degeneration and necrosis were identified in the brain and cerebellum, and Usutu virus antigen", 
+"and RNA were detected by immunohistochemistry and real-time reverse transcriptase PCR, respectively.", 
+"The two cases reported here represent the most western distribution of clinical disease in birds due to", 
+"Usutu virus in Europe.")
 
+
+[Works] Barbic-2013
+ 
   Abstract title
   spans entire width of page
   followed by Key Words:
 
 
-Weissenbock-2013
+[Works] Weissenbock-2013
+ + Get rid of DISPATCHES
  Very similar to Wernery-2015 above.
 
-Waldenstrom-2017
+[Works] Waldenstrom-2017
  Similar to Wernery-2015 and Wessenbock
-
-Biernat-2014
- ABSTRACT ....
- spans 2 columns
- Followed by Key words:
-
- [FIX] getColPositions ()  wrong for most of the pages.
-
-
-Barrette-2009
- 3 columns on page,
-   abstract spans first two.
- Under title and author list - these also span 2 columns.
 
 
  
