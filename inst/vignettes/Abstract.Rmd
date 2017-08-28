@@ -1,0 +1,101 @@
+# Finding the Abstract
+
+Look for the "title" Abstract or Summary,
+possibly with all capitals.
+The text may follow this on the same line or on a line below.
+
+The abstract may be to the right of content providing, e.g.,
+metadata about the paper, e.g., publication date, accepted date, etc.
+
+The text of the abstract may span the entire width of the page or may
+be indented but spanning all columns but not to the margins.
+
+
+
+
+
+## Examples - Manually Observed Patterns
+
+
+Switzer-2005
+ Abstract on separate line centered
+ Bold text spanning two columns.
+
+Santiago-2005
+Bold font
+spans two columns
+Line underneath separating from regular text.
+
+Sendow-2010
+  Summary on separate line
+  Text to the right of meta data - keywords, Correspondence
+  Spans part of 1st column and all of second column
+  Left aligned with Summary
+
+Silva-2014
+([Done - works]  Check can find section headers for this - in grey boxes.)
+Spans 2 columns
+Abstract on separae line, centered.
+
+
+1249277242/177-3-529.pdf
+  f = "LatestDocs/PDF/1249277242/177-3-529.pdf"
+  [Fix] getDocFont(f) returns nothing.
+  [done] tt = nodesByLine(readPDFXML(f)[[1]])
+  Spans 2 columns
+  Different font.
+
+Gulati-2011
+ Abstract in first column
+ No title for abstract
+ Different font
+ Followed by
+     Keywords: ...
+
+
+Nandi-2000
+ Spans 2 columns, indented a bit from the regular columns
+
+
+Wernery-2015
+  In first column,
+  under authors list which is centered
+  text for abstract is not centered
+  line underneath the abstract separating it from the text.
+
+
+1-s2.0-S1090023313005315-main
+ Like one above
+  ABSTRACT
+  ---------
+   ....
+  Spans last part of first column and second.
+
+Barbic-2013
+
+  Abstract title
+  spans entire width of page
+  followed by Key Words:
+
+
+Weissenbock-2013
+ Very similar to Wernery-2015 above.
+
+Waldenstrom-2017
+ Similar to Wernery-2015 and Wessenbock
+
+Biernat-2014
+ ABSTRACT ....
+ spans 2 columns
+ Followed by Key words:
+
+ [FIX] getColPositions ()  wrong for most of the pages.
+
+
+Barrette-2009
+ 3 columns on page,
+   abstract spans first two.
+ Under title and author list - these also span 2 columns.
+
+
+ 
