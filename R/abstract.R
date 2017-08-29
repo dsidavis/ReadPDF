@@ -22,37 +22,47 @@ function(doc, asNodes = TRUE,  page = doc[[1]])
 
 
     nodes = list()
-    a = getNodeSet(page, ".//text[lower-case(normalize-space(.)) = 'abstract' or lower-case(normalize-space(.)) = 'summary']")
+    a = getNodeSet(page, ".//text[starts-with(lower-case(normalize-space(.)), 'abstract') or starts-with(lower-case(normalize-space(.)), 'summary')]")
 browser()
     if(length(a) == 0) {
         # See if there are two columns and a line across one column that 
         # separates some text from  regular document text
         # This is the title, author list, abstract, line and then regular text.
         # See Waldenstrom-2007, etc.
-        cols = getColPositions(page)
-        colNodes = getTextByCols(page, asNodes = TRUE)
+        cols = getColPositions(page, docFont = FALSE)
+        colNodes = getTextByCols(page, asNodes = TRUE, breaks = cols)
         docFont = getDocFont(doc)
         if(length(cols) > 1) {
             lines = getBBox(getNodeSet(page, ".//line | .//rect"))
-              # only lines that span the first column
-            w = lines[,1] - cols[1] < 5 & lines[,3] < cols[2]
-#            browser()
-            if(any(w))
-                w = which(w)[1]
-            nodes = getNodeSet(page, sprintf(".//text[@top + @height < %f and @left < %d]", lines[w, 2], cols[2]))
+            if(nrow(lines)) {
+                   # only lines that span the first column
+                w = lines[,1] - cols[1] < 5 & lines[,3] < cols[2] & abs(lines[,3] - cols[2]) < 15
 
-            # XXX Might possibly want them all to be contiguous since in Wessenbrock, we include the word DISPATCHES.
-            # So we can find all the nodes with smallest font and cumsum() them and take the last block
-            # Need to order them by line/@top            
-            # Should order from top to bottom in order to discard
-            #   bb = getBBox2(nodes)
-            #   nodes = nodes[order(bb[, 2])]
-            fontInfo = getFontInfo(doc)
-            fonts = sapply(nodes, xmlGetAttr, "font")
-            i = fontInfo[fonts, "size"] == min(fontInfo[fonts, "size"])
-            nodes = nodes[i]            
-#browser()            
+                if(any(w)) {
+                    w = which(w)[1]
 
+                    nodes = getNodeSet(page, sprintf(".//text[@top + @height < %f and @left < %d]", lines[w, 2], cols[2]))
+
+                # XXX Might possibly want them all to be contiguous since in Wessenbrock, we include the word DISPATCHES.
+                # So we can find all the nodes with smallest font and cumsum() them and take the last block
+                # Need to order them by line/@top            
+                # Should order from top to bottom in order to discard
+                #   bb = getBBox2(nodes)
+                #   nodes = nodes[order(bb[, 2])]
+                    fontInfo = getFontInfo(doc)
+                    fonts = sapply(nodes, xmlGetAttr, "font")
+                    i = fontInfo[fonts, "size"] == min(fontInfo[fonts, "size"])
+                    nodes = nodes[i]
+                }  else
+                    nodes = spansColumns(page, cols, colNodes, doc)
+
+                if(length(nodes) == 0)
+                    # try within single column, but w/o line.
+                   stop("try within single column")
+            } else {
+                   # See if there are lines that span columns
+                nodes = spansColumns(page, cols, colNodes, doc)
+            }
         }
     } else {
 
@@ -78,9 +88,11 @@ browser()
         } else {
             # Flush with left margin
 
-            kw = getNodeSet(page, ".//text[starts-with(., 'Key Words') or starts-with(., 'Keywords')]")
+            kw = getNodeSet(page, ".//text[starts-with(., 'Key Words') or starts-with(., 'Keywords') or starts-with(., 'Key words')]")
             if(length(kw))
                 nodes = getNodesBetween(a[[1]], kw[[1]])
+            else
+               browser()
         }
     }
         
@@ -99,3 +111,36 @@ function(doc, col = getColPositions(doc[[1]]))
 
 
 
+
+
+spansColumns =
+function(page, cols = getColPositions(page, docFont = FALSE), colNodes = getTextByCols(page, breaks = cols),
+            doc = as(page, "XMLInternalDocument") )
+{
+    bb = getBBox2(colNodes[[1]])
+    w = bb[,1] + bb[,3] > cols[length(cols)] #XXXX!!!!
+    nodes = NULL
+
+    
+browser()    
+    if(any(w)) {
+        nodes = colNodes[[1]][w]
+        # Different ways to filter just the abstract.
+        # Last paragraph of these nodes with a big enough space in between
+        # all the nodes with the same font as the last line.
+        # The lines are right aligned (and left) as opposed to just centered
+        # Below a line with Received
+
+                       # taken from above for lines - merge.
+        fontInfo = getFontInfo(doc)
+        fonts = sapply(nodes, xmlGetAttr, "font")
+        browser()
+        w = fonts == fonts[length(fonts)]
+        nodes = nodes[w]
+        # Now have to get all the nodes in this region, not just the ones
+        # with these fonts as that drops, e.g., italics.
+        nodes = getNodesBetween(nodes[[1]], nodes[[length(nodes)]])
+    }
+
+    nodes
+}
