@@ -2,8 +2,11 @@ getBBox2 =
     # For text, not rect or line nodes.
 function(nodes, asDataFrame = FALSE, attrs = c("left", "top"))
 {
-   if(is(nodes, "XMLInternalElementNode"))
-       nodes = getNodeSet(nodes, ".//text")
+    if(is(nodes, "XMLInternalElementNode"))
+        if(xmlName(nodes) == "text")
+            nodes = list(nodes)
+        else
+            nodes = getNodeSet(nodes, ".//text")
 
    ats = c(attrs, "width", "height")    
    if(length(nodes) == 0)
@@ -40,8 +43,13 @@ function(nodes, asDataFrame = FALSE)
     els = strsplit(tmp, ",")
     bb = matrix(as.numeric(unlist(els)), , 4, byrow = TRUE)
     colnames(bb) = c("x0", "y0", "x1", "y1")
-    if(asDataFrame) 
-       as.data.frame(bb)
-    else
-       bb
+    ty = sapply(nodes, xmlName)
+    if(asDataFrame) {
+        ans = as.data.frame(bb)
+        ans$nodeType = ty
+        ans
+    } else {
+        rownames(bb) = sapply(nodes, xmlName)
+        bb
+    }
 }

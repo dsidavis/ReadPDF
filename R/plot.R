@@ -67,7 +67,8 @@ function(page, cex.text = .5, adj = c(0, 1), showText = TRUE, showBoxes = FALSE)
                 function(i) {
                      at = xmlAttrs(lines[[i]])
                      lines(bb[i, c(1,3)], h - bb[i, c(2, 4)], col = mkColor(at["stroke.color"]),
-                               lwd = max(1, as.numeric(at["lineWidth"], na.rm = TRUE)))
+                           lwd = max(1, as.numeric(at["lineWidth"], na.rm = TRUE)),
+                           lty = 2)
                 })
         # lines(bb[,1], h - bb[,2], bb[,3], h-bb[,4], col = "red")
     }

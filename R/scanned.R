@@ -5,7 +5,7 @@ isScanned2 =
 function(doc, threshold = 154.95, words = getDocWords(doc))
 {
   if(is.character(doc))
-     doc = xmlParse(doc)
+      doc = xmlParse(doc)
 
   length(words)/getNumPages(doc)  < threshold
 }

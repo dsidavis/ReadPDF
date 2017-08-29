@@ -22,7 +22,7 @@ getColPositions.character =
 function(p, threshold = .1,
          txtNodes = getNodeSet(p, getXPathDocFontQuery(p, docFont)),
          bbox = getBBox2(txtNodes), docFont = TRUE, ...)    
-   getColPositions(readPDFXML(p), threshold)
+   getColPositions(readPDFXML(p), threshold, docFont = docFont, ...)
 
 
 getColPositions.PDFToXMLDoc = getColPositions.XMLInternalDocument =
@@ -34,7 +34,7 @@ function(p, threshold = .1,
 {
 
        # getPages() call here since could be called with an XMLInternalDocument, not a PDFToXMLDoc.
-    ans = lapply(getPages(p), getColPositions, threshold)
+    ans = lapply(getPages(p), getColPositions, threshold, docFont = docFont, ...)
     if(is.logical(perPage) && perPage)
         return(ans)
 
@@ -91,10 +91,28 @@ function(p, threshold = .1, txtNodes = getNodeSet(p, ".//text"), bbox = getBBox2
 
 
 
+hardCols =
+function(page, nodes = getNodeSet(nodes, ".//text"),
+         bbox = getBBox2(nodes, TRUE))
+{
 
+}
 
+interNodeDist =
+function(nodes, bbox = getBBox2(nodes, TRUE), asNA = TRUE)
+{
+    if(nrow(bbox) == 1)
+       if(asNA) NA else 0
+    else
+      max(bbox[-1, 1] - bbox[-nrow(bbox),2])
+}
+
+if(FALSE)
 getHorizExtremes =
 function(node)
 {
   
 }
+
+
+

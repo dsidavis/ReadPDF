@@ -20,7 +20,8 @@ function(doc)
 findTable =
 function(node, page = xmlParent(node),
          colNodes = getTextByCols(page, asNodes = TRUE, perPage = perPage),
-         docFont = getDocFont(node), perPage = FALSE)
+         docFont = getDocFont(node), perPage = FALSE,
+         spansWithin = 20, ...)
 {
 
     if(!perPage && length(getColPositions(node, perPage)) < 2)
@@ -41,6 +42,8 @@ function(node, page = xmlParent(node),
 browser()        
       # also look at rectangles.  J Infect Dis. 2015 has no lines, just rect.
     lines = getNodeSet(page, ".//line | .//rect")
+    lw = as.numeric(sapply(lines, xmlGetAttr, "lineWidth", 1))
+    lines = lines[ lw > 0 & lw < 30]
     bb = getBBox(lines, TRUE)
       # discard rectangles that are probably too tall to be lines, i.e. span more than half a letter.
     bb = bb[ abs(bb$y1 - bb$y0) < docFont$size * .5, ]
@@ -51,9 +54,6 @@ browser()
 
     bb = combineBBoxLines(bb)    
 
-    colNum = inColumn(node, colNodes)    
-
-    
 #    doesSpan = rep(FALSE, nrow(bb))    
     if(centered == 1 || (colNum == length(colNodes))) {
        # Could span all columns.
@@ -69,7 +69,7 @@ browser()
       else
          bb = bb[bb$x0 >= ex[1]*.95, ]
 
-      doesSpan = spansWidth(bb, ex)
+      doesSpan = spansWidth(bb, ex, spansWithin)
       spansCols = colNum
 
       if(!any(doesSpan)) {
@@ -105,7 +105,7 @@ browser()
          ex = range(colInfo)
 
            # same line as in earlier if() clause so should centralize. But may need it here now.
-         doesSpan = spansWidth(bb, ex)
+         doesSpan = spansWidth(bb, ex, spansWithin)
 
          # This may be a little cavalier and we may need to check.
          spansCols = seq(along = colNodes)
@@ -118,9 +118,9 @@ browser()
 #XX Fix this.  Far too specific to 2 columns.             
              if(length(colNodes) > 2) {
                  # do any of the lines span 2 or more contiguous columns
-                doesSpan = spansWidth(bb, c(colInfo[1,1], colInfo[2, 2]))
+                doesSpan = spansWidth(bb, c(colInfo[1,1], colInfo[2, 2]), spansWithin)
                 if(!any(doesSpan)) {
-                    doesSpan = spansWidth(bb, c(colInfo[2,1], colInfo[3, 2]))
+                    doesSpan = spansWidth(bb, c(colInfo[2,1], colInfo[3, 2]), spansWithin)
                     if(any(doesSpan))
                         spansCols = c(2, 3)
                     # If we don't define spansCols above, then we need to do it here as an else or else won't necessarily be defined.
@@ -178,5 +178,20 @@ browser()
 }
 
 spansWidth =
+    #
+    # Make if within < 1, treat it as a percentage and that the span
+    # has to be be at least within % of the width of locs.
+    #
+    #  spansWidth(matrix(c(2, 0, 8, 0,
+    #                      3, 0, 8, 0,
+    #                      3, 0, 7, 0), , 4, byrow = TRUE), c(0, 10), .8)
+    #
+    # To use  a within < 1 as an actual distance and not a multiple use, e.g., I(.6)
+    #
 function(bbox, locs, within = 4) # within was 2 but somewhat arbitrary. Needed 4 for Padula-2002
-   apply(bbox, 1, function(x) abs(locs[1] - x[1]) < within & abs(locs[2] - x[3]) < within)
+{
+    if(within < 1 && !is(within, "AsIs"))
+       bbox[,3] - bbox[,1] >=  diff(locs)*within
+    else
+      abs(locs[1] - bbox[,1]) < within & abs(locs[2] - bbox[,3]) < within
+}

@@ -1,5 +1,5 @@
 getSectionText =
-function(doc, asNodes = FALSE, secHeaders = findSectionHeaders(doc))
+function(doc, asNodes = FALSE, secHeaders = findSectionHeaders(doc, ...), ...)
 {
     if(is.character(doc))
         doc = readPDFXML(doc)
@@ -55,7 +55,7 @@ findSectionHeaders =
     
 function(doc, sectionName = c('introduction', 'background',
                   'conclusions', 'discussion', 'materials and methods',
-                  'literature cited', 'references cited'),
+                  'literature cited', 'references cited', 'the study'),
             # For, e.g., Lahm-2007-Morbidity, with these 2 extra section names, we
             # match References and Ackno..  and these don't have
             # numbers.
@@ -114,12 +114,13 @@ function(doc, sectionName = c('introduction', 'background',
         if(!allowRotated)
            secs = secs[as.numeric(sapply(secs, xmlGetAttr, "rotation")) == 0]
         
-           # Discard elements that are table of contents, ie. have leaders ..... page number
+           # Discard elements that are just numbers
         secs = secs[!grepl("^[0-9]+$", xmlValue(secs))]            
 
         w = sapply(secs, function(x) length(getNodeSet(x, ".//preceding::text[ lower-case(normalize-space(.)) = 'references' or lower-case(normalize-space(.)) = 'references cited' or lower-case(normalize-space(.)) = 'supporting online material']"))) > 0
         secs = secs[!w]
-        
+
+           # if all the known section headers are all upper case
         if(all(isUpperCase(sapply(intro, xmlValue))))  {
             txt = sapply(secs, xmlValue)
             secs = secs[ i <- isUpperCase(txt)  ]
@@ -219,8 +220,14 @@ function(page, nodes = getNodeSet(page, ".//text"), bb = getBBox2(nodes, TRUE),
 
 
 getNodesBetween =
-function(x, y = NULL)
+function(x = NULL, y = NULL)
 {
+    if(is.null(x) && is.null(y))
+        stop("need to specify either x or y or both")
+    
+    if(is.null(x))
+       x = getFirstTextNode(as(y, "XMLInternalDocument"))
+    
     if(is.null(y))
        y = getLastNode(as(x, "XMLInternalDocument"))    
     s = pageOf(x)
@@ -300,6 +307,14 @@ getLastNode =
 function(doc)
 {
   getNodeSet(doc, "//page[last()]/text[last()]")[[1]]
+}
+
+getFirstTextNode =
+    # get the final node in the document - last node in last page
+    # Use this when getting the content for the last section
+function(doc)
+{
+  getNodeSet(doc, "//page[1]/text[1]")[[1]]
 }
 
 

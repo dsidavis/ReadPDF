@@ -19,14 +19,20 @@ getFontInfo =
     # used to be fontInfo
 function(doc)
 {
-   df = as.data.frame(t(xpathSApply(doc, xpathQ("//fontspec", doc), xmlAttrs)), stringsAsFactors = FALSE)
-   iids = c("size" = 'integer',  isItalic = 'logical', isBold = 'logical', isOblique = 'logical')
 
-   df[names(iids)] = mapply(function(var, to)
+   tmp = xpathSApply(doc, xpathQ("//fontspec", doc), xmlAttrs)
+   if(length(tmp) > 0) {
+       df = as.data.frame(t(tmp), stringsAsFactors = FALSE)
+       iids = c("size" = 'integer',  isItalic = 'logical', isBold = 'logical', isOblique = 'logical')
+
+       df[names(iids)] = mapply(function(var, to)
                               as(as.integer(df[[var]]), to),
                             names(iids), iids, SIMPLIFY = FALSE)
    
-   rownames(df) = df$id
+       rownames(df) = df$id
+   } else
+       df = data.frame(size = integer(), isItalic = logical(), isBold = logical(), isOblique = logical())
+   
    df
 }
 
@@ -116,6 +122,9 @@ function(doc)
       # If we don't take into account the number of characters, but just the number of text nodes:
       #   sort(table(unlist(getNodeSet(doc, "//text/@font"))))
     txt = textByFonts(doc)
+    if(length(txt) == 0)
+        return(data.frame(size = integer(), id = character()))
+    
     ctr = sapply(txt, function(x) sum(nchar(x)))
     info = getFontInfo(as(doc, "XMLInternalDocument"))
     id = names(ctr)[which.max(ctr)]

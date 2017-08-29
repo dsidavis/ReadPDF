@@ -35,6 +35,14 @@ function(doc)
 }
 
 
+isCenteredMargins =
+function(node, margins = margins(xmlParent(node)), bbox = getBBox2(list(node)))
+{
+    mid = bbox[,1] + bbox[,3]/2
+browser()    
+    abs(mid - mean(margins)) < .2 * diff(margins)
+}
+
 isCentered =
     #
     # Determine if the node is centered within a column
@@ -43,12 +51,12 @@ isCentered =
     # with the same font but that is not centered, then that
     # additional text not a section title.
 function(node, cols = getTextByCols(xmlParent(node), asNodes = TRUE),
-         threshold = .2)
+         threshold = .2, colNum = inColumn(node, cols))
 {
      # find out which column the node is in and get those columns and
      # their bounding boxes
-  col = inColumn(node, cols)
-  bb = getBBox2(cols[[ col ]] )
+
+  bb = getBBox2(cols[[ colNum[1] ]] )
 
      # This is now also done in nodesByLine and getLineEnds(). Leave
      # this here for now but eventually use those.
@@ -64,9 +72,9 @@ function(node, cols = getTextByCols(xmlParent(node), asNodes = TRUE),
 
   top = xmlGetAttr(node, "top")
   lw = byLine[[ top ]]
-  if((lw[1] - pos[1] < 5) || diff(pos) - diff(lw) < 40)
+    # lw could be NULL if we use docFont = TRUE when getting the nodes in getTextByCols().
+  if(length(lw) && ((lw[1] - pos[1] < 5) || diff(pos) - diff(lw) < 40))
       return(FALSE)
-  
   
      # now compute the middle of the string itself.
   textPos = as.numeric(xmlAttrs(node)[c("left", "width")])
@@ -83,10 +91,16 @@ nodesByLine =
     #
 function(nodes, asNodes = TRUE, bbox = getBBox2(nodes, TRUE),
          baseFont = getDocFont(as(nodes[[1]], "XMLInternalDocument")),
+         fontSize = if(nrow(baseFont) > 0) baseFont$size else 11,
          addText = TRUE
         )
 {
-    intv = seq(0, max(bbox$top)+ baseFont$size - 1, by = baseFont$size)
+    if(length(nodes) == 1 && xmlName(nodes) == "page")
+        nodes = getNodeSet(nodes, ".//text")
+    
+    if(length(nodes) == 0)
+       return(list())
+    intv = seq(0, max(bbox$top)+ fontSize - 1, by = fontSize)
     topBins = cut(bbox$top, intv)
     byLine = tapply(nodes, topBins, arrangeLineNodes, asNodes, simplify = FALSE)
 
@@ -153,11 +167,15 @@ getTextByCols =
     #
     #
 function(p, threshold = .1, asNodes = FALSE,
-         txtNodes = getNodeSet(p, ".//text"),
+         txtNodes = getNodeSet(p, getXPathDocFontQuery(p, docFont)),
          bbox = getBBox2(txtNodes, TRUE),
          breaks = getColPositions(if(perPage) p else as(p, "XMLInternalDocument"), threshold = threshold, bbox = bbox, perPage = perPage, ...),
-         perPage = FALSE, ...)         
+         perPage = FALSE, docFont = FALSE, ...)         
 {
+
+    if(length(txtNodes) == 0)
+        return(character())
+    
     bb = bbox
     bb$text = sapply(txtNodes, xmlValue)
     

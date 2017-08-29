@@ -49,7 +49,17 @@ function(doc)
 
 pageOf =
 function(node, asNode = FALSE)
+    UseMethod("pageOf")
+
+pageOf.list = 
+function(node, asNode = FALSE)
 {
+    sapply(node, pageOf, asNode)
+}
+
+pageOf.XMLInternalNode =
+function(node, asNode = FALSE)
+{    
     p = getNodeSet(node, ".//ancestor::page")[[1]]
     if(asNode)
         p
