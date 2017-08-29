@@ -36,7 +36,7 @@ browser()
             lines = getBBox(getNodeSet(page, ".//line | .//rect"))
             if(nrow(lines)) {
                    # only lines that span the first column
-                w = lines[,1] - cols[1] < 5 & lines[,3] < cols[2] & abs(lines[,3] - cols[2]) < 15
+                w = lines[,1] - cols[1] < 5 & lines[,3] < cols[2] & abs(lines[,3] - cols[2]) < 18 # The 18 should be based on the width of the column, not the location of the second column.
 
                 if(any(w)) {
                     w = which(w)[1]
@@ -84,7 +84,7 @@ browser()
             nodes = getNodeSet(page, sprintf(".//text[abs(@left - %d) < 4]", bb[1,1]))
             bb2 = getBBox2(nodes)
             bot = max(bb2[, 2] + bb[,4])
-            nodes = getNodeSet(page, sprintf(".//text[@left > %d - 4 and @top > %d and @top + @height <= %f + 9]", bb[1,1], bb[1,2], bot))       
+            nodes = getNodeSet(page, sprintf(".//text[@left > %d and @top > %d and @top + @height <= %f + 9]", bb[1,1] - 4, bb[1,2] - 4, bot))       
         } else {
             # Flush with left margin
 
@@ -92,7 +92,7 @@ browser()
             if(length(kw))
                 nodes = getNodesBetween(a[[1]], kw[[1]])
             else
-               browser()
+               nodes = spansColumns(page, doc = doc)
         }
     }
         
@@ -114,15 +114,14 @@ function(doc, col = getColPositions(doc[[1]]))
 
 
 spansColumns =
-function(page, cols = getColPositions(page, docFont = FALSE), colNodes = getTextByCols(page, breaks = cols),
+function(page, cols = getColPositions(page, docFont = FALSE), colNodes = getTextByCols(page, asNodes = TRUE, breaks = cols),
             doc = as(page, "XMLInternalDocument") )
 {
     bb = getBBox2(colNodes[[1]])
     w = bb[,1] + bb[,3] > cols[length(cols)] #XXXX!!!!
     nodes = NULL
 
-    
-browser()    
+
     if(any(w)) {
         nodes = colNodes[[1]][w]
         # Different ways to filter just the abstract.

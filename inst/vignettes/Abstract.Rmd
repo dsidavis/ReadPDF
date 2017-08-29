@@ -10,54 +10,36 @@ metadata about the paper, e.g., publication date, accepted date, etc.
 The text of the abstract may span the entire width of the page or may
 be indented but spanning all columns but not to the margins.
 
-
-
-
-
 ## Examples - Manually Observed Patterns
 
-
-Biernat-2014
- ABSTRACT ....
- spans 2 columns
- Followed by Key words:
-
- [FIX] getColPositions ()  wrong for most of the pages.
-
-
-Barrette-2009
- 3 columns on page,
-   abstract spans first two.
- Under title and author list - these also span 2 columns.
-
-
 Switzer-2005
+ Getting the margin wrong. The header is positioned incorrectly in the XML.
+ 
  Abstract on separate line centered
  Bold text spanning two columns.
 
 Santiago-2005
-Bold font
-spans two columns
-Line underneath separating from regular text.
+ Bold font
+ spans two columns
+ getColPositions() thinks there are 3 columns since the abstract has sufficiently many lines
+ to count as its own column.  Need to make getColPositions() smarter about this.
+ Line underneath separating from regular text.
+ Also the text under the line is in a different font.
+ Also don't have the same margins.
 
-Sendow-2010
-  Summary on separate line
-  Text to the right of meta data - keywords, Correspondence
-  Spans part of 1st column and all of second column
-  Left aligned with Summary
+Barrette-2009
+ !! 3 columns on page,
+   abstract spans first two.
+ Under title and author list - these also span 2 columns.
 
 Silva-2014
 ([Done - works]  Check can find section headers for this - in grey boxes.)
 Spans 2 columns
-Abstract on separae line, centered.
+  Word "Abstract" on separate line, centered.
+  Then abstract
+  Then Keywords:  - line also centered.
+  Gap between abstract and Keywords: line.
 
-
-1249277242/177-3-529.pdf
-  f = "LatestDocs/PDF/1249277242/177-3-529.pdf"
-  [Fix] getDocFont(f) returns nothing.
-  [done] tt = nodesByLine(readPDFXML(f)[[1]])
-  Spans 2 columns
-  Different font.
 
 Gulati-2011
  Abstract in first column
@@ -66,16 +48,119 @@ Gulati-2011
  Followed by
      Keywords: ...
 
-
-Nandi-2000
- Spans 2 columns, indented a bit from the regular columns
+   With the current code (a8462add6c0d7), we get the two lines that span the 2 columns
+    These are the author and affiliation/address.
+   So we need to recognize these don't form an abstract.  The font changes so shouldn't be combining them, but we understand why.  (If each line has just one font and the lines are different, then not an abstract)
+   Instead, look for Keywords: and recognize that its text spans one column. Hence, presume that the abstract
+   is also in a single column.
 
 
 Wernery-2015
+ [Fix]  Missing the <fontspec> .  Error: Illegal entry in bfchar block in ToUnicode CMap
   In first column,
   under authors list which is centered
   text for abstract is not centered
   line underneath the abstract separating it from the text.
+
+
+
+Zou-2008
+ Big box on left side of page for correspondence; title and abstract to the right of this.
+ Then two-columns.
+ Lines before and after the abstract.
+ Can recognize the affiliations/addresses with lines that start with a superscript number.
+
+2987776261/Day-1996-Antibodies to arthropod-borne encepha.xml
+Nemeth-2010
+ BioOne paper so have to skip first page.
+ Then abstract is identified by word.  In first column.
+
+
+
+Wang-2005
+ Emerging Infectious Diseases like Waldenstrom, but not quite the same.
+ Large gap between title and text.
+ Lots of lines and rectangles - unlike the others.
+
+ 
+Laurenson-2007
+  Should be like others that worked.
+  Abstract is ragged right.
+
+Calzolari-2012
+ Abstract in a rectangle and shaded box.
+ Recognize end by end of blue box, or large gap between then last line and the next one.
+
+Andriamandimby-2011-Crimean-Congo hemorrhagic.xml" 
+ Returns NULL. 
+  But like  Oliveira-2009 below which works.
+
+3518639413/10072152.xml
+Gets the first line, but the rest has some from the abstract but skips lines and includes text not from the abstract.
+ 
+4210961853/Linke-2007-Serologic evidence of West Nile vir.xml
+ Finds the abstract and the first line, but then stops.
+
+3934412932/Rollin-1999-Ebola (Subtype Reston) Virus among.xml
+  get an error.
+
+0595442163/Buckley-2006-Detection of seroconversion to W1.xml"
+ Close but includes some text from the second column below.
+ Looks like a different font.
+ There are lines above and below.
+
+
+WORKING
+[Works] 4050973724/Navarro-2005-Postepizootic persistence of Ven1.xml
+
+[Works] 4081573285/Morikawa-2007-Current knowledge on lower virul.xml
+
+[Works] 4021441054/Hilbe et al_2006_Shrews as reservoir hosts of.xml
+
+[works] 3178445298/Nolen-Walston-2007-Eastern equine encephalitis.xml
+ Curiously drops the Background: that start's the abstract and the values after the "Key words:"
+  Different fonts the cause?	 
+
+[works] 2013078097/Chinikar-2010-Crimean-Congo hemorrhagic fever1.xml"
+
+[Works] 3329983488/1-s2.0-S0147957106000208-main.xml
+
+[Works] 0730080335/Kinnunen-2007-Serological evidence for Borna 1.xml
+
+[Works] 3471737079/Oliveira-2009-Genetic characterization of a Ju.xml
+
+[Works] 2386999233/Delfraro-2008-Juquitiba-like Hantavirus from 1.xml
+  Emerging Infectious Diseases
+
+[Works] 1975170925/Ganesh-2012-Picobirnavirus infections_ viral p.xml
+
+[Works] Gilbert-2000
+ [fixed] Cuts-off the first line.
+ Includes the Key words.
+
+
+[Works] Rushton-2013
+  Emerging Infectious Diseases - should be the same as ones we got working earlier, e.g. Waldenstrom.
+
+
+[Works] Biernat-2014
+ ABSTRACT ....
+ spans 2 columns
+ Followed by Key words:
+
+ [FIX] getColPositions ()  wrong for most of the pages.
+
+
+[Works] 1249277242/177-3-529.pdf
+  f = "LatestDocs/PDF/1249277242/177-3-529.pdf"
+  [Fix] getDocFont(f) returns nothing.
+  [done] tt = nodesByLine(readPDFXML(f)[[1]])
+  Spans 2 columns
+  Different font.
+
+
+[Works] Nandi-2000
+ Spans 2 columns, indented a bit from the regular columns
 
 
 [Works] 1-s2.0-S1090023313005315-main
@@ -108,5 +193,11 @@ c("In October 2012, a 3-year-old bullfinch ( Pyrrhula pyrrhula ) held in captivi
 [Works] Waldenstrom-2017
  Similar to Wernery-2015 and Wessenbock
 
+
+[Works] Sendow-2010
+  Summary on separate line
+  Text to the right of meta data - keywords, Correspondence
+  Spans part of 1st column and all of second column
+  Left aligned with Summary
 
  
