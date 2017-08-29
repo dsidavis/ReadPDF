@@ -80,11 +80,13 @@ browser()
         # Then find all nodes to the right of bb[1,1] and above this position.
         # OR find all lines flush with this bb[1,1] and the lowest of these 
         # defines the end. Then go back and find all the text to right
-        # 
-            nodes = getNodeSet(page, sprintf(".//text[abs(@left - %d) < 4]", bb[1,1]))
+            #
+            # If the "Abstract" line is indented, then need to allow for how far back??
+            # Using 14.  Used to be 4. But we really should look at the next line down.
+            nodes = getNodeSet(page, sprintf(".//text[abs(@left - %d) < 14]", bb[1,1]))
             bb2 = getBBox2(nodes)
             bot = max(bb2[, 2] + bb[,4])
-            nodes = getNodeSet(page, sprintf(".//text[@left > %d and @top > %d and @top + @height <= %f + 9]", bb[1,1] - 4, bb[1,2] - 4, bot))       
+            nodes = getNodeSet(page, sprintf(".//text[abs(@left - %d) < 14 and @top > %d and @top + @height <= %f + 9]", bb[1,1] - 4, bb[1,2] - 4, bot))       
         } else {
             # Flush with left margin
 

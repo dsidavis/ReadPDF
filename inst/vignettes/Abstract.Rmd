@@ -98,8 +98,6 @@ Andriamandimby-2011-Crimean-Congo hemorrhagic.xml"
 3518639413/10072152.xml
 Gets the first line, but the rest has some from the abstract but skips lines and includes text not from the abstract.
  
-4210961853/Linke-2007-Serologic evidence of West Nile vir.xml
- Finds the abstract and the first line, but then stops.
 
 3934412932/Rollin-1999-Ebola (Subtype Reston) Virus among.xml
   get an error.
@@ -111,6 +109,9 @@ Gets the first line, but the rest has some from the abstract but skips lines and
 
 
 WORKING
+[Works] 4210961853/Linke-2007-Serologic evidence of West Nile vir.xml
+ Finds the abstract and the first line, but then stops.
+
 [Works] 4050973724/Navarro-2005-Postepizootic persistence of Ven1.xml
 
 [Works] 4081573285/Morikawa-2007-Current knowledge on lower virul.xml
