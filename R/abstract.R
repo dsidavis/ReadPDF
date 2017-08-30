@@ -78,7 +78,11 @@ browser()
 
         mar = margins(page)
         bb = getBBox2(a)
-        if(bb[1,1] > mar[1] * 1.1) {
+
+        # This test may be more appropriate as is there any text within a few lines that is
+        # significantly to the left of a[[1]].  This is for the Elsevier documents
+        # such as Oliveira-2009
+        if(anyTextToLeft(a[[1]], bb)) {  # Used to be simply if(bb[1,1] > mar[1] * 1.1)
             # So not flush with left margin or even very close
             # e.g. 1.s2.0-S1090
             #
@@ -110,6 +114,13 @@ browser()
         
     nodesByLine(nodes)
 }
+
+anyTextToLeft =
+function(node, bbox = getBBox2(list(node)), page = xmlParent(node))
+{
+  length(getNodeSet(page, sprintf(".//text[ abs(@top - %f) < 30 and @left <=  %f]", bbox[1,2], bbox[1,1]*.66))) > 0
+}
+
 
 getAbstractBySpan=
 function(doc, col = getColPositions(doc[[1]]))
