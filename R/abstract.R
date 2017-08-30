@@ -40,19 +40,29 @@ browser()
 
                 if(any(w)) {
                     w = which(w)[1]
-
-                    nodes = getNodeSet(page, sprintf(".//text[@top + @height < %f and @left < %d]", lines[w, 2], cols[2]))
+                    # the lines[w,2] + 2 gives us a little flexibility for the text going.
+                    # Could possibly just use @top and ignore height.
+                    nodes = getNodeSet(page, sprintf(".//text[@top + @height <= %f and @left < %d]", lines[w, 2] + 2, cols[2]))
 
                 # XXX Might possibly want them all to be contiguous since in Wessenbrock, we include the word DISPATCHES.
                 # So we can find all the nodes with smallest font and cumsum() them and take the last block
                 # Need to order them by line/@top            
                 # Should order from top to bottom in order to discard
                 #   bb = getBBox2(nodes)
-                #   nodes = nodes[order(bb[, 2])]
+                    #   nodes = nodes[order(bb[, 2])]
+                    # The abstract may have a single text node that has a smaller font and then we would throw the remainder away.
                     fontInfo = getFontInfo(doc)
                     fonts = sapply(nodes, xmlGetAttr, "font")
                     i = fontInfo[fonts, "size"] == min(fontInfo[fonts, "size"])
-                    nodes = nodes[i]
+                    if(sum(i) < 5)  {
+                        # probably a small font within the abstract, e.g. a superscript (see Mehla-2009)
+                        # So need to separate title, authors, abstract in a different way.
+                        i = fontInfo[fonts, "size"] == min(setdiff(fontInfo[fonts, "size"], min(fontInfo[fonts, "size"])))
+#                        ll = nodesByLine(nodes)
+                        # tops = as.numeric(sapply(ll, function(x) xmlGetAttr(x[[1]], "top")))
+                        nodes = nodes[i]                        
+                    } else
+                        nodes = nodes[i]
                 }  else
                     nodes = spansColumns(page, cols, colNodes, doc)
 

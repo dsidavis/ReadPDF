@@ -13,6 +13,32 @@ be indented but spanning all columns but not to the margins.
 ## Examples - Manually Observed Patterns
 
 
+Murray-2013
+ Abstract at top of first column. getColPositions is returning empty
+ numeric.
+ 
+Mehla-2009
+ nodes = getNodeSet(page, sprintf(".//text[@top + @height < %f and @left < %d]", 
+    lines[w, 2], cols[2]))
+ returns the abstract, but then the function discards it at the font
+ stage and returns "Â­4"
+ 
+Aviles-1992
+ nodesByLine gives error: Error in bbox$top : $ operator is invalid
+ for atomic vectors. PDF is pixelated, but can be copied and pasted.
+ 
+Pan 2014
+ Returns the line "Received: ..."
+ bb around abstract is being recognized as:
+            left top width height
+  Abstract   77 425    56     13
+
+Buitrago-2012
+ Returns:
+ [1] "Abstract. "                                             
+ [2] "Key words: "                                            
+ [3] "In September 2010, BAGV was detected and identified in "
+ 
 
 Switzer-2005
  Getting the margin wrong. The header is positioned incorrectly in the XML.
