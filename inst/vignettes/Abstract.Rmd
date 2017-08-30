@@ -12,6 +12,8 @@ be indented but spanning all columns but not to the margins.
 
 ## Examples - Manually Observed Patterns
 
+
+
 Switzer-2005
  Getting the margin wrong. The header is positioned incorrectly in the XML.
  
@@ -76,6 +78,11 @@ Nemeth-2010
  Then abstract is identified by word.  In first column.
 
 
+[Works] Gilbert-2000
+  Cuts-off the first line.
+ Includes the Key words.
+
+
 
 Wang-2005
  Emerging Infectious Diseases like Waldenstrom, but not quite the same.
@@ -134,10 +141,6 @@ WORKING
   Emerging Infectious Diseases
 
 [Works] 1975170925/Ganesh-2012-Picobirnavirus infections_ viral p.xml
-
-[Works] Gilbert-2000
- [fixed] Cuts-off the first line.
- Includes the Key words.
 
 
 [Works] Rushton-2013
