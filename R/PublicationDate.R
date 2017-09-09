@@ -168,17 +168,32 @@ getPublicationDate =
     #               AboveTitle (text above the title of the paper)
     #               TextRegEx  (find a date of the form [number] NameOfMonth[,] Year anywhere in the text)
     #
-function(doc)
+function(doc, checkAbstract = TRUE)
 {
   if(is.character(doc))
-     doc = xmlParse(doc)
+     doc = readPDFXML(doc)
 
+
+  abstract = names(findAbstract(doc, FALSE))
+
+  if(checkAbstract && length(abstract)) {
+      txt = paste(abstract, collapse = "\n")
+      m = gregexpr("\\b[0-9]{4}\\b", txt)
+      if(any(m[[1]] > -1)) {
+          return(structure(regmatches(txt, m)[[1]], names = rep("abstract", length(m[[1]]))))
+      } 
+  }
+  
   if(isBioOne(doc))
       return(textAboveTitle(doc, 2))
 
-  if(isScanned2(doc))
-      return(structure(NA, names = "Scanned"))
-
+  if(isScanned2(doc)) {
+      y = getYearFromFileName(basename(docName(doc)))
+      if(length(y))
+          return(c(filename = y))
+      else
+          return(structure(NA, names = "Scanned"))
+  }
 
   nih = getNodeSet(doc, "//text[. = 'NIH Public Access']")
   if(length(nih) > 0) {
@@ -226,11 +241,12 @@ function(doc)
 
   p1 = getNodeSet(doc, "//page")[[1]]
   footer = getPageFooter(p1)
-  if(any(w <- hasYear(footer)))
+ 
+  if(!grepl("Downloaded", footer) && any(w <- hasYear(footer)))
       return(structure(footer[w], names = rep("footer", sum(w))))
 
   footer = getPageHeader(p1)
-  if(any(w <- hasYear(footer)))
+  if(!grepl("Downloaded", footer) && any(w <- hasYear(footer)))
       return(structure(footer[w], names = rep("header", sum(w))))  
 
   cr = getNodeSet(doc, "//text[contains(., '©')]")
@@ -260,8 +276,27 @@ function(doc)
   if(length(tt)) 
       return(unique(extractDate(sapply(tt, xmlValue))))
 
+
+  fname = basename(docName(doc))
+  y = getYearFromFileName(fname)
+  if(length(y))
+     return(c(filename = y))
   
   NA
+}
+
+getYearFromFileName =
+    # getYearFromFileName("Kohl 1996.xml")
+    # getYearFromFileName("Smithburn-1949-The susceptibility of African w.xml")
+function(fname)
+{
+  #   "(^|[^0-9])[0-9]{4}([^[0-9]|$)"
+  # But need to not include characters within the () ()
+  m = gregexpr("\\b[0-9]{4}\\b", fname, perl = TRUE)[[1]]
+  if(any(m > -1))
+     regmatches(fname, m)
+  else
+     character()
 }
 
 getMonthNames =
