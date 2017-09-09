@@ -26,12 +26,12 @@ nchar(cols)
 
 
 pdfText = pdf_text =
-function(doc)
+function(doc, numPages = getNumPages(doc), docFont = getDocFont(doc))
 {
    if(is.character(doc))
       doc = xmlParsePDFTOHTML(doc)
    
-   lapply(getPages(doc), getTextByCols)
+   lapply(getPages(doc)[seq(1, numPages)], getTextByCols, docFont = docFont)
 }
 
 
@@ -95,7 +95,7 @@ function(nodes, asNodes = TRUE, bbox = getBBox2(nodes, TRUE),
          addText = TRUE
         )
 {
-    if(length(nodes) == 1 && xmlName(nodes) == "page")
+    if(length(nodes) == 1 && xmlName(nodes[[1]]) == "page")
         nodes = getNodeSet(nodes, ".//text")
     
     if(length(nodes) == 0)
@@ -169,7 +169,7 @@ getTextByCols =
 function(p, threshold = .1, asNodes = FALSE,
          txtNodes = getNodeSet(p, getXPathDocFontQuery(p, docFont)),
          bbox = getBBox2(txtNodes, TRUE),
-         breaks = getColPositions(if(perPage) p else as(p, "XMLInternalDocument"), threshold = threshold, bbox = bbox, perPage = perPage, ...),
+         breaks = getColPositions(if(perPage) p else as(p, "XMLInternalDocument"), threshold = threshold, bbox = bbox, perPage = perPage, docFont = docFont, ...),
          perPage = FALSE, docFont = FALSE, ...)         
 {
 
