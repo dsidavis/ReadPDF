@@ -180,7 +180,8 @@ function(doc, checkAbstract = TRUE)
       txt = paste(abstract, collapse = "\n")
       m = gregexpr("\\b[0-9]{4}\\b", txt)
       if(any(m[[1]] > -1)) {
-          return(structure(regmatches(txt, m)[[1]], names = rep("abstract", length(m[[1]]))))
+         y = unique(regmatches(txt, m)[[1]])
+         return(structure(y, names = rep("abstract", length(y))))
       } 
   }
   
@@ -292,9 +293,9 @@ function(fname)
 {
   #   "(^|[^0-9])[0-9]{4}([^[0-9]|$)"
   # But need to not include characters within the () ()
-  m = gregexpr("\\b[0-9]{4}\\b", fname, perl = TRUE)[[1]]
-  if(any(m > -1))
-     regmatches(fname, m)
+  m = gregexpr("\\b(19[0-9]{2}|20[01][0-9]{1})\\b", fname, perl = TRUE)
+  if(any(m[[1]] > -1))
+     regmatches(fname, m)[[1]]
   else
      character()
 }

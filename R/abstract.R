@@ -99,7 +99,7 @@ function(doc, asNodes = TRUE, page = doc[[1]], byLine = TRUE)
 
         mar = margins(page)
         bb = getBBox2(a)
-        browser()
+#        browser()
         # See if we have a line just below the declaration and if so, see if there is one below the text.
         bb2 = getBBox(getNodeSet(page, ".//line | .//rect"))
         bb2 = bb2[ bb2[,2]> bb[1,2], ]
@@ -110,7 +110,7 @@ function(doc, asNodes = TRUE, page = doc[[1]], byLine = TRUE)
         # such as Oliveira-2009.
         # However, causes problems for Buckley-2006 and similar that have a Summary not quite centered
         if(anyTextToLeft(a[[1]], bb)) {  # Used to be simply if(bb[1,1] > mar[1] * 1.1)
-           nodes = getShiftedAbstract(page, bbox)
+           nodes = getShiftedAbstract(page, bb)
         } else {
             # Flush with left margin.  Maybe not quite flush.
 
@@ -209,7 +209,7 @@ function(page, cols = getColPositions(page, docFont = FALSE), colNodes = getText
                        # taken from above for lines - merge.
         fontInfo = getFontInfo(doc)
         fonts = sapply(nodes, xmlGetAttr, "font")
-        browser()
+#        browser()
         w = fonts == fonts[length(fonts)]
         nodes = nodes[w]
         # Now have to get all the nodes in this region, not just the ones
