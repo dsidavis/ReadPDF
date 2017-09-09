@@ -1,0 +1,213 @@
+# Detecting Columns
+
+Many journal articles use two or three columns on each page.
+However, there are also many that have a single column of text.
+And often the abstract, or some other section of text,
+is formatted with a single column, while the rest of the page(s)
+is multi-column.
+
+The function getColPositions() is a generic function
+that attempts to determine the number of columns.
+
+
+```
+sot = readPDFXML("LatestDocs/PDF/1573445118/Sotomayor-Bonilla et al_2014_Short Report Deng.xml")
+```
+We start with a page and get the nodes
+```r
+tnodes = getNodeSet(sot[[1]], ".//text")
+```
+Next we group these by lines.
+```
+ll = nodesByLine(tnodes)
+```
+This is a little more flexible than just matching the top attribute of each node.
+It allows the top attributes to be different by a small amount based on the
+most commonly occuring font in the document (based on number of characters).
+
+We might like to think that the number of elements in each element of `ll`
+is the number of columns. In other words, that if there are two columns
+there are two text nodes, with one for each column.
+However, a single contiguous text segment on the page may be divided
+into multiple nodes because of changes in font or color or other reasons within the PDF structure.
+
+Next we compute the start and end positions of each node within each "line" of nodes:
+```
+le = lapply(ll, getLineEnds)
+```
+Each element of `le` is a matrix giving us the left- and right-most extents of
+each element.
+
+Let's look at the 15th element. We happen to know that this is the line that contains
+the word "Abstract":
+```r
+grep("Abstract", sapply(ll, xmlValue))
+```
+
+```r
+le[[15]]
+```
+```
+     [,1] [,2]
+[1,]  136  188
+[2,]  203  822
+```
+This shows there is a separate of 15 horizontal units between the two line segments.
+Now let's compare that with the the next line:
+```r
+le[[16]]
+```
+```
+     [,1] [,2]
+[1,]  123  822
+```
+This is a single line segment.
+
+However, the 20-th element has 6 components:
+```r
+le[[20]]
+```
+```
+     [,1] [,2]
+[1,]  123  242
+[2,]  241  294
+[3,]  298  362
+[4,]  362  585
+[5,]  589  653
+[6,]  653  822
+```
+This corresponds to the line 
+```r
+xmlValue(ll[[20]])
+```
+```
+[1] "Artibeus jamaicensis"                  ", and one"                             "A. lituratus"                          ") and two bats in Montes Azules (both"
+[5] "A. lituratus"                          "). No effect of anthropogenic"
+```
+Let's compute the between-node distance:
+```
+x = le[[20]]
+x[-1, 1] - x[-nrow(x),2]
+```
+These values are all small: -1, 4, and 0.
+
+Next, let's look at the 25-th element of `le`:
+```
+le[[25]]
+```
+```
+     [,1] [,2]
+[1,]  109  454
+[2,]  490  849
+```
+We can see that there is a "gap" of 36 units between the two segments.
+
+Let's look at the next 20 elements. We'll use the
+function `interNodeDist()` to compute the maximum distance between
+the nodes:
+```
+unname(sapply(le[26:45], function(x) interNodeDist(, x)))
+ [1] 35 35 35  0 35 36  0 35 35  0 35 36  0 35 35  0 36 35 35 36
+```
+We see a consistent 35 or 36 unit distance, except when there are 0 values.
+These 0 values occur typically when there is only one node on this line.
+In these cases, these correspond to lines where we have a sole superscript node:
+```r
+ll[26:45][which(unname(sapply(le[26:45], function(x) interNodeDist(, x))) == 0)]
+```
+This indicates that we need to split the lines more precisely to include the 
+superscripts on the line on which they occur, or alternatively,
+ignore/discard these superscript nodes.
+Ignoring or discarding them will add to the "between-node" distance.
+However, it is unlikely to be significant.
+
+We can ignore these line elements
++ being a single text node
++ determining their extent to be a small proportion of the page width.
+Alternatively, we can have `interNodeDist()` return a `NA` value.
+
+We adjust the `interNodeDist()` function to return `NA` for single nodes.
+So now we query the inter-node distance with
+```
+na.omit(unname(sapply(le[26:45], function(x) interNodeDist(, x))))
+```
+```
+[1] 35 35 35 35 36 35 35 35 36 35 35 36 35 35 36
+attr(,"na.action")
+[1]  4  7 10 13 16
+attr(,"class")
+[1] "omit"
+```
+
+There are 70 lines  in `ll`. What about all of these from 26 onwards
+```
+na.omit(unname(sapply(le[26:70], function(x) interNodeDist(, x))))
+```
+```
+[1]  35  35  35  35  36  35  35  35  36  35  35  36  35  35  36  35  35  36  36  49  35  35  35  36  35  36 154  36  36  35  36  35 388  35 174
+```
+We see very large values: 154, 388 and 174.
+
+The lines these come from are
+```
+unname(sapply(ll[26:70][is.na((sapply(le[26:70], function(x) interNodeDist(, x))))], function(x) paste(xmlValue(x), collapse = " ")))
+```
+```
+ [1] "14"                                                                    
+ [2] "15"                                                                    
+ [3] "2"                                                                     
+ [4] "16"                                                                    
+ [5] "3"                                                                     
+ [6] "17"                                                                    
+ [7] "transitional zone between primary forest and agricultural/"            
+ [8] "livestock areas or human settlements. In both regions, the sites"      
+ [9] "3000, Colonia Ciudad Universitaria, MeÂ´xico, Distrito Federal, Mexico"
+[10] "129"   
+```
+
+The 2, 16, 3, 17 are superscripts.
+The 129 is the page number at the bottom of the page.
+The 'transitional zone...' and
+'livestock...' are consecutive lines in the second column.
+There is a gap in the first column at that vertical position.
+The gap precedes the Address for the author.
+The '3000, Colonia...' element is in the address and while
+it visually aligns with text in the second column, it is technically
+on a different line as it has a different top and bottom since it is
+rendered in a different smaller font.
+
+
+We can query the elements for which the gap is greater than 40:
+```r
+p = sapply(le[26:70], function(x) interNodeDist(, x))
+names(le[26:70][!is.na(p) & p > 40])
+```
+```
+[1] "a different mosquito species or cross-reaction with antibodies In this study, samples were collected from bats trapped in"
+[2] "in DENV transmission remains unknown. changes using RT-PCR. Bats were collected in Montes Azules"                         
+[3] "* were located at least 20 km from significant human populations"                                                         
+[4] "03310. E-mail: chuchomayor16@gmail.com and BenemeÂ´rito de la AmeÂ´ricas in Chiapas State). Bats were"                    
+```
+The first corresponds to a gap of 54 and corresponds to a regular line
+in the first column and an line in the second column that starts a
+paragraph with an indentation.
+
+The 'in DENV ...' corresponds to a line in the first column that ends a paragraph
+and is shorter than the other lines in that column. The associated line
+in the second column starts at the usual position for that column.
+
+The '* were located' text corresponds  to the first line in the Address 
+text of the first column, and the line in the second column at the same vertical position.
+However, the * is slightly higher than the 'Address correspondence...' 
+and is considered to be on a line by itself. This is again
+due to the way we segmented the lines and the smaller font in this Address text.
+We probably want to discard this text under the line at the bottom of the 
+first column's regular text.
+The line and the smaller font suggests this.
+
+The final text - '03310. E-mail:...' also corresponds to a short line in the first column
+ending a paragraph.
+
+
+Let's look at the lines ll[1:24], i.e. that appear before the start
+of the regular text.
