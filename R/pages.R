@@ -34,6 +34,12 @@ setMethod("length", "ConvertedPDFDoc",
           function(x)
            getNumPages(x))
 
+
+dim.PDFToXMLPage =
+function(x)
+{
+   structure( as.numeric(xmlAttrs(x)[c("width", "height")]), names = c("width", "height"))
+}
 getPages = 
 function(doc)
 {
