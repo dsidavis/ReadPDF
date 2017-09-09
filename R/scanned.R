@@ -2,12 +2,12 @@
 
 
 isScanned2 = 
-function(doc, threshold = 154.95, words = getDocWords(doc))
+function(doc, threshold = 154.95, words = getDocWords(doc, numPages), numPages = getNumPages(doc))
 {
   if(is.character(doc))
       doc = xmlParse(doc)
 
-  length(words)/getNumPages(doc)  < threshold
+  length(words)/numPages  < threshold
 }
 
 isScanned =
@@ -215,7 +215,7 @@ function(name, EndNotePDFDir = getOption("EndNotePDFDir", "../NewData_May30_2017
 
 
 getDocWords =
-function(doc, text = pdfText(doc))
+function(doc, numPages = getNumPages(doc), text = pdfText(doc, numPages))
 {
     if(!missing(doc) && is.character(doc))
        doc = readPDFXML(doc)
