@@ -13,13 +13,13 @@ function(p,  bbox = getBBox2(getNodeSet(p, ".//text")), ignorePageNumber = TRUE)
 {
     mx = max(bbox[, "top"], na.rm = TRUE)
     w = bbox[, "top"] == mx
-    ans = rownames(bbox)[w]
+    ans = rownames(bbox)[w][order(bbox[w, "left"])]
 
        # We have some docs with E57 as a page number (de la Torre-2009)
-    if(length(ans) == 1 && (grepl("^[0-9]+$", ans) || grepl("For +personal +use", ans) || (length(strsplit(ans, " +")[[1]]) == 1)))
+    if(length(ans) == 1 && (grepl("^[0-9]+$", ans) || grepl("Downloaded from", ans) || grepl("For +personal +use", ans) || (length(strsplit(ans, " +")[[1]]) == 1)))
         getPageFooter(, bbox[!w,])
     else
-        ans
+        paste(trim(ans), collapse = " ")
     
 #    foot = bbox[ w , ]
      # Now combine the elements that are close
