@@ -1,8 +1,10 @@
 getXPathDocFontQuery =
 function(node, docFont = TRUE, fontId = getDocFont(node)$id)
 {
-    xp = if(docFont)
+    xp = if(is.logical(docFont) && docFont)
             sprintf("//text[@font = '%s']", fontId)
+         else if(is.data.frame(docFont) && nrow(docFont) > 0)
+            sprintf("//text[@font = '%s']", docFont$id)
          else
             "//text"
     
