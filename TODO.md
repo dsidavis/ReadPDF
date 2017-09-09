@@ -26,7 +26,97 @@
 # Todo list for ReadPDF
 
 
+## Publication date
+
+1. getPublicationDate("LatestDocs/PDF/3409903038/9b53223b0c8d1a98f4831a14cbb3e0a5fe64.xml") gets
+   specific dates from the text of the document. Not publication related.
+   ```
+     TextRegEx       TextRegEx       TextRegEx       TextRegEx 
+    "July 1999" "26 April 1999" "21 April 1999"  "20 July 1999" 
+   ```
+
+## Section headers
+ 5 minutes to process 71 documents.
+```r
+tt = readRDS("SP_SectionText.rds")
+names(tt) = gsub("^../", "", names(tt))
+len = sapply(tt, length)
+b = tt[len >= 10]
+system.time({tmp = lapply(names(b), findSectionHeaders)})
+names(tmp) = names(b)
+isNumbered = sapply(tmp, function(x) all(grepl("^[0-9]+(\\.[0-9]+)?", sapply(x, xmlValue))))
+tmp = tmp[!isNumbered]
+b = b[!isNumbered]
+order(sapply(tmp, length))
+```
+
+1. [fixed] Leroy-2004  - finding "Materials and Methods" under the "Supporting Online Material". 
+   For the same paper, we run into this with the "Table S1" - see below.
+
+1. Brauburger-2012 - get header content page number and year (both look like years)
+1. Develop getPageHeader/getHeader and footer versions.
+
+1. Venter-2010 - findSectionHeaders() includes the header for the pages "VENTER AND SWANEPOEL" and
+   "WNV LINEAGE 2 PATHOGENESIS"
+
+1.  Blasdell - table 1 is a great example of containing all the data we want.
+1.  Also Linke table 3 another example of where the data are that we want.
+
+1. Klein - gets   getColPosition() wrong for perPage = TRUE or FALSE. Hence isOnLineBySelf() fails.
+    And we need that for determining if the section titles are on their own line.
+
+1.  LatestDocs/PDF/0212899111/Levis-2004-Hantavirus pulmonary syndrome in no.xml
+    Matching CA).
+	Check on line by itself.
+	
+1. Matching too many - References???   But more than that.
+
+    + LatestDocs/PDF/0263146437/Biernat-2014-Study on the occurrence of tick-b.xml	
+    + LatestDocs/PDF/0337534517/Andriamandimby-2011-Crimean-Congo hemorrhagic.xml"   	
+    + LatestDocs/PDF/0672362859/Bosch-2007-West Nile Virus, Venezuela.xml	 + authors?
+    + LatestDocs/PDF/2150982356/Brauburger-2012-Forty-five years of Marburg vi.xml
+       50 page document. Sections are clear but picking up 92 of them	
+    + LatestDocs/PDF/3982771992/Leroy-2004-Multiple Ebola virus transmission e.xml
+	+ LatestDocs/PDF/4154443567/Barrette-2009-Discovery of swine as a host for.xml
+    + LatestDocs/PDF/2939921293/Holsomback-2009-Bayou virus detected in non-Or.xml
+	+ LatestDocs/PDF/0817727758/Klein-2011-Hantaan virus surveillance targetin.xml
+	+ LatestDocs/PDF/2735769979/VandeWoude-2006-Going wild_ lessons from natur.xml
+	+ LatestDocs/PDF/1609915988/McIntosh-1976-Culex (Eumelanomyia) rubinotus T.xml
+	
+    + [This may be correct as it is a 35 page doc with a table of contents]
+	   LatestDocs/PDF/0817727758/Klein-2011-Hantaan virus surveillance targetin.xml
+
+1. Fix isScanned - LatestDocs/PDF/1609915988/McIntosh-1976-Culex (Eumelanomyia) rubinotus T.xml
+	 But isScanned() and isScanned2() say no!
+	 Hjelle-1995 also scanned.
+	 
+1. Getting the author names
+    LatestDocs/PDF/0368782170/Chew-2000-Risk factors for Nipah virus infecti.xml	
+    LatestDocs/PDF/0382058825/Rihtaric-2010-Identification of SARS-like Coro.xml
+
+1. Combine the text on the same line.
+
+1. Names of the sections have extra spaces within word
+    LatestDocs/PDF/0851236576/Chevalier-2010-Environmental risk factors of W.xml
+
+1. OKAY - 
+    Numbered sections
+    + LatestDocs/PDF/0415231817/Yang-2010-Simultaneous typing and HA_NA subtyp.xml
+    + LatestDocs/PDF/0609202356/Charrel-2003-Arenaviruses other than Lassa vir.xml
+	+ LatestDocs/PDF/0779208162/Bowden-2001-Molecular characterization of Mena.xml
+	
+
+## Abstract
+
+1. In weisenbock-2013, don't include DISPATCHES. See comment in the code.
+
+1. In Wernery, get the col positions correct. Currently returning -2
+
 ## Tables
+
+1. Read the tables back to data frames
+
+1. Read the footnotes. Make sense of them!!
 
 1. **Remove** any footer line that spans the entire page on all pages before looking for tables.
 
@@ -42,6 +132,13 @@
 
 1. Schmaljohn-1997 - 2 complex tables. one which spans 1 1/4 columns.
     <br/>
+	getTextByCols() is returning 4 elements, but getColPositions() gives just 2.
+	<br/>
+	Almost works out of the box, but doesn't include the right-most column.
+	<br/>
+	For table that partiall goes into another column, check the line endings of the text
+	within the vertical region and see if there is a big enough gap/margin.
+	<br/>
 	Table 1 is on a page all by itself. Its contents are not in the doc font - not a single text element
 	with the doc font on that page. So getTextByCols() and getColPositions() fail to return anything.
 	We need getColPositions(, docFont = FALSE).  **ADDED NOW**
@@ -56,8 +153,24 @@
    + For Neel, page 5:   all the text is rotated 90 except 5 nodes which are the header for that page.
    Can we detect this and then change the bbox to treat  x0 as y0 and x1 as y1 and reorder the
    dimensions of the page.
-   
-1.  Nitatpattana-2008, 
+
+1.  [**!!**] "1351986620/J Infect Dis.-2015-Ogawa-infdis-jiv063.xml" - tables with rows with alternating  colors.
+    + [used to work, I think] Table 2.  Has <rect> not <line>
+	    Gets the header and first row, but not the remaining rows.
+		The rows have alternative colors. Can we exploit this to identify 
+   	  [previously] Now gets more than we want. Includes line from other column from Figure 3 and much f the caption
+      and then from the 2nd  column below the table and the "Downloaded from " which is rotated text.
+
+    + [works] Table 1  (which comes second)
+	
+1. [table 2 broken] Armien-2004 - good example of table<br/>	
+ ```r
+ names(findTable(getTables(ar)[[2]]))
+ ```
+ 
+## Tables Work
+
+1.  [works] Nitatpattana-2008, 
      Table 1 - finds the table, but the bottom line is actually two half lines so the span code
      doesn't find it since neither span the entire column.
 	 In fact, the two lines overlap and do not meet at the same point as in other document.s
@@ -66,19 +179,6 @@
 	 ```r
      tt = getTables(nit); findTable(tt[[1]])
       ```
-
-1.  [**!!**] "1351986620/J Infect Dis.-2015-Ogawa-infdis-jiv063.xml" - tables with rows with alternating  colors.
-
-    + [used to work, I think] Table 2.  Has <rect> not <line>
-	    Gets the header and first row, but not the remaining rows.
-		The rows have alternative colors. Can we exploit this to identify 
-   	  [previously] Now gets more than we want. Includes line from other column from Figure 3 and much f the caption
-      and then from the 2nd  column below the table and the "Downloaded from " which is rotated text.
-
-    + [works] Table 1  (which comes second)
-
-## Tables Work
-
 1. [works] Armien-2004 - good example of table<br/>
      [**works**]
      [no caveats now afer adjusting getTextByCols(), etc. to compute getColPositions() across entire document.]
@@ -94,7 +194,7 @@
 
 1. [works] Can't detect Klein-2011 - lines don't span all the way across the page. But no text to the right.
     But many additional lines.
-     `names(findTable(getNodeSet(k, "//text[contains(., 'Table 1')]")[[2]]))`
+     `names(findTable(getNodeSet(k, "//text[contains(., 'Table 1')]")[[1]]))`
 
 1. [works] Weaver-2001  - table 2 - getColPositions() has 5 columns because the table dominates.
       [this part fixed now.]  getColPositions() uses the id of the most common font (getDocFont()) to find the
