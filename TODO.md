@@ -25,15 +25,48 @@
 
 # Todo list for ReadPDF
 
-
+## Abstract
+1. Remove the footer material from the text included in the abstract. And header if spans multiple
+   pages.
+    copyright, Elsevier all rights reserved
+1. Bennet-2000.  Dropping the lat part of the last sentence in the abstract.
+1. In weisenbock-2013, don't include DISPATCHES. See comment in the code.
+1. In Wernery, get the col positions correct. Currently returning -2. Is this a docFont = FALSE issue.	
+1. findAbstract() seems to have become slower when dealing with multiple pages and using
+   nodesByLine() multiple times in tapply().
+   See if we can use the page in the bbox.
+   findAbstract("LatestDocs/PDF/3637917410/Meister-2008-Serological evidence of continui1.xml")
+1. Use findSectionHeaders(, onlyFirst = TRUE) to find the Introduction/Background. Abstract should
+   be before this.
+    + "LatestDocs/PDF/1727052847/Tong-2004-Ross River virus disease in Australi.xml"
+	   Can find the introduction. getNodesBetween() only gives the first column.
+1. Find abstract between two lines
+     "LatestDocs/PDF/1727052847/Tong-2004-Ross River virus disease in Australi.xml"
+1. "LatestDocs/PDF/1727052847/Tong-2004-Ross River virus disease in Australi.xml" has keywords
+    within the abstract "region"
+	
 ## Publication date
 
-1. getPublicationDate("LatestDocs/PDF/3409903038/9b53223b0c8d1a98f4831a14cbb3e0a5fe64.xml") gets
-   specific dates from the text of the document. Not publication related.
+## Dates
+1. Convert the text into dates, i.e. extract date from DOI, Received, ...
+1. Figure out the dates that aren't years, e.g. 3644, 3395, 3805, 4029, 4059.
+    + 4059  - LatestDocs/PDF/1727052847/Tong-2004-Ross River virus disease in Australi.xml.   Part
+      of address. Getting the abstract wrong.
+	+ 3131, 2085 LatestDocs/PDF/2939921293/Holsomback-2009-Bayou virus detected in non-Or.xml
+	   Address again. Abstract problem.
+    + 3644  LatestDocs/PDF/0567227266/Papa-2001-Isolation of Dobrava virus from Apo1.xml
+	   In text, not abstract. Abstract incorrect.
+1. [check] Exclude For dates in the footer, see if "Downloaded on ... " e.g. Buitrago-2012
+1. [check] Exclude Check Rotated "Downloaded...." 
+1. getPublicationDate("LatestDocs/PDF/3409903038/9b53223b0c8d1a98f4831a14cbb3e0a5fe64.xml")
+    gets specific dates from the text of the document. Not publication related.
    ```
      TextRegEx       TextRegEx       TextRegEx       TextRegEx 
     "July 1999" "26 April 1999" "21 April 1999"  "20 July 1999" 
    ```
+1. [done] Get Date from Abstract Buitrago-2012
+1. [done] If we fail to get any date, get it from the name of the file.
+
 
 ## Section headers
  5 minutes to process 71 documents.
@@ -105,12 +138,6 @@ order(sapply(tmp, length))
     + LatestDocs/PDF/0609202356/Charrel-2003-Arenaviruses other than Lassa vir.xml
 	+ LatestDocs/PDF/0779208162/Bowden-2001-Molecular characterization of Mena.xml
 	
-
-## Abstract
-
-1. In weisenbock-2013, don't include DISPATCHES. See comment in the code.
-
-1. In Wernery, get the col positions correct. Currently returning -2
 
 ## Tables
 
