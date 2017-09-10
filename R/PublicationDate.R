@@ -174,15 +174,17 @@ function(doc, checkAbstract = TRUE)
      doc = readPDFXML(doc)
 
 
-  abstract = names(findAbstract(doc, FALSE))
+  if(checkAbstract) {
+      abstract = try(names(findAbstract(doc, FALSE)))
 
-  if(checkAbstract && length(abstract)) {
-      txt = paste(abstract, collapse = "\n")
-      m = gregexpr("\\b[0-9]{4}\\b", txt)
-      if(any(m[[1]] > -1)) {
-         y = unique(regmatches(txt, m)[[1]])
-         return(structure(y, names = rep("abstract", length(y))))
-      } 
+      if(!is(abstract, 'try-error') && length(abstract)) {
+          txt = paste(abstract, collapse = "\n")
+          m = gregexpr("\\b(19|20)[0-9]{2}\\b", txt)
+          if(any(m[[1]] > -1)) {
+              y = unique(regmatches(txt, m)[[1]])
+              return(structure(y, names = rep("abstract", length(y))))
+          } 
+      }
   }
   
   if(isBioOne(doc))
@@ -286,7 +288,7 @@ function(doc, checkAbstract = TRUE)
   NA
 }
 
-getYearFromFileName =
+getYearFromFileName = getYearFromString =
     # getYearFromFileName("Kohl 1996.xml")
     # getYearFromFileName("Smithburn-1949-The susceptibility of African w.xml")
 function(fname)
