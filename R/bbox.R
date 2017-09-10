@@ -1,6 +1,6 @@
 getBBox2 =
     # For text, not rect or line nodes.
-function(nodes, asDataFrame = FALSE, attrs = c("left", "top"))
+function(nodes, asDataFrame = FALSE, attrs = c("left", "top"), pages = FALSE)
 {
     if(is(nodes, "XMLInternalElementNode"))
         if(xmlName(nodes) == "text")
@@ -10,17 +10,25 @@ function(nodes, asDataFrame = FALSE, attrs = c("left", "top"))
 
    ats = c(attrs, "width", "height")    
    if(length(nodes) == 0)
-       return(matrix(0, 0, 4, dimnames = list(NULL, ats)))
+       return(matrix(0, 0, length(ats) + pages, dimnames = list(NULL, c(ats, if(pages) "page"))))
     
    m = do.call(rbind, lapply(nodes, function(x) as.integer(xmlAttrs(x)[ats])))
    colnames(m) = ats
 
+   if(pages)
+      pageNums = sapply(nodes, pageOf)
+    
    txt = sapply(nodes, xmlValue)
    if(asDataFrame) {
      m = as.data.frame(m)
      m$text = txt
-   } else
-     rownames(m) = txt
+     if(pages)
+        m$page = pageNums
+   } else {
+       if(pages)
+          m = cbind(m, page = pageNums)
+       rownames(m) = txt
+   }
    m
 }
 
