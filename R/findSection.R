@@ -63,7 +63,7 @@ function(doc, sectionName = c('introduction', 'background',
          otherSectionNames = c('references', 'acknowledgements', 'acknowledgments', 'results', 'methods'),
          checkCentered = TRUE,
          discardAfterReferences = TRUE,
-         allowRotated = FALSE
+         allowRotated = FALSE, onlyFirst = FALSE
          )
 {
     if(is.character(doc))
@@ -91,6 +91,9 @@ function(doc, sectionName = c('introduction', 'background',
 
     if(length(intro))
         intro = intro[ ! isLowerCase(sapply(intro, xmlValue)) ]
+
+    if(onlyFirst)
+        return(intro)
 
     if(length(intro)) {
         if(hasNum)
