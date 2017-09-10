@@ -1,6 +1,6 @@
 library(ReadPDF)
 
-doc = xmlParsePDFTOTHML("dayrpt.xml")
+doc = readPDFXML("dayrpt.xml")
 showPage(doc) # Fix Colors.
 #renderPage(doc[[1]], showText = FALSE)
 
@@ -36,7 +36,7 @@ els = rev(split(txt.nodes, cut(h - (tbb[, "top"] + tbb[, "height"]), c(0, sort(u
 
 els = els[sapply(els, length) > 0]
 
-lapply(els, function(row) split(els
+#lapply(els, function(row) split(els
 
 
 # display the rectangles 1 by 1
