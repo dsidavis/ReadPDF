@@ -99,7 +99,14 @@ function(nodes, asNodes = TRUE, bbox = getBBox2(nodes, TRUE),
         nodes = getNodeSet(nodes, ".//text")
     
     if(length(nodes) == 0)
-       return(list())
+        return(list())
+
+    pgnum = sapply(nodes, pageOf)
+    if(length(unique(pgnum)) > 1) {
+       tmp = tapply(nodes, pgnum, nodesByLine, asNodes, baseFont = baseFont, fontSize = fontSize, addText = addText)
+       return(structure(unlist(tmp, recursive = FALSE, use.names = FALSE), names = unlist(lapply(tmp, names))))
+    }
+    
     intv = seq(0, max(bbox$top)+ fontSize - 1, by = fontSize)
     topBins = cut(bbox$top, intv)
     byLine = tapply(nodes, topBins, arrangeLineNodes, asNodes, simplify = FALSE)
