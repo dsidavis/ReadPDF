@@ -26,18 +26,26 @@ function(doc, asNodes = TRUE, page = doc[[1]], byLine = TRUE)
        page = doc[[2]]
     
     nodes = list()
-    
+
       # Start by finding a declaration of an abstract: Abstract or Summary
     a = findAbstractDecl(page)
 #    browser()
 
     kw = findKeywordDecl(page)
+    if(length(kw) == 0)
+        kw = findKeywordDecl(getSibling(page))
+
     if(length(a) && length(kw)) {  #XXX Should check kw is below a
         nodes = getNodesBetween(a[[1]], kw[[1]])
-        return(if(byLine) nodesByLine(nodes) else nodes)
+        if(byLine) {
+            nodes = nodesByLine(nodes)
+            if(!asNodes)
+               return(names(nodes))
+        } 
+        return(nodes)
     }
 
-
+browser()
     rect = getNodeSet(page, ".//rect")
     rect.bb = getBBox(rect)
 
@@ -82,14 +90,16 @@ function(doc, asNodes = TRUE, page = doc[[1]], byLine = TRUE)
                         nodes = nodes[i]                        
                     } else
                         nodes = nodes[i]
-                }  else
+                }  else {
                     nodes = spansColumns(page, cols, colNodes, doc)
+                }
 
                 if(length(nodes) == 0)
                     # try within single column, but w/o line.
                    stop("try within single column")
             } else {
                    # See if there are lines that span columns
+
                 nodes = spansColumns(page, cols, colNodes, doc)
             }
         }
@@ -115,18 +125,24 @@ function(doc, asNodes = TRUE, page = doc[[1]], byLine = TRUE)
             # Flush with left margin.  Maybe not quite flush.
 
               # Dealt with this above now as first check.
-            kw = findKeywordDecl(page)
+            # kw = findKeywordDecl(page)
             if(length(kw))
                 nodes = getNodesBetween(a[[1]], kw[[1]])
-            else
-               nodes = spansColumns(page, doc = doc)
+            else if(length(h <- findSectionHeaders(doc, onlyFirst = TRUE))) {
+                nodes = getNodesBetween(a[[1]], h[[1]])
+            } else {
+                nodes = spansColumns(page, doc = doc)
+            }
         }
     }
 
-    if(byLine)
-       nodesByLine(nodes)
-    else
-       nodes
+    if(byLine) {
+        nodes = nodesByLine(nodes)
+        if(!asNodes)
+           return(names(nodes))
+    }
+    
+    nodes
 }
 
 findKeywordDecl =
@@ -134,7 +150,7 @@ findKeywordDecl =
     # Could add test for bold font.
 function(page)
 {
-    getNodeSet(page, ".//text[starts-with(., 'Key Words') or starts-with(., 'Keywords') or starts-with(., 'Key words')]")    
+    getNodeSet(page, ".//text[starts-with(., 'Key Words') or starts-with(., 'Keywords') or starts-with(., 'Key words') or starts-with(., 'Keyword Index')]")    
 }
 
 findAbstractDecl =
@@ -193,11 +209,38 @@ spansColumns =
 function(page, cols = getColPositions(page, docFont = FALSE), colNodes = getTextByCols(page, asNodes = TRUE, breaks = cols),
             doc = as(page, "XMLInternalDocument") )
 {
+    #
+    # Find all the lines that span multiple columns.  This includes title, authors, and abstract and possibly centered
+    #  section headers.
+    # Find the ones that don't have a large gap between the text segments,
+    #                    start in the first column
+    # Within these lines, find the subset that are consecutive, left aligned (allowing for a small indentation) and span 
+    # 
+
+    # Get all the lines of text, across all columns
+    ll = nodesByLine(getNodeSet(page, ".//text"))
+    # get the left and right of each line 
+    r = t(sapply(ll, function(x) { bb = getBBox2(x); c(start = min(bb[,1] ), end = max(bb[,1] + bb[,3]))}))
+    #
+    mdiff = sapply(ll, function(x) max(gapBetweenSegments(x)))
+    w = r[,1] < cols[length(cols)] & r[,2] > cols[length(cols)] & mdiff < .8*median(mdiff)
+
+    idx = split((1:length(ll))[w], cumsum(!w)[w])
+      # Pick the block with the most text. XXX  Need to make this more robust
+    b = idx[[which.max(sapply(idx, length))]]
+      # XXX add an extra line after this as the final line may not span the entire width to be beyond the start of the last column.
+    unlist( ll[ c(b, max(b) + 1) ] )
+}
+
+
+spansColumns2 =
+function(page, cols = getColPositions(page, docFont = FALSE), colNodes = getTextByCols(page, asNodes = TRUE, breaks = cols),
+            doc = as(page, "XMLInternalDocument") )
+{
     bb = getBBox2(colNodes[[1]])
     w = bb[,1] + bb[,3] > cols[length(cols)] #XXXX!!!!
     nodes = NULL
-
-
+   
     if(any(w)) {
         nodes = colNodes[[1]][w]
         # Different ways to filter just the abstract.
@@ -218,4 +261,14 @@ function(page, cols = getColPositions(page, docFont = FALSE), colNodes = getText
     }
 
     nodes
+}
+
+
+gapBetweenSegments =
+function(nodes, bbox = getBBox2(nodes))
+{
+   n = nrow(bbox)
+   if(n == 1) return(-1)
+   bb = bbox[order(bbox[,1]), ] 
+   bb[-1, 1] - (bb[1:(n-1), 1] + bb[1:(n-1), 3])
 }
