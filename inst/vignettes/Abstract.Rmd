@@ -10,18 +10,43 @@ metadata about the paper, e.g., publication date, accepted date, etc.
 The text of the abstract may span the entire width of the page or may
 be indented but spanning all columns but not to the margins.
 
+
+Look at the font for the abstract text and use that to know where we end.
+And a larger interlineskip between lines to indicate the start of a new section even if there is no section header.
+ e.g. LatestDocs/PDF/1609915988/McIntosh-1976-Culex (Eumelanomyia) rubinotus T.xml
+ 
 ## Examples - Manually Observed Patterns
+
+
+LatestDocs/PDF/1609915988/McIntosh-1976-Culex (Eumelanomyia) rubinotus T.xml
+  Scanned but there is text.
+  
+"LatestDocs/PDF/1879820842/Memish-2010-Alkhurma haemorrhagic fever - a v1.xml"
+ Should work. Was one of the earlier formats we implemented.
+
+"LatestDocs/PDF/1754306302/Mackenzie-2009-The zoonotic flaviviruses of s1.xml"
+ Interesting.
+
+
+LatestDocs/PDF/1727052847/Tong-2004-Ross River virus disease in Australi.xml
+ including the address and probably a lot of the Introduction.
+
+
+LatestDocs/PDF/0567227266/Papa-2001-Isolation of Dobrava virus from Apo1.xml
+  including text
+  
+[almost] LatestDocs/PDF/3637917410/Meister-2008-Serological evidence of continui1.xml
+ Remove the header and footer information from the first page and any from the second page.
+ Wrong. But should be "easy"
+  Gets the footer material for the page.
+  Note spans 2 pages
+  Keywords on second page identify the end.
 
 
 Murray-2013
  Abstract at top of first column. getColPositions is returning empty
  numeric.
- 
-Mehla-2009
- nodes = getNodeSet(page, sprintf(".//text[@top + @height < %f and @left < %d]", 
-    lines[w, 2], cols[2]))
- returns the abstract, but then the function discards it at the font
- stage and returns "Â­4"
+
  
 Aviles-1992
  nodesByLine gives error: Error in bbox$top : $ operator is invalid
@@ -33,12 +58,6 @@ Pan 2014
             left top width height
   Abstract   77 425    56     13
 
-Buitrago-2012
- Returns:
- [1] "Abstract. "                                             
- [2] "Key words: "                                            
- [3] "In September 2010, BAGV was detected and identified in "
- 
 
 Switzer-2005
  Getting the margin wrong. The header is positioned incorrectly in the XML.
@@ -98,9 +117,10 @@ Zou-2008
  Lines before and after the abstract.
  Can recognize the affiliations/addresses with lines that start with a superscript number.
 
-2987776261/Day-1996-Antibodies to arthropod-borne encepha.xml
+[Scanned] 2987776261/Day-1996-Antibodies to arthropod-borne encepha.xml
 Nemeth-2010
  BioOne paper so have to skip first page.
+ Scanned paper.
  Then abstract is identified by word.  In first column.
 
 
@@ -109,13 +129,6 @@ Nemeth-2010
  Includes the Key words.
 
 
-
-Wang-2005
- Emerging Infectious Diseases like Waldenstrom, but not quite the same.
- Large gap between title and text.
- Lots of lines and rectangles - unlike the others.
-
- 
 Laurenson-2007
   Should be like others that worked.
   Abstract is ragged right.
@@ -136,12 +149,97 @@ Gets the first line, but the rest has some from the abstract but skips lines and
   get an error.
 
 0595442163/Buckley-2006-Detection of seroconversion to W1.xml"
- Close but includes some text from the second column below.
+ Previously close but includes some text from the second column below.
+ But now gives only meta data about accepted, available from, open access
+  This the change to use anyTextToLeft() which is FALSE. But there are no Key words: to end this.
+  However, there are lines. Also it spans columns. But then we pick up the meta data above the Summary.
+
+ If we call getShiftedAbstract(page, bb), it works, but we also get "bo" and "rne viruses(" added. These are from 180 pixels below.
+ This is because there is a change of font in borne virus in the 1st column that is close to the left margin of the summary.
+
+ We should detect the start and ending line after summary and before the text and then take all the text between these.
+
  Looks like a different font.
  There are lines above and below.
 
 
 WORKING
+ "LatestDocs/PDF/2475418629/Iehlé-2007-Henipavirus and tioman virus antib1.xml"
+
+[works] "LatestDocs/PDF/1249277242/177-3-529.xml"
+
+[works] LatestDocs/PDF/2457284182/Kariwa-2007-Hantavirus infection in East Asia1.xml"
+[works]  "LatestDocs/PDF/2599571499/Cigarroa-Toledo-2016-Serologic Evidence of Fla.xml"
+[works] "LatestDocs/PDF/0659339597/NipahAsia.xml"
+
+[works] 2699927534/Jayme et al_2015_Molecular evidence of Ebola R.xml
+
+[works] "LatestDocs/PDF/1214934190/Baak et al SWE Mar 2016.xml"
+[works] LatestDocs/PDF/2939921293/Holsomback-2009-Bayou virus detected in non-Or.xml
+  address
+
+
+[Works] Buitrago-2012  - 2dd516288fdca75
+ Returns:
+ [1] "Abstract. "                                             
+ [2] "Key words: "                                            
+ [3] "In September 2010, BAGV was detected and identified in "
+c("Abstract.  In September 2010, an outbreak of disease in 2 wild bird species (red-legged partridge,  Alectoris rufa ; ring-", 
+"necked pheasant,  Phasianus colchicus ) occurred in southern Spain.  Bagaza virus  (BAGV) was identified as the etiological ", 
+"agent of the outbreak. BAGV had only been reported before in Western Africa (Central African Republic, Senegal) and in ", 
+"India. The first occurrence of BAGV in Spain stimulated a demand for rapid, reliable, and efficacious diagnostic methods ", 
+"to facilitate the surveillance of this disease in the field. This report describes a real-time reverse transcription polymerase ", 
+"chain reaction (RT-PCR) method based on a commercial 5'-Taq nuclease-3' minor groove binder DNA probe and primers ", 
+"targeting the Bagaza NS5 gene. The method allowed the detection of BAGV with a high sensitivity, whereas other closely ", 
+"related flaviviruses ( Usutu virus ,  West Nile virus , and  Japanese encephalitis virus ) were not detected. The assay was evaluated ", 
+"using field samples of red-legged partridges dead during the outbreak ( n  = 11), as well as samples collected from partridges ", 
+"during surveillance programs ( n  = 81). The results were compared to those obtained with a pan-flaviviral hemi-nested RT-", 
+"PCR followed by nucleotide sequencing, which was employed originally to identify the virus involved in the outbreak. The ", 
+"results obtained with both techniques were 100% matching, indicating that the newly developed real-time RT-PCR is a valid ", 
+"technique for BAGV genome detection, useful in both diagnosis and surveillance studies."
+)
+
+
+
+Mehla-2009
+ Works - commit 3349e1a48fcc
+ nodes = getNodeSet(page, sprintf(".//text[@top + @height < %f and @left < %d]", 
+    lines[w, 2], cols[2]))
+ returns the abstract, but then the function discards it at the font
+ stage and returns "Â­4"
+c("Kyasanur Forest disease virus (KFDV) is enzootic to In -", 
+"dia and maintained in ticks, mammals, and birds. It causes ", 
+"severe  febrile  illness  in  humans  and  was  first  recognized ", 
+"in  1957  associated  with  a  high  number  of  deaths  among ", 
+"monkeys in Kyasanur Forest. Genetic analysis of 48 virus -", 
+"es isolated in India during 1957Â­2006 showed low diversity ", 
+"(1.2%). Bayesian coalescence analysis of these sequences ", 
+"and  those  of  KFDVs  from  Saudi Arabia  and  the  People's ", 
+"Republic of China estimated that KFDVs have evolved at ", "a mean rate of 6.4 Ã\u0097 10  substitutions/site/year, which is ", 
+"similar  to  rates  estimated  for  mosquito-borne  flaviviruses. ", 
+"KFDVs were estimated to have shared a common ancestor ", "in   1942, fifteen years before identification of the disease in ", 
+"India. These data are consistent with the view that KFD rep -", 
+"resented a newly emerged disease when first recognized. ", "Recent common ancestry of KFDVs from India and Saudi ", 
+"Arabia, despite their large geographic separation, indicates ", 
+"long-range movement of virus, possibly by birds.")
+
+
+[Works] Wang-2005 - like Mehla
+ Emerging Infectious Diseases like Waldenstrom, but not quite the same.
+ Large gap between title and text.
+ Lots of lines and rectangles - unlike the others.
+
+c("RESEARCH", "Epidemiologic investigations showed that 2 of 4", 
+"patients with severe acute respiratory syndrome (SARS)", "identified in the winter of 2003Â­2004 were a waitress at a", 
+"restaurant in Guangzhou, China, that served palm civets", "as food and a customer who ate in the restaurant a short", 
+"distance from animal cages. All 6 palm civets at the restau-", 
+"rant were positive for SARS-associated coronavirus", "(SARS-CoV). Partial spike (S) gene sequences of SARS-", 
+"CoV from the 2 patients were identical to 4 of 5 S gene", "viral sequences from palm civets. Phylogenetic analysis", 
+"showed that SARS-CoV from palm civets in the restaurant", "was most closely related to animal isolates. SARS cases", 
+"at the restaurant were the result of recent interspecies", "transfer from the putative palm civet reservoir, and not the", 
+"result of continued circulation of SARS-CoV in the human", "population."
+)
+
 [Works] 4210961853/Linke-2007-Serologic evidence of West Nile vir.xml
  Finds the abstract and the first line, but then stops.
 
@@ -162,6 +260,16 @@ WORKING
 [Works] 0730080335/Kinnunen-2007-Serological evidence for Borna 1.xml
 
 [Works] 3471737079/Oliveira-2009-Genetic characterization of a Ju.xml
+ Still works with commit 2dd516288fdca75.  See Buitrago-2012 for the need to change the code to accommodate larger indents.
+
+c("abstract", "Hantaviruses, family Bunyaviridae, are rodent-borne RNA viruses that have caused cases of hantavirus", 
+"cardiopulmonary syndrome (HCPS) in various regions of the Americas. There are five hantaviral lineages", 
+"associated with HCPS in Brazil: Juquitiba virus (JUQV), Araraquara virus (ARAV), Laguna Negra-like virus", 
+"(LNV), Castelo dos Sonhos virus (CASV), and Anajatuba virus (ANAJV). Three additional hantaviruses have", 
+"been described in rodents alone: Rio Mearim virus, JaborÃ¡ virus, and a hantavirus lineage related to Seoul", 
+"virus. This study describes the genetic detection and characterization of a Juquitiba-like hantavirus in", 
+"Oligoryzomys nigripes", "Janeiro State, where so far no cases of HCPS have been reported."
+)
 
 [Works] 2386999233/Delfraro-2008-Juquitiba-like Hantavirus from 1.xml
   Emerging Infectious Diseases
@@ -231,3 +339,5 @@ c("In October 2012, a 3-year-old bullfinch ( Pyrrhula pyrrhula ) held in captivi
   Left aligned with Summary
 
  
+
+[Scanned] "LatestDocs/PDF/1141406970/Rollin-1995-Isolation of black creek canal vir.xml"
