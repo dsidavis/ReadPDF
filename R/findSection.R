@@ -81,6 +81,9 @@ function(doc, sectionName = c('introduction', 'background',
        xp = sprintf("//text[%s]", filter)
        intro = getNodeSet(doc, xp)
     }
+
+    if(onlyFirst)
+        return(intro)
     
 #browser()
     if(!length(intro)) {
@@ -92,8 +95,7 @@ function(doc, sectionName = c('introduction', 'background',
     if(length(intro))
         intro = intro[ ! isLowerCase(sapply(intro, xmlValue)) ]
 
-    if(onlyFirst)
-        return(intro)
+
 
     if(length(intro)) {
         if(hasNum)

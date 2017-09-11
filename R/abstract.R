@@ -20,8 +20,6 @@ function(doc, asNodes = TRUE, page = doc[[1]], byLine = TRUE)
     if(is.character(doc))
         doc = readPDFXML(doc)
     
-#opdf(doc)    
-
     if(isBioOne(doc) && missing(page))
        page = doc[[2]]
     
@@ -29,7 +27,7 @@ function(doc, asNodes = TRUE, page = doc[[1]], byLine = TRUE)
 
       # Start by finding a declaration of an abstract: Abstract or Summary
     a = findAbstractDecl(page)
-#    browser()
+ browser()
 
     kw = findKeywordDecl(page)
     if(length(kw) == 0)
@@ -37,6 +35,7 @@ function(doc, asNodes = TRUE, page = doc[[1]], byLine = TRUE)
 
     if(length(a) && length(kw)) {  #XXX Should check kw is below a
         nodes = getNodesBetween(a[[1]], kw[[1]])
+        nodes = cleanAbstract(nodes)        
         if(byLine) {
             nodes = nodesByLine(nodes)
             if(!asNodes)
@@ -45,7 +44,7 @@ function(doc, asNodes = TRUE, page = doc[[1]], byLine = TRUE)
         return(nodes)
     }
 
-browser()
+
     rect = getNodeSet(page, ".//rect")
     rect.bb = getBBox(rect)
 
@@ -136,6 +135,8 @@ browser()
         }
     }
 
+    nodes = cleanAbstract(nodes)
+    
     if(byLine) {
         nodes = nodesByLine(nodes)
         if(!asNodes)
@@ -143,6 +144,13 @@ browser()
     }
     
     nodes
+}
+
+cleanAbstract =
+function(nodes)    
+{
+   txt = sapply(nodes, xmlValue)
+   nodes[ ! grepl("(19|20)[0-9]{2}.*elsevier|rights reserved|copyright" , tolower(txt)) ]
 }
 
 findKeywordDecl =
@@ -224,9 +232,12 @@ function(page, cols = getColPositions(page, docFont = FALSE), colNodes = getText
     #
     mdiff = sapply(ll, function(x) max(gapBetweenSegments(x)))
     w = r[,1] < cols[length(cols)] & r[,2] > cols[length(cols)] & mdiff < .8*median(mdiff)
-
+    if(!any(w))
+       return(list())
+    
     idx = split((1:length(ll))[w], cumsum(!w)[w])
-      # Pick the block with the most text. XXX  Need to make this more robust
+    # Pick the block with the most text. XXX  Need to make this more robust
+browser()    
     b = idx[[which.max(sapply(idx, length))]]
       # XXX add an extra line after this as the final line may not span the entire width to be beyond the start of the last column.
     unlist( ll[ c(b, max(b) + 1) ] )

@@ -175,7 +175,7 @@ function(doc, checkAbstract = TRUE)
 
 
   if(checkAbstract) {
-      abstract = try(names(findAbstract(doc, FALSE)))
+      abstract = try(findAbstract(doc, FALSE))
 
       if(!is(abstract, 'try-error') && length(abstract)) {
           txt = paste(abstract, collapse = "\n")
