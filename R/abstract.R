@@ -35,7 +35,7 @@ function(doc, asNodes = TRUE, page = doc[[1]], byLine = TRUE)
 
     if(length(a) && length(kw)) {  #XXX Should check kw is below a
         nodes = getNodesBetween(a[[1]], kw[[1]])
-        nodes = cleanAbstract(nodes)        
+        nodes = cleanAbstract(nodes, a)        
         if(byLine) {
             nodes = nodesByLine(nodes)
             if(!asNodes)
@@ -55,7 +55,7 @@ function(doc, asNodes = TRUE, page = doc[[1]], byLine = TRUE)
         # separates some text from  regular document text
         # This is the title, author list, abstract, line and then regular text.
         # See Waldenstrom-2007, etc.
-        cols = getColPositions(page, docFont = FALSE)
+        cols = mostCommon(unlist(getColPositions(doc, docFont = FALSE)))
         colNodes = getTextByCols(page, asNodes = TRUE, breaks = cols)
         docFont = getDocFont(doc)
         if(length(cols) > 1) {
@@ -129,13 +129,21 @@ function(doc, asNodes = TRUE, page = doc[[1]], byLine = TRUE)
                 nodes = getNodesBetween(a[[1]], kw[[1]])
             else if(length(h <- findSectionHeaders(doc, onlyFirst = TRUE))) {
                 nodes = getNodesBetween(a[[1]], h[[1]])
+            } else if(length(nodes <- spansColumns(page, doc = doc, abstractDecl = a))) {
+               # don't do anything, just fall through to the cleanAbstract() 
             } else {
-                nodes = spansColumns(page, doc = doc)
+                # Have Abstract declaration. In a single column and there is a line that ends it.
+                # e.g. Pan 2014
+                # Can generalize to find another way to find the end.
+                cols = getColPositions(page)
+                col = columnOf(a[[1]], cols)
+                bot = min(bb2[ bb2[, "x1"] < cols[2] , "y0"])
+                nodes = getNodeSet(page, sprintf(".//text[ @top >= %f and @top < %f and @left < %f]", as.numeric(xmlGetAttr(a[[1]], "top")) - 8,  bot, cols[2]))
             }
         }
     }
 
-    nodes = cleanAbstract(nodes)
+    nodes = cleanAbstract(nodes, a)
     
     if(byLine) {
         nodes = nodesByLine(nodes)
@@ -147,10 +155,37 @@ function(doc, asNodes = TRUE, page = doc[[1]], byLine = TRUE)
 }
 
 cleanAbstract =
-function(nodes)    
+function(nodes, abstractDecl = NULL)    
 {
-   txt = sapply(nodes, xmlValue)
-   nodes[ ! grepl("(19|20)[0-9]{2}.*elsevier|rights reserved|copyright" , tolower(txt)) ]
+    if(length(nodes) == 0)
+       return(nodes)
+    
+    if(length(abstractDecl)) {
+        bb = getBBox2(abstractDecl)
+        page = xmlParent(abstractDecl[[1]])
+        ll = getBBox(getNodeSet(page, ".//rect|.//line"))
+
+        # is there a line above the abstract and nothing in between, e.g. Meister-2008
+        w = ll[, "y0"] < bb[1, "top"]  # and wide enough to not be a line for some other purpose.
+        z = getNodeSet(page, sprintf(".//text[@top > %f and @top < %f]", max(ll[w, "y0"]), bb[1, "top"]))
+        if(length(z) == 0) {
+            bb = getBBox2(nodes, pages = TRUE)
+            pageNum = pageOf(abstractDecl[[1]])
+            nodes = nodes[ bb[, "top"] > max(ll[w, "y0"]) | bb[, "page"] != pageNum ]
+        }
+    }
+
+      #XXX do other pages
+    pos = getFooterPos(xmlParent( nodes[[1]] ) )
+    if(!is.na(pos)) {
+        bb = getBBox2(nodes, pages = TRUE)
+        pageNum = pageOf(nodes[[1]])
+        nodes = nodes[ bb[, "top"] < pos | bb[, "page"] != pageNum]
+    }
+        
+    
+    txt = sapply(nodes, xmlValue)
+    nodes[ ! grepl("(19|20)[0-9]{2}.*elsevier|rights reserved|copyright" , tolower(txt)) ]
 }
 
 findKeywordDecl =
@@ -211,11 +246,10 @@ function(doc, col = getColPositions(doc[[1]]))
 
 
 
-
-
 spansColumns =
-function(page, cols = getColPositions(page, docFont = FALSE), colNodes = getTextByCols(page, asNodes = TRUE, breaks = cols),
-            doc = as(page, "XMLInternalDocument") )
+function(page, cols = getColPositions(as(page, "XMLInternalDocument"), docFont = FALSE),
+         colNodes = getTextByCols(page, asNodes = TRUE, breaks = cols),
+         doc = as(page, "XMLInternalDocument"), abstractDecl = NULL)
 {
     #
     # Find all the lines that span multiple columns.  This includes title, authors, and abstract and possibly centered
@@ -231,18 +265,45 @@ function(page, cols = getColPositions(page, docFont = FALSE), colNodes = getText
     r = t(sapply(ll, function(x) { bb = getBBox2(x); c(start = min(bb[,1] ), end = max(bb[,1] + bb[,3]))}))
     #
     mdiff = sapply(ll, function(x) max(gapBetweenSegments(x)))
-    w = r[,1] < cols[length(cols)] & r[,2] > cols[length(cols)] & mdiff < .8*median(mdiff)
+    gap = mostCommon(mdiff[mdiff > 0])
+    w = r[, "start"] < cols[2] & r[, "end"] > cols[length(cols)] & mdiff < gap
     if(!any(w))
        return(list())
     
     idx = split((1:length(ll))[w], cumsum(!w)[w])
     # Pick the block with the most text. XXX  Need to make this more robust
-browser()    
+
     b = idx[[which.max(sapply(idx, length))]]
-      # XXX add an extra line after this as the final line may not span the entire width to be beyond the start of the last column.
-    unlist( ll[ c(b, max(b) + 1) ] )
+
+    # now patch up
+    
+    # XXX add an extra line after this as the final line may not span the entire width to be beyond the start of the last column.
+    ans = unlist(ll[ c(b, max(b) + 1) ] )
+
+    bb2 = getBBox2(ans)
+    left = mostCommon(bb2[, "left"])
+    i = abs(r[, "start"] - left) < 15
+    ans = unlist(ll[i])
+
+    if(length(abstractDecl)) {
+        bb = getBBox2(ans)
+        top = getBBox2(abstractDecl)
+        ans = ans[ bb[, "top"] >= (top[1, "top"] - 5)]
+    } 
+    
+    ans
 }
 
+mostCommon =
+function(x, convert = as.numeric)
+{
+    tt = table(x)
+    ans = names(tt)[tt == max(tt)]
+    if(!is.null(convert))
+        convert(ans)
+    else
+        ans
+}
 
 spansColumns2 =
 function(page, cols = getColPositions(page, docFont = FALSE), colNodes = getTextByCols(page, asNodes = TRUE, breaks = cols),
