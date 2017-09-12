@@ -73,3 +73,10 @@ function(node, asNode = FALSE)
         xmlGetAttr(p, "number", converter = as.integer)
 }
 
+
+columnOf =
+function(node, cols = getColPositions(xmlParent(node)))
+{
+    bb = getBBox2(list(node))
+    which(bb[1, "left"] < cols)[1] - 1
+}
