@@ -26,37 +26,17 @@ LatestDocs/PDF/1609915988/McIntosh-1976-Culex (Eumelanomyia) rubinotus T.xml
 
 "LatestDocs/PDF/1754306302/Mackenzie-2009-The zoonotic flaviviruses of s1.xml"
  Interesting.
+ The Keywords confue things as it is at the same approximate height but to the left of the Summary
+ So in this case, we don't want to use it.
 
 
 LatestDocs/PDF/1727052847/Tong-2004-Ross River virus disease in Australi.xml
  including the address and probably a lot of the Introduction.
-
+  Lines delimit the abstract that consists of 2 columns.
 
 LatestDocs/PDF/0567227266/Papa-2001-Isolation of Dobrava virus from Apo1.xml
-  including text
-  
-[almost] LatestDocs/PDF/3637917410/Meister-2008-Serological evidence of continui1.xml
- Remove the header and footer information from the first page and any from the second page.
- Wrong. But should be "easy"
-  Gets the footer material for the page.
-  Note spans 2 pages
-  Keywords on second page identify the end.
-
-
-Murray-2013
- Abstract at top of first column. getColPositions is returning empty
- numeric.
-
- 
-Aviles-1992
- nodesByLine gives error: Error in bbox$top : $ operator is invalid
- for atomic vectors. PDF is pixelated, but can be copied and pasted.
- 
-Pan 2014
- Returns the line "Received: ..."
- bb around abstract is being recognized as:
-            left top width height
-  Abstract   77 425    56     13
+  including text from institutional affiliation and Received, ...
+  Different font for abstract. Only 4 lines so won't "dominate".
 
 
 Switzer-2005
@@ -66,11 +46,15 @@ Switzer-2005
  Bold text spanning two columns.
 
 Santiago-2005
+ + now gettng all of the abstract, plus some content from the title,author affiliations.
+   Need to ensure contiguity.
+ + Getting the lower part of this. so finding some of it.
+ 
  Bold font
  spans two columns
- getColPositions() thinks there are 3 columns since the abstract has sufficiently many lines
+ getColPositions() thinks there are 3 columns since the abstract has sufficiently many lines to constitute a column by itself.
  to count as its own column.  Need to make getColPositions() smarter about this.
- Line underneath separating from regular text.
+ * Line underneath separating from regular text.
  Also the text under the line is in a different font.
  Also don't have the same margins.
 
@@ -79,13 +63,6 @@ Barrette-2009
    abstract spans first two.
  Under title and author list - these also span 2 columns.
 
-Silva-2014
-([Done - works]  Check can find section headers for this - in grey boxes.)
-Spans 2 columns
-  Word "Abstract" on separate line, centered.
-  Then abstract
-  Then Keywords:  - line also centered.
-  Gap between abstract and Keywords: line.
 
 
 Gulati-2011
@@ -129,9 +106,6 @@ Nemeth-2010
  Includes the Key words.
 
 
-Laurenson-2007
-  Should be like others that worked.
-  Abstract is ragged right.
 
 Calzolari-2012
  Abstract in a rectangle and shaded box.
@@ -162,9 +136,50 @@ Gets the first line, but the rest has some from the abstract but skips lines and
  Looks like a different font.
  There are lines above and below.
 
+NOT IN sp.xml
+
+Murray-2013 - 
+ Abstract at top of first column. getColPositions is returning empty
+ numeric.
+
+Aviles-1992
+ nodesByLine gives error: Error in bbox$top : $ operator is invalid
+ for atomic vectors. PDF is pixelated, but can be copied and pasted.
 
 WORKING
  "LatestDocs/PDF/2475418629/Iehlé-2007-Henipavirus and tioman virus antib1.xml"
+
+Silva-2014
+([Done - works]  Check can find section headers for this - in grey boxes.)
+Spans 2 columns
+  Word "Abstract" on separate line, centered.
+  Then abstract
+  Then Keywords:  - line also centered.
+  Gap between abstract and Keywords: line.
+
+
+Laurenson-2007
+  Should be like others that worked.
+  Abstract is ragged right.
+
+
+"LatestDocs/PDF/0278287729/Pan 2014.xml"
+ Returns the line "Received: ..."
+ bb around abstract is being recognized as:
+            left top width height
+  Abstract   77 425    56     13
+
+[almost] LatestDocs/PDF/3637917410/Meister-2008-Serological evidence of continui1.xml
+ Remove the header and footer information from the first page and any from the second page.
+ Wrong. But should be "easy"
+  Gets the footer material for the page.
+  Note spans 2 pages
+  Keywords on second page identify the end.
+
+[works] LatestDocs/PDF/3089301912/Kading-2015-Detection of Entebbe Bat Virus Aft.xml"
+ Almost working. But includes the title, authors, affiliations, eventhough the word Abstract appears below these.
+ Ends correctly.
+
 
 [works] "LatestDocs/PDF/1249277242/177-3-529.xml"
 
