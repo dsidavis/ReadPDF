@@ -354,3 +354,16 @@ function(txt)
      grepl("\\b(19|20)[0-9]{2}\\b", txt)
 }
 
+
+
+firstIsolated =
+function(doc, text = pdfText(doc))
+{
+    if(missing(text) && is.character(doc))
+       doc = readPDFXML(doc)
+
+    pageNum = rep(seq(along = text), sapply(text, length))
+    text = unlist(text)
+    i = grep("first[[:space:]]+isolated", text, ignore.case = TRUE)
+    structure(text[i], names = pageNum[i])
+}
