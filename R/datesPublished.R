@@ -11,3 +11,10 @@ function(doc)
    structure(XML:::trim(sapply(e, `[[`, 2)), names = XML:::trim(sapply(e, `[[`, 1)))
 }
 
+
+getSubmissionDateInfo =
+function(doc, phrases = c("Received", "Accepted", "Available online", "Published at", "Published online", "received for review"))
+{
+  cond = sprintf("starts-with(normalize-space(.), '%s')", t(cbind(phrases, paste0("(", phrases))))
+  getNodeSet(doc, sprintf("//text[%s]", paste(cond, collapse = " or ")))
+}
