@@ -15,13 +15,16 @@ function(page, bbox = getBBox2(getNodeSet(page, ".//text[@rotation = 0]")))
 }
 
 findAbstract =
-function(doc, asNodes = TRUE, page = doc[[1]], byLine = TRUE)
+function(doc, asNodes = TRUE, page = doc[[1 + hasCoverPage(doc) ]], byLine = TRUE)
 {
     if(is.character(doc))
         doc = readPDFXML(doc)
     
     if(isBioOne(doc) && missing(page))
-       page = doc[[2]]
+        page = doc[[2]]
+    
+    if(is.numeric(page))
+        page = doc[[page]]
     
     nodes = list()
 
@@ -33,6 +36,11 @@ function(doc, asNodes = TRUE, page = doc[[1]], byLine = TRUE)
     if(length(kw) == 0)
         kw = findKeywordDecl(getSibling(page))
 
+
+    if(length(kw) == 0)
+        # Look for Received, Accepted, Published below the abstract, e.g. Alagaili
+       kw = getSubmissionDateInfo(doc)
+    
     if(length(a) && length(kw)) {  #XXX Should check kw is below a
         nodes = getNodesBetween(a[[1]], kw[[1]])
         nodes = cleanAbstract(nodes, a)        
@@ -45,8 +53,17 @@ function(doc, asNodes = TRUE, page = doc[[1]], byLine = TRUE)
     }
 
 
-    rect = getNodeSet(page, ".//rect")
+    rect = getNodeSet(page, ".//rect | .//line")
     rect.bb = getBBox(rect)
+    w = (rect.bb[,3] - rect.bb[,1])/as.numeric(xmlGetAttr(page, "width")) > .6
+
+    if(any(w)) {
+        if(length(a))
+           nodes = getNodesBetween(a[[1]], rect[which(w)[1]])
+        else {
+           browser()
+        }
+    }
 
        # If no declaration
     if(length(a) == 0) {
@@ -165,13 +182,15 @@ function(nodes, abstractDecl = NULL)
         page = xmlParent(abstractDecl[[1]])
         ll = getBBox(getNodeSet(page, ".//rect|.//line"))
 
-        # is there a line above the abstract and nothing in between, e.g. Meister-2008
+        # is there a line above the abstract and nothing between that line and the abstract text, e.g. Meister-2008
         w = ll[, "y0"] < bb[1, "top"]  # and wide enough to not be a line for some other purpose.
-        z = getNodeSet(page, sprintf(".//text[@top > %f and @top < %f]", max(ll[w, "y0"]), bb[1, "top"]))
+                          # add the max(, 0) here in case !any(w) and would get empty vector.
+        z = getNodeSet(page, sprintf(".//text[@top > %f and @top < %f]", max(ll[w, "y0"], 0), bb[1, "top"])) 
         if(length(z) == 0) {
             bb = getBBox2(nodes, pages = TRUE)
             pageNum = pageOf(abstractDecl[[1]])
-            nodes = nodes[ bb[, "top"] > max(ll[w, "y0"]) | bb[, "page"] != pageNum ]
+               # below the line, but only on this page, include all the nodes above this on the other pages
+            nodes = nodes[ bb[, "top"] > max(ll[w, "y0"], 0) | bb[, "page"] != pageNum ]
         }
     }
 
@@ -193,7 +212,7 @@ findKeywordDecl =
     # Could add test for bold font.
 function(page)
 {
-    getNodeSet(page, ".//text[starts-with(., 'Key Words') or starts-with(., 'Keywords') or starts-with(., 'Key words') or starts-with(., 'Keyword Index')]")    
+    getNodeSet(page, ".//text[starts-with(lower-case(.), 'key words') or starts-with(., 'Keywords') or starts-with(., 'Key words') or starts-with(., 'Keyword Index')]")    
 }
 
 findAbstractDecl =
@@ -343,4 +362,16 @@ function(nodes, bbox = getBBox2(nodes))
    if(n == 1) return(-1)
    bb = bbox[order(bbox[,1]), ] 
    bb[-1, 1] - (bb[1:(n-1), 1] + bb[1:(n-1), 3])
+}
+
+
+
+context =
+function(pos, vec, num = 10)
+{
+    if(length(pos) > 1)
+        return(lapply(pos, context, vec))
+
+
+    vec[seq(max(1, pos - num),  min(length(vec), pos + num))]
 }
