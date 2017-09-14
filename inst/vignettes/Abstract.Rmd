@@ -33,6 +33,7 @@ LatestDocs/PDF/1609915988/McIntosh-1976-Culex (Eumelanomyia) rubinotus T.xml
 LatestDocs/PDF/1727052847/Tong-2004-Ross River virus disease in Australi.xml
  including the address and probably a lot of the Introduction.
   Lines delimit the abstract that consists of 2 columns.
+ getNodesBetween needs to recognize the horizontal line spanning the width of the page.
 
 LatestDocs/PDF/0567227266/Papa-2001-Isolation of Dobrava virus from Apo1.xml
   including text from institutional affiliation and Received, ...
@@ -148,6 +149,10 @@ Aviles-1992
 
 WORKING
  "LatestDocs/PDF/2475418629/Iehlé-2007-Henipavirus and tioman virus antib1.xml"
+
+"LatestDocs/PDF/0358861568/Alagaili et al_ 2014_Middle East Respiratory S.xml"
+  Skips cover page.
+   Note ABSTRACT is second element as it is slightly lower than remaining text on that line.
 
 Silva-2014
 ([Done - works]  Check can find section headers for this - in grey boxes.)
