@@ -138,6 +138,19 @@ function(node)
 #tmp = lapply(docs2, )
 
 
+
+hasCoverPage =
+function(doc)
+{
+  isBioOne(doc) || isMBio(doc)
+}
+
+isMBio =
+function(doc)    
+{
+   length(getNodeSet(doc, "//page[1]//text[contains(., 'mBio')]")) > 0 &&    length(getNodeSet(doc, "//page[1]//ulink[starts-with(@url, 'http://mbio.asm.org')]")) > 0
+}
+
 isBioOne =
     #
     # There are some documents from BioOne which are scanned documents with a front page that is not scanned.
@@ -214,11 +227,7 @@ function(doc, checkAbstract = TRUE)
   if(hasYear(title))
       return(structure(title, names = "Title"))
 
-  words = c("Received", "Accepted", "Available online", "Published at", "Published online", "received for review")
-  cond = sprintf("starts-with(normalize-space(.), '%s')", t(cbind(words, paste0("(", words))))
-  
-  rec = getNodeSet(doc, sprintf("//text[%s]", paste(cond, collapse = " or ")))
-  
+  rec = getSubmissionDateInfo(doc)
   if(length(rec) > 0) {
       txt = xmlValue(rec[[1]])
       if(!hasYear(txt)) {
