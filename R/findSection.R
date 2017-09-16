@@ -144,7 +144,7 @@ function(doc, sectionName = c('introduction', 'background',
             i = sapply(secs, isOnLineBySelf)
             secs = secs[ i ]
         }
-        return(secs)
+        return(nodesByLine(secs))
     }
 }
 
@@ -225,7 +225,7 @@ function(page, nodes = getNodeSet(page, ".//text"), bb = getBBox2(nodes, TRUE),
 
 
 getNodesBetween =
-function(x = NULL, y = NULL)
+function(x = NULL, y = NULL, useLines = TRUE)
 {
     if(is.null(x) && is.null(y))
         stop("need to specify either x or y or both")
@@ -234,22 +234,23 @@ function(x = NULL, y = NULL)
        x = getFirstTextNode(as(y, "XMLInternalDocument"))
     
     if(is.null(y))
-       y = getLastNode(as(x, "XMLInternalDocument"))    
+       y = getLastNode(as(x, "XMLInternalDocument"))
+    
     s = pageOf(x)
     e = pageOf(y)
 
     if(e > s) {
         # get all the nodes on each page up to e
-        p1 = getTextAfter(x)
+        p1 = getTextAfter(x, useLines = useLines)
         if(e - s > 1) {
             pgs = getPages(as(x, "XMLInternalDocument"))[ seq(s + 1, e - 1)]
             pgs = lapply(pgs, getTextByCols, asNodes = TRUE)
         } else
             pgs = NULL
-        pe = getTextAfter(, y)
+        pe = getTextAfter(, y, useLines = useLines)
         c(p1, unlist(pgs, recursive = FALSE), pe)
     } else {
-        getTextAfter(x, y)
+        getTextAfter(x, y, useLines = useLines)
     }
 }
 
@@ -264,11 +265,23 @@ getTextAfter =
     # One can specify x and not to, x and to, or just to.
     #
     #
-    
-function(x = NULL, to = NULL, before = FALSE)
+
+#XXX FIX THIS TO KEEP THE TEXT BY COLUMN.
+function(x = NULL, to = NULL, before = FALSE, useLines = TRUE)
 {
     page = xmlParent(if(!is.null(x)) x else to)
     cols = getTextByCols(page, asNodes = TRUE)
+
+    if(useLines) {
+       if(!is.null(to) && xmlName(to) %in% c('rect', 'line')) {
+           bb = getBBox(list(to))
+           browser()
+           bb[1,2] = bb[1,4]
+           to = NULL
+#           useLines = FALSE
+       } else
+           bb = getBBox(getNodeSet(page, ".//rect | .//line"))
+    }
     
     if(!is.null(x)) {
           # find the column and the index of the node matching x
@@ -301,6 +314,26 @@ function(x = NULL, to = NULL, before = FALSE)
                         cols[[to.colNum]][ seq(1, length = j[[to.colNum]] - 1) ])
         }
     }
+
+    
+    if(useLines) {
+        w = (bb[,3] - bb[,1])/as.numeric(xmlGetAttr(page, "width")) > .6
+        if(any(w)) {
+            #XXX FIX THIS - x or to is missing?
+            # Handle the cases where we return earlier.
+            tmp = list(x)
+            if(!is.null(to))
+                tmp[[2]] = to
+            bb2 = getBBox2(tmp)
+            bot = max(bb[w, 4])
+            f = function(x) {
+                            bb.n = getBBox2(x)
+                            x[ bb.n[,2] + bb.n[,4] <= bot ]
+                        }
+browser()            
+            nodes = if(length(nodes) != length(cols)) f(nodes) else lapply(nodes, f) 
+        }
+    } 
 
     unlist(nodes, recursive = FALSE)
 }
