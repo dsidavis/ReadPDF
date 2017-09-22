@@ -48,14 +48,16 @@ getFooterPos =
 function(page, docFont = getDocFont(page), fontInfo = getFontInfo(page))
 {
     ll = getNodeSet(page, ".//rect | .//line")
-    bb = getBBox(ll)
-    bottom = max(bb[, "y0"])
-    # look for a line with all the text below it being smaller than the the document font.
-    nodes = getNodeSet(page, sprintf(".//text[ @top > %f]", bottom))
-    if(length(nodes)) {
-        fontId = sapply(nodes, xmlGetAttr, "font")
-        if(all(fontInfo[fontId, "size"] < docFont$size))
-            return(bottom)
+    if(length(ll)) {
+        bb = getBBox(ll)
+        bottom = max(bb[, "y0"])
+        # look for a line with all the text below it being smaller than the the document font.
+        nodes = getNodeSet(page, sprintf(".//text[ @top > %f]", bottom))
+        if(length(nodes)) {
+            fontId = sapply(nodes, xmlGetAttr, "font")
+            if(all(fontInfo[fontId, "size"] < docFont$size))
+                return(bottom)
+        }
     }
     
     NA
