@@ -30,38 +30,53 @@ function(doc, asNodes = TRUE, page = doc[[1 + hasCoverPage(doc) ]], byLine = TRU
 
       # Start by finding a declaration of an abstract: Abstract or Summary
     a = findAbstractDecl(page)
- browser()
-
-    kw = findKeywordDecl(page)
-    if(length(kw) == 0)
-        kw = findKeywordDecl(getSibling(page))
-
-
-    if(length(kw) == 0)
-        # Look for Received, Accepted, Published below the abstract, e.g. Alagaili
-       kw = getSubmissionDateInfo(doc)
-    
-    if(length(a) && length(kw)) {  #XXX Should check kw is below a
-        nodes = getNodesBetween(a[[1]], kw[[1]])
-        nodes = cleanAbstract(nodes, a)        
-        if(byLine) {
-            nodes = nodesByLine(nodes)
-            if(!asNodes)
-               return(names(nodes))
-        } 
-        return(nodes)
-    }
+browser()
 
 
     rect = getNodeSet(page, ".//rect | .//line")
-    rect.bb = getBBox(rect)
-    w = (rect.bb[,3] - rect.bb[,1])/as.numeric(xmlGetAttr(page, "width")) > .6
+    rect.bb = getBBox(rect, color = TRUE)    
+
+    if(length(a) && any(w <- isNodeIn(a[[1]], rect.bb))) {
+        # Calzolari
+        # Is the Abstract within a colored box. If so, get the text in that box.
+
+        #XXX Only taking one. Generalize
+#    browser()        
+        nodes = getNodesBetween(a[[1]], rect[[which(w)[1]]])
+        return(cleanAbstract(nodes, asNodes = asNodes, byLine = byLine))
+    }
+    
+    
+    kw = findKeywordDecl(page)
+    if(length(kw) == 0 && !is.null(nxt <- getSibling(page)))
+        kw = findKeywordDecl(nxt)
+
+    
+    kwIsSubmissionInfo = TRUE
+    if(length(kw) == 0) {
+        # Look for Received, Accepted, Published below the abstract, e.g. Alagaili
+        kw = getSubmissionDateInfo(doc)
+        kwIsSubmissionInfo = TRUE
+        # Could be at the end of the paper, e.g. Khaiboullina
+        if(length(kw) > 0 &&  (pageOf(kw[[1]]) - pageOf(page)) > 1)
+            kw = NULL
+    }
+    
+    if(length(a) && length(kw)) {  #XXX Should check kw is below a
+        nodes = getNodesBetween(a[[1]], kw[[1]])
+        return(cleanAbstract(nodes, a, asNodes, byLine = byLine))
+    }
+
+    w = (rect.bb[,3] - rect.bb[,1])/as.numeric(xmlGetAttr(page, "width")) > .54
 
     if(any(w)) {
         if(length(a))
-           nodes = getNodesBetween(a[[1]], rect[which(w)[1]])
-        else {
-           browser()
+            nodes = getNodesBetween(a[[1]], rect[[which(w)[1]]])
+        else if(length(kw)) {
+            nodes = getNodesBetween(kw[[1]], rect[[which(w)[1]]])
+browser()            
+        } else {
+#           browser()
         }
     }
 
@@ -76,7 +91,7 @@ function(doc, asNodes = TRUE, page = doc[[1 + hasCoverPage(doc) ]], byLine = TRU
         colNodes = getTextByCols(page, asNodes = TRUE, breaks = cols)
         docFont = getDocFont(doc)
         if(length(cols) > 1) {
-            lines = getBBox(getNodeSet(page, ".//line | .//rect"))
+            lines = rect.bb # getBBox(getNodeSet(page, ".//line | .//rect"))
             if(nrow(lines)) {
                    # only lines that span the first column
                 w = lines[,1] - cols[1] < 5 & lines[,3] < cols[2] & abs(lines[,3] - cols[2]) < 18 # The 18 should be based on the width of the column, not the location of the second column.
@@ -114,7 +129,10 @@ function(doc, asNodes = TRUE, page = doc[[1 + hasCoverPage(doc) ]], byLine = TRU
                     # try within single column, but w/o line.
                    stop("try within single column")
             } else {
-                   # See if there are lines that span columns
+                # See if there are lines that span columns
+
+                # And the case where we have no Abstract declaration, but we do have a keyword but the abstract is in the first column.
+                # See Gulati-2011
 
                 nodes = spansColumns(page, cols, colNodes, doc)
             }
@@ -160,19 +178,11 @@ function(doc, asNodes = TRUE, page = doc[[1 + hasCoverPage(doc) ]], byLine = TRU
         }
     }
 
-    nodes = cleanAbstract(nodes, a)
-    
-    if(byLine) {
-        nodes = nodesByLine(nodes)
-        if(!asNodes)
-           return(names(nodes))
-    }
-    
-    nodes
+    cleanAbstract(nodes, a, asNodes, byLine = byLine)
 }
 
 cleanAbstract =
-function(nodes, abstractDecl = NULL)    
+function(nodes, abstractDecl = NULL, asNodes = TRUE, byLine = TRUE)    
 {
     if(length(nodes) == 0)
        return(nodes)
@@ -204,7 +214,16 @@ function(nodes, abstractDecl = NULL)
         
     
     txt = sapply(nodes, xmlValue)
-    nodes[ ! grepl("(19|20)[0-9]{2}.*elsevier|rights reserved|copyright" , tolower(txt)) ]
+    nodes = nodes[ ! grepl("(19|20)[0-9]{2}.*elsevier|rights reserved|copyright" , tolower(txt)) ]
+
+    
+    if(byLine) 
+       nodes = nodesByLine(nodes)
+
+    if(!asNodes)
+       return(names(nodes))
+    
+    nodes
 }
 
 findKeywordDecl =
@@ -276,7 +295,10 @@ function(page, cols = getColPositions(as(page, "XMLInternalDocument"), docFont =
     # Find the ones that don't have a large gap between the text segments,
     #                    start in the first column
     # Within these lines, find the subset that are consecutive, left aligned (allowing for a small indentation) and span 
-    # 
+    #
+
+    if(is.list(cols))
+       cols = cols[[1]] # XXX make better
 
     # Get all the lines of text, across all columns
     ll = nodesByLine(getNodeSet(page, ".//text"))
@@ -374,4 +396,12 @@ function(pos, vec, num = 10)
 
 
     vec[seq(max(1, pos - num),  min(length(vec), pos + num))]
+}
+
+
+
+isNodeIn =
+function(node, boxes, pos = getBBox2(list(node)))
+{
+    pos[,1] >= boxes[,1] & pos[,2] > boxes[,2] & (pos[,1] + pos[,3]) < boxes[,3] & (pos[,2] + pos[,4]) < boxes[,4] 
 }

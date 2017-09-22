@@ -38,13 +38,13 @@ getBBox =
     #
     # This bbox function expects an attribute named bbox
     #
-function(nodes, asDataFrame = FALSE)
+function(nodes, asDataFrame = FALSE, color = FALSE)
 {
     if(length(nodes) == 0) {
         if(asDataFrame)
             return(data.frame(x0 = numeric(), y0 = numeric(), x1 = numeric(), y1 = numeric()))
         else
-            return(matrix(0, nrow = 0, ncol = 4))
+            return(matrix(0, nrow = 0, ncol = 4 + if(color) 2 else 0, dimnames = list(NULL, c("x0", "y0", "x1", "y1", if(color) c("fill", "stroke")))))
     }
     
     tmp = sapply(nodes, xmlGetAttr, "bbox")

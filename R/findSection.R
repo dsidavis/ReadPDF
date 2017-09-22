@@ -271,11 +271,12 @@ function(x = NULL, to = NULL, before = FALSE, useLines = TRUE)
 {
     page = xmlParent(if(!is.null(x)) x else to)
     cols = getTextByCols(page, asNodes = TRUE)
-
+#browser()
+    
     if(useLines) {
        if(!is.null(to) && xmlName(to) %in% c('rect', 'line')) {
            bb = getBBox(list(to))
-           browser()
+#           browser()
            bb[1,2] = bb[1,4]
            to = NULL
 #           useLines = FALSE
@@ -317,20 +318,20 @@ function(x = NULL, to = NULL, before = FALSE, useLines = TRUE)
 
     
     if(useLines) {
-        w = (bb[,3] - bb[,1])/as.numeric(xmlGetAttr(page, "width")) > .6
-        if(any(w)) {
             #XXX FIX THIS - x or to is missing?
-            # Handle the cases where we return earlier.
-            tmp = list(x)
-            if(!is.null(to))
-                tmp[[2]] = to
-            bb2 = getBBox2(tmp)
+            # Handle the cases where we return earlier.        
+        tmp = list(x)
+        if(!is.null(to))
+            tmp[[2]] = to
+        bb2 = getBBox2(tmp)        
+        w = (bb[,3] - bb[,1])/as.numeric(xmlGetAttr(page, "width")) > .6 & bb[,2] > bb2[1,2]
+        if(any(w)) {
             bot = max(bb[w, 4])
             f = function(x) {
                             bb.n = getBBox2(x)
                             x[ bb.n[,2] + bb.n[,4] <= bot ]
                         }
-browser()            
+#browser()            
             nodes = if(length(nodes) != length(cols)) f(nodes) else lapply(nodes, f) 
         }
     } 

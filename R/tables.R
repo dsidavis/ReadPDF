@@ -13,8 +13,9 @@ function(doc)
 
       # Now find those that are in text and not part of a separate block
 
-#    tbls = lapply(tableNodes, findTable)
-    
+    tbls = lapply(tableNodes, findTable)
+    names(tbls) = sapply(tableNodes, xmlValue)
+    tbls
 }
 
 findTable =
@@ -39,7 +40,7 @@ function(node, page = xmlParent(node),
             centered = 2
     }
 
-browser()        
+#browser()        
       # also look at rectangles.  J Infect Dis. 2015 has no lines, just rect.
     lines = getNodeSet(page, ".//line | .//rect")
     lw = as.numeric(sapply(lines, xmlGetAttr, "lineWidth", 1))

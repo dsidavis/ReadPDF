@@ -259,7 +259,10 @@ function(page, nodes = getNodeSet(doc, ".//text"))
 combineBBoxLines =
 function(bbox, by = "y1")
 {
-  do.call(rbind, by(bbox, bbox[[by]], combineLines))
+    if(nrow(bbox) == 0)
+       return(bbox)
+
+    do.call(rbind, by(bbox, bbox[[by]], combineLines))
 }
 
 combineLines =
