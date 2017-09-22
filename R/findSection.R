@@ -122,7 +122,12 @@ function(doc, sectionName = c('introduction', 'background',
            # Discard elements that are just numbers
         secs = secs[!grepl("^[0-9]+$", xmlValue(secs))]            
 
-        w = sapply(secs, function(x) length(getNodeSet(x, ".//preceding::text[ lower-case(normalize-space(.)) = 'references' or lower-case(normalize-space(.)) = 'references cited' or lower-case(normalize-space(.)) = 'supporting online material']"))) > 0
+        preRefs = sapply(secs, function(x) getNodeSet(x, ".//preceding::text[ lower-case(normalize-space(.)) = 'references' or lower-case(normalize-space(.)) = 'references cited' or lower-case(normalize-space(.)) = 'supporting online material']"))
+        w = sapply(preRefs, length) > 0
+
+        if(any(w) && hasCoverPage(doc))
+            w[w] = sapply(preRefs[w], function(x) pageOf(x) != 1)
+
         secs = secs[!w]
 
            # if all the known section headers are all upper case
