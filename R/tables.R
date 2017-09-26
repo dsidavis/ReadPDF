@@ -24,7 +24,7 @@ function(node, page = xmlParent(node),
          docFont = getDocFont(node), perPage = FALSE,
          spansWithin = 20, ...)
 {
-
+#browser()
     if(!perPage && length(getColPositions(node, perPage)) < 2)
         colNodes = getTextByCols(page, asNodes = TRUE, perPage = TRUE)
     
@@ -94,8 +94,10 @@ function(node, page = xmlParent(node),
       }
     } else if(centered == 2 || centered == 0) {
 
-        # need the margins.
-#        xpathSApply(page, ".//text")        
+        # For the columns, get the start and the end "margins"
+        # by computing the start and end of each line and then computing
+        # the 
+ #        xpathSApply(page, ".//text")        
         # Get rid of any lines that are only within one column.
          colInfo = t(sapply(colNodes, function(x) {
             ll = nodesByLine(x)
@@ -105,6 +107,7 @@ function(node, page = xmlParent(node),
          }))
          ex = range(colInfo)
 
+           # Which lines span the page.
            # same line as in earlier if() clause so should centralize. But may need it here now.
          doesSpan = spansWidth(bb, ex, spansWithin)
 
@@ -112,6 +115,16 @@ function(node, page = xmlParent(node),
          spansCols = seq(along = colNodes)
          
          if(!any(doesSpan)) {
+
+             # If centered = 0 and no line spans more than one column, then
+             # the table is in that column
+
+             if(centered == 0) {
+                 browser()
+                 w = abs(bb[, "x0"] - colInfo[colNum,1]) < 10 & abs(bb[, "x1"] - colInfo[colNum,2]) < 10
+                 doesSpan = w
+             }
+             
              # Are there are text nodes to the right???  CHECK.
              # Example where the table doesn't span the entire page, but there is no text to the right of it.
              #  Table is on same page as image and there is nothing else so no text (other than figure caption).
@@ -168,7 +181,7 @@ function(node, page = xmlParent(node),
 
     # Perhaps use getNodesBetween(). But no need.
     # But for 3 columns, maybe we need to be using that to avoid repeating all the code.
-    b = max(spans[,2])
+    b = max(spans[,2]) #XXX if spans is empty, what value should we return. The height of the page? or -Inf?
     ok = sapply(colLines, function(x) {
                             tp = as.numeric(xmlGetAttr(x[[1]], "top"))
                             tp <= b & tp >= nodeTop
