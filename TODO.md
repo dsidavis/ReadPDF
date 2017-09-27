@@ -1,37 +1,30 @@
 # pdftohtml
 
 1. Beta character in Wong et al  supplement.  See BadCharacters in pdftohtml for analysis. 
-
 1. The + characters in table3 of Leroy-2004 are not present in the XML. No <text> node for them at
    all.
-   
 1. Also in Leroy-2004 words are put together LossiDec 2002 when should be 
-
 1. findTable().  FOr Aguilar-2007, missing the >= in table 3. Not in XML. This is not just > but a
    symbol in  font. And it is getting ignored/dropped!
-   
-
 1. Are the image locations and dimensions (x, y) correct?  Do we need to transform them?
    See Klein-2011
-
 1. spaces in Table 2 of Aguilar-2007  The 5 and 80 run together.
 1. Spaces within a string are getting lost in pdftohotml - e.g., Fulhorst-2002  - page 1 - 'TexasParksand'
-
 1. Check the links in pdftohtml. In Lahm, we only get 14 links to the bibliography items.
   There are 519 /Link elements in the uncompressed PDF.
-  
 1. Are the dimensions for the shaded rectangles correct from pdftohtml. Is linewidth transformed also?
    See Lahm[[ page 5]]  
 
 # Todo list for ReadPDF
 
 ## Abstract
+1. Fix getTextAfter to keep the text by column, e.g.  Tong...
+1. Detect cover page for mbio papers, see Algaili et al.
 1. Remove the footer material from the text included in the abstract. And header if spans multiple
    pages.
     copyright, Elsevier all rights reserved
 1. Bennet-2000.  Dropping the lat part of the last sentence in the abstract.
 1. In weisenbock-2013, don't include DISPATCHES. See comment in the code.
-1. In Wernery, get the col positions correct. Currently returning -2. Is this a docFont = FALSE issue.	
 1. findAbstract() seems to have become slower when dealing with multiple pages and using
    nodesByLine() multiple times in tapply().
    See if we can use the page in the bbox.
@@ -44,7 +37,11 @@
      "LatestDocs/PDF/1727052847/Tong-2004-Ross River virus disease in Australi.xml"
 1. "LatestDocs/PDF/1727052847/Tong-2004-Ross River virus disease in Australi.xml" has keywords
     within the abstract "region"
-	
+
+
+1. [works] In Wernery, get the col positions correct. Currently returning -2. Is this a docFont =
+   FALSE issue.	
+   
 ## Publication date
 
 ## Dates
@@ -122,6 +119,7 @@ order(sapply(tmp, length))
 1. Fix isScanned - LatestDocs/PDF/1609915988/McIntosh-1976-Culex (Eumelanomyia) rubinotus T.xml
 	 But isScanned() and isScanned2() say no!
 	 Hjelle-1995 also scanned.
+	 Rudnick also: LatestDocs/PDF/3257936385/Rudnick-1965-Studies of the ecology of Dengue.xml
 	 
 1. Getting the author names
     LatestDocs/PDF/0368782170/Chew-2000-Risk factors for Nipah virus infecti.xml	
