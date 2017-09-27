@@ -236,10 +236,14 @@ function(x = NULL, y = NULL, useLines = TRUE)
         stop("need to specify either x or y or both")
     
     if(is.null(x))
-       x = getFirstTextNode(as(y, "XMLInternalDocument"))
+        x = getFirstTextNode(as(y, "XMLInternalDocument"))
+    else if(is.list(x))
+        x = x[[length(x)]]
     
     if(is.null(y))
        y = getLastNode(as(x, "XMLInternalDocument"))
+    else if(is.list(y))
+       y = y[[length(y)]]
     
     s = pageOf(x)
     e = pageOf(y)
