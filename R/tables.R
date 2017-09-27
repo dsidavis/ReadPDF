@@ -120,9 +120,9 @@ function(node, page = xmlParent(node),
              # the table is in that column
 
              if(centered == 0) {
-                 browser()
                  w = abs(bb[, "x0"] - colInfo[colNum,1]) < 10 & abs(bb[, "x1"] - colInfo[colNum,2]) < 10
                  doesSpan = w
+                 spansCols= colNum
              }
              
              # Are there are text nodes to the right???  CHECK.
