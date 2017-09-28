@@ -139,14 +139,22 @@ order(sapply(tmp, length))
 
 ## Tables
 
-1. Read the tables back to data frames
+1. When combining nodes on a line in, e.g., Forrester-2008, get nodesByLine() correct.
+   The b/< characters have @top=149 & @height=12 and the number have @top=151 & @height=10
+   We may want to group by @top + @height.
+
+1. Read the tables back to data frames, arranging each line into columns, but determining the columns
+   across all lines first.
 
 1. Read the footnotes. Make sense of them!!
+
+1. Determine the caption, e.g., above the first line
 
 1. **Remove** any footer line that spans the entire page on all pages before looking for tables.
 
 1.  Recognize Table XX  in the text as not a table identifier.  See Leroy-2004 - "Table S1" at the
     very end of the article that refers to supporting online material.
+	We'll just end up with 0 rows for the table and can discard.
 
 1. identify tables and put the related nodes into a table node and then potentially write the result
   back to the original file so we have that information for subsequent reads of that document.
