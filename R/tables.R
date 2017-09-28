@@ -66,9 +66,9 @@ function(node, page = xmlParent(node),
       # if column 2, then x0 >= ex[1]
 
       if(colNum == 1) 
-         bb = bb[bb$x1 <= ex[2]*1.05, ]
+         bb = bb[bb$x1 <= ex[2]*1.075, ]
       else
-         bb = bb[bb$x0 >= ex[1]*.95, ]
+         bb = bb[bb$x0 >= ex[1]*.925, ]
 
       doesSpan = spansWidth(bb, ex, spansWithin)
       spansCols = colNum
