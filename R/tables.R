@@ -11,8 +11,8 @@ function(doc)
     tableNodes = getNodeSet(doc,
         "//text[. = 'Table' or . = 'TABLE' or starts-with(., 'TABLE') or starts-with(., 'Table') or (. = 'T' and following-sibling::text[1] ='ABLE')]")
 
+#browser()
       # Now find those that are in text and not part of a separate block
-
     tbls = lapply(tableNodes, findTable)
     names(tbls) = sapply(tableNodes, xmlValue)
     tbls
@@ -25,7 +25,7 @@ function(node, page = xmlParent(node),
          spansWithin = 20, ...)
 {
 #browser()
-    if(!perPage && length(getColPositions(node, perPage)) < 2)
+    if(!perPage && length(getColPositions(page, perPage)) < 2)
         colNodes = getTextByCols(page, asNodes = TRUE, perPage = TRUE)
     
     colNum = inColumn(node, colNodes)
