@@ -139,9 +139,12 @@ order(sapply(tmp, length))
 
 ## Tables
 
-1. When combining nodes on a line in, e.g., Forrester-2008, get nodesByLine() correct.
+1. [check] When combining nodes on a line in, e.g., Forrester-2008, get nodesByLine() correct.
    The b/< characters have @top=149 & @height=12 and the number have @top=151 & @height=10
    We may want to group by @top + @height.
+   
+1.  useBase = TRUE in nodesByLine().  How does it perform with superscripts. See Alagaili...2014
+    and Table 1's column headers.
 
 1. Read the tables back to data frames, arranging each line into columns, but determining the columns
    across all lines first.
