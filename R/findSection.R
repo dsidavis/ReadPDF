@@ -4,10 +4,13 @@ function(doc, asNodes = FALSE, secHeaders = findSectionHeaders(doc, ...), ...)
     if(is.character(doc))
         doc = readPDFXML(doc)
 
+    secHeaders = orderNodes(unlist(secHeaders))
+
     secs = lapply(seq(along = secHeaders),
                   function(i)
                     getNodesBetween(secHeaders[[i]], if(i == length(secHeaders)) NULL else secHeaders[[i+1]]))
     names(secs) = sapply(secHeaders, xmlValue)
+    
     if(asNodes)
        return(secs)
     
@@ -145,7 +148,6 @@ function(doc, sectionName = c('introduction', 'background',
         if(checkCentered)
            secs = secs[ sapply(secs, isCentered) == isCentered(intro[[1]])]
 
-#browser()        
         if(isOnLineBySelf(intro[[1]])) {
             i = sapply(secs, isOnLineBySelf)
             secs = secs[ i ]
@@ -391,4 +393,24 @@ function(colNodes, lines = nodesByLine(colNodes))
     lines[ isShort ]
 
     # Check for fonts here or in a separate function.
+}
+
+
+orderNodes =
+    #
+    # Take a list of nodes and order them by page and within each page by column
+    # We'll assume they are ordered correctly within column already.
+    #
+function(nodes, pages = sapply(nodes, pageOf))
+{
+  unlist(tapply(nodes, pages, orderNodesInPage))
+}
+
+orderNodesInPage =
+function(nodes, columnNum = sapply(nodes, inColumn, colNodes),
+         colNodes = getTextByCols(page, breaks = colPos, asNodes = TRUE),
+         colPos = getColPositions(xmlParent(nodes[[1]])),
+         page = xmlParent(nodes[[1]]))
+{
+    nodes[order(columnNum)]
 }
