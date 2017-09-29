@@ -68,7 +68,7 @@ function(doc, sectionName = c('introduction', 'background',
 {
     if(is.character(doc))
         doc = readPDFXML(doc)
-
+    
        # Find section titles with numbers
     hasNum = FALSE    
     filter = paste(sprintf("(contains(lower-case(normalize-space(.)), '%s') and isNum(normalize-space(.)))", sectionName), collapse = " or ")
@@ -141,10 +141,11 @@ function(doc, sectionName = c('introduction', 'background',
         # we are dealing with and compute the getTextByCols() and
         # nodesByLine() for each of these just once and pass them to these
         # functions
-        
-        if(checkCentered && isCentered(intro[[1]]))
-           secs = secs[ sapply(secs, isCentered) ]
 
+        if(checkCentered)
+           secs = secs[ sapply(secs, isCentered) == isCentered(intro[[1]])]
+
+#browser()        
         if(isOnLineBySelf(intro[[1]])) {
             i = sapply(secs, isOnLineBySelf)
             secs = secs[ i ]
@@ -176,13 +177,12 @@ function(doc, fontID)
 }
 
 isOnLineBySelf =
-function(node, pos = getColPositions(doc),
+function(node, pos = getColPositions(xmlParent(node)),
          textNodes = getNodeSet(xmlParent(node), ".//text"),
          bbox = getBBox2(textNodes, TRUE))
-    # doc = as(node, "XMLInternalDocument"),
+#         doc = as(node, "XMLInternalDocument"))
 {
-#browser()    
-    colNodes = getTextByCols(pageOf(node, TRUE), asNodes = TRUE)
+    colNodes = getTextByCols(pageOf(node, TRUE), breaks = pos, asNodes = TRUE)
        # determine which column this is in
     colNum = inColumn(node, colNodes)
     col = colNodes[[colNum]]
@@ -319,6 +319,11 @@ function(x = NULL, to = NULL, before = FALSE, useLines = TRUE)
         } else {
               # nodes in x's column
             nodes = cols[[colNum]][ - (1:(i[[colNum]]-1)) ]
+            # in Becker-2012, Author Contributions is x and References is to
+            # but References is actually in the 1st column of this page and Author Contributions
+            # is in the second but slightly above. findSectionHeaders() is ordering them this way
+            # but not taking into account References should probabl come first.
+            # Is References a node that is after Author Contributions in document order?
             btwn = seq(colNum + 1, length = to.colNum  - colNum - 1)
             nodes =  c(nodes, cols[btwn],
                         cols[[to.colNum]][ seq(1, length = j[[to.colNum]] - 1) ])
@@ -340,8 +345,11 @@ function(x = NULL, to = NULL, before = FALSE, useLines = TRUE)
                             bb.n = getBBox2(x)
                             x[ bb.n[,2] + bb.n[,4] <= bot ]
                         }
-#browser()            
-            nodes = if(length(nodes) != length(cols)) f(nodes) else lapply(nodes, f) 
+            #browser()
+            # Really it is if nodes is a list with all elements being XMLInternalElementNode
+            # or
+            
+            nodes = if(length(nodes) != length(cols)) f(unlist(nodes)) else lapply(nodes, f) 
         }
     } 
 

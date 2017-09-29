@@ -40,13 +40,14 @@ function(node, page = xmlParent(node),
             centered = 2
     }
 
-#browser()        
+# browser()        
       # also look at rectangles.  J Infect Dis. 2015 has no lines, just rect.
     lines = getNodeSet(page, ".//line | .//rect")
     lw = as.numeric(sapply(lines, xmlGetAttr, "lineWidth", 1))
     lines = lines[ lw > 0 & lw < 30]
     bb = getBBox(lines, TRUE)
       # discard rectangles that are probably too tall to be lines, i.e. span more than half a letter.
+      #XXXX 
     bb = bb[ abs(bb$y1 - bb$y0) < docFont$size * .5, ]
     
     nodeTop = as.numeric(xmlGetAttr(node, "top"))
@@ -66,7 +67,7 @@ function(node, page = xmlParent(node),
       # if column 2, then x0 >= ex[1]
 
       if(colNum == 1) 
-         bb = bb[bb$x1 <= ex[2]*1.075, ]
+         bb = bb[bb$x1 <= ex[2]*1.15, ] # 1.075
       else
          bb = bb[bb$x0 >= ex[1]*.925, ]
 
