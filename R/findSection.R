@@ -243,7 +243,7 @@ function(x = NULL, y = NULL, useLines = TRUE)
         x = x[[length(x)]]
     
     if(is.null(y))
-       y = getLastNode(as(x, "XMLInternalDocument"))
+       y = getLastNode(x)
     else if(is.list(y))
        y = y[[length(y)]]
     
@@ -362,9 +362,18 @@ function(x = NULL, to = NULL, before = FALSE, useLines = TRUE)
 getLastNode =
     # get the final node in the document - last node in last page
     # Use this when getting the content for the last section
-function(doc)
+function(node, doc = as(node, "XMLInternalDocument"))
 {
-  getNodeSet(doc, "//page[last()]/text[last()]")[[1]]
+    ans = getNodeSet(doc, "//page[last()]/text[last()]")[[1]]
+    if(pageOf(ans) == pageOf(node)) {
+        # if on the same page, then we need to check which column node is in
+        # and ensure that the ans node is in the same column.
+        page = xmlParent(node)
+        byCol = getTextByCols(page, asNodes = TRUE)
+        w = inColumn(node, byCol)
+        ans = byCol[[w]][[ length(byCol[[w]]) ]]
+    }
+    ans
 }
 
 getFirstTextNode =
