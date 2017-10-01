@@ -10,8 +10,21 @@ function(doc)
       # Some docs have T able as two separate text elements
     tableNodes = getNodeSet(doc,
         "//text[. = 'Table' or . = 'TABLE' or starts-with(., 'TABLE') or starts-with(., 'Table') or (. = 'T' and following-sibling::text[1] ='ABLE')]")
+browser()
+    # Discard tables Table S1 (etc.) and if it is in the "section" named 'Supporting Online Material'
+    # This doesn't show up as an actual section header, so we just look for it.  But it has to be on the same
+    # page as the Table S text node so that we don't pick one up from another article.
+    # We could be stricter that it has to be within a few lines of the Supporting ... and in the same column.
+    # See Barrette-2009-Discovery...
+    label = sapply(tableNodes, xmlValue)
+    w = grepl("Table S[0-9]+", label)
+    if(any(w))
+       w[w] = z = sapply(tableNodes[w], function(x) length(getNodeSet(x, sprintf("./preceding::text[contains(., 'Supporting Online Material') and ../@number = %d]", pageOf(x)))) > 0)
 
-#browser()
+    w[!w] = grepl("\\(.*(online|Appendix)", label[!w])
+    tableNodes = tableNodes[!w]
+    
+
       # Now find those that are in text and not part of a separate block
     tbls = lapply(tableNodes, findTable)
     names(tbls) = sapply(tableNodes, xmlValue)
@@ -20,11 +33,13 @@ function(doc)
 
 findTable =
 function(node, page = xmlParent(node),
-         colNodes = getTextByCols(page, asNodes = TRUE, perPage = perPage),
-         docFont = getDocFont(node), perPage = FALSE,
+         colNodes = getTextByCols(page, asNodes = TRUE, perPage = perPage, docFont = docFont), # breaks = getColPositions(page, perPage = perPage, docFont = TRUE)),
+         docFont = getDocFont(node),
+         perPage = TRUE,
          spansWithin = 20, ...)
 {
-#browser()
+if(pageOf(page) == 4) browser()
+    
     if(!perPage && length(getColPositions(page, perPage)) < 2)
         colNodes = getTextByCols(page, asNodes = TRUE, perPage = TRUE)
     
@@ -40,11 +55,11 @@ function(node, page = xmlParent(node),
             centered = 2
     }
 
-# browser()        
+
       # also look at rectangles.  J Infect Dis. 2015 has no lines, just rect.
     lines = getNodeSet(page, ".//line | .//rect")
     lw = as.numeric(sapply(lines, xmlGetAttr, "lineWidth", 1))
-    lines = lines[ lw > 0 & lw < 30]
+    lines = lines[ lw >= 0 & lw < 30]
     bb = getBBox(lines, TRUE)
       # discard rectangles that are probably too tall to be lines, i.e. span more than half a letter.
       #XXXX 
@@ -56,6 +71,7 @@ function(node, page = xmlParent(node),
 
     bb = combineBBoxLines(bb)    
 
+browser()
 #    doesSpan = rep(FALSE, nrow(bb))    
     if(centered == 1 || (colNum == length(colNodes))) {
        # Could span all columns.
@@ -160,7 +176,7 @@ function(node, page = xmlParent(node),
     # them both with all the text in between.
     spans =  bb[doesSpan,]
     if(nrow(spans) > 3) {
-                # need the ones "close" to node.
+        # need the ones "close" to node.
         # under node but closest to it.
         # For, e.g. J Infect. Dist-2015, we have <rect> nodes and two of these are very close together. 866 and 868
         # So looking at the first 3 is too simplistic.
