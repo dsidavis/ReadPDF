@@ -183,7 +183,6 @@ function(p, threshold = .1, asNodes = FALSE,
          breaks = getColPositions(if(perPage) p else as(p, "XMLInternalDocument"), threshold = threshold, bbox = bbox, perPage = perPage, docFont = docFont, ...),
          perPage = FALSE, docFont = FALSE, ...)         
 {
-
     if(length(txtNodes) == 0)
         return(character())
     
@@ -252,7 +251,7 @@ function(els)
 
 
 
-foo = 
+xfoo = 
 function(page, nodes = getNodeSet(doc, ".//text"))
 {    
     ll = nodesByLine(nodes)

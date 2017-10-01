@@ -20,7 +20,10 @@ function(p, threshold = .1,
     UseMethod("getColPositions")
 
 
-getColPositions.character = 
+getColPositions.character =
+    #
+    # For a file name
+    #
 function(p, threshold = .1,
          txtNodes = getNodeSet(p, getXPathDocFontQuery(p, docFont)),
          bbox = getBBox2(txtNodes), docFont = TRUE, ...)    
@@ -28,27 +31,36 @@ function(p, threshold = .1,
 
 
 getColPositions.PDFToXMLDoc = getColPositions.XMLInternalDocument =
+    #
+    # For a document of probably multiple pages.
+    #
 function(p, threshold = .1,
          txtNodes = getNodeSet(p, getXPathDocFontQuery(p, docFont)),
          bbox = getBBox2(txtNodes), docFont = TRUE,
-         perPage = TRUE, ...
+         perPage = TRUE,
+         acrossPages = FALSE, ...
         )    
 {
-
-       # getPages() call here since could be called with an XMLInternalDocument, not a PDFToXMLDoc.
-    ans = lapply(getPages(p), getColPositions, threshold, docFont = docFont, ...)
-    if(is.logical(perPage) && perPage)
+    # getPages() call here since could be called with an XMLInternalDocument, not a PDFToXMLDoc.
+    pages = getPages(p)
+    ans = lapply(pages, getColPositions, threshold, docFont = docFont, ...)
+    if(is.logical(perPage) && perPage && !acrossPages)
         return(ans)
 
+    if(acrossPages)
+       return(collapsePageCols(ans, length(pages)))
+
+# The following is the same intent as collapsePageCols    
     if(is.logical(perPage))
        perPage = .66
 
-    tt = table(unlist(ans))/getNumPages(p)
+    tt = table(unlist(ans))/length(pages)
     as.numeric(names(tt))[ tt >= perPage ]
 }
 
 
 getColPositions.PDFToXMLPage = getColPositions.XMLInternalNode =
+    # For a single page
 function(p, threshold = .1,
          txtNodes = getNodeSet(p, getXPathDocFontQuery(p, docFont)),
          bbox = getBBox2(txtNodes), docFont = TRUE, ...)    
@@ -65,6 +77,16 @@ function(p, threshold = .1,
        ans = ans[ - (w+1)]
     
     ans
+}
+
+
+collapsePageCols =
+function(vals, numPages)
+{
+    v2 = table(unlist(vals))
+
+    ans = names(v2)[ v2 >  numPages * .5]
+    as.integer(ans)
 }
 
 #########

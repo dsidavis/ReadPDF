@@ -1,9 +1,16 @@
 getSectionText =
-function(doc, asNodes = FALSE, secHeaders = findSectionHeaders(doc, ...), ...)
+function(doc, asNodes = FALSE, secHeaders = findSectionHeaders(doc, ...), maxNumPages = 30, ... )
 {
     if(is.character(doc))
         doc = readPDFXML(doc)
 
+
+    if(getNumPages(doc) > maxNumPages)
+        return(list())
+    
+    if(length(secHeaders) == 0)
+        return(list())
+    
     secHeaders = orderNodes(unlist(secHeaders))
 
     secs = lapply(seq(along = secHeaders),
@@ -297,12 +304,12 @@ function(x = NULL, to = NULL, before = FALSE, useLines = TRUE)
     
     if(!is.null(x)) {
           # find the column and the index of the node matching x
-        i = lapply(cols, function(n) which(sapply(n, identical,  x)))
+        i = lapply(cols, function(n) if(length(n)) which(sapply(n, identical,  x)) else integer())
         colNum = which(sapply(i, length) > 0)
     }
 
     if(!is.null(to)) {
-        j = lapply(cols, function(n) which(sapply(n, identical,  to)))
+        j = lapply(cols, function(n) if(length(n)) which(sapply(n, identical,  to)) else integer())
         to.colNum = which(sapply(j, length) > 0)
 
         if(is.null(x))
@@ -418,8 +425,14 @@ function(nodes, pages = sapply(nodes, pageOf))
 orderNodesInPage =
 function(nodes, columnNum = sapply(nodes, inColumn, colNodes),
          colNodes = getTextByCols(page, breaks = colPos, asNodes = TRUE),
-         colPos = getColPositions(xmlParent(nodes[[1]])),
-         page = xmlParent(nodes[[1]]))
+         colPos = getColPositions(if(colsAcrossPages) as(nodes[[1]], "XMLInternalDocument") else xmlParent(nodes[[1]]), acrossPages = colsAcrossPages),
+         page = xmlParent(nodes[[1]]),
+         colsAcrossPages = any(grepl("References", sapply(nodes, xmlValue))))
 {
+    # If this page includes a References section but the number of columns is 1 and the number of
+    # columns on the previous page is 2, then use the previous page's columns. 
+    if(colsAcrossPages && length(colPos) == 1 && length(x <- getColPositions(getSibling(page, FALSE))))
+        colPos = x
+    
     nodes[order(columnNum)]
 }
