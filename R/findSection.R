@@ -201,10 +201,19 @@ function(node, pos = getColPositions(xmlParent(node)),
     sum(npos == h) == 1
 }
 
+identicalInColumn = 
+function(x, node)
+{    
+    if(length(x))
+       any(sapply(x, identical, node))
+    else
+       FALSE
+}
+       
 inColumn =
 function(node, cols = getTextByCols(xmlParent(node), asNodes = TRUE))
 {
-    ans = which(sapply(cols, function(x) any(sapply(x, identical, node))))
+    ans = which(sapply(cols, identicalInColumn, node))
     if(length(ans))
        return(ans)
 
@@ -303,15 +312,17 @@ function(x = NULL, to = NULL, before = FALSE, useLines = TRUE)
     }
     
     if(!is.null(x)) {
-          # find the column and the index of the node matching x
+        # find the column and the index of the node matching x
         i = lapply(cols, function(n) if(length(n)) which(sapply(n, identical,  x)) else integer())
-        colNum = which(sapply(i, length) > 0)
+        colNum = which(sapply(i, length) > 0)        
+#        colNum = which(sapply(cols, identicalInColumn, x))
     }
 
     if(!is.null(to)) {
+        # to.colNum = which(sapply(cols, identicalInColumn, to))        
+
         j = lapply(cols, function(n) if(length(n)) which(sapply(n, identical,  to)) else integer())
         to.colNum = which(sapply(j, length) > 0)
-
         if(is.null(x))
            return( c(cols[ seq(1, length = to.colNum - 1) ],
                      cols[[to.colNum]][ seq(1, length = j[[to.colNum]] - 1) ]))

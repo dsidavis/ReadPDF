@@ -10,7 +10,7 @@ function(doc)
       # Some docs have T able as two separate text elements
     tableNodes = getNodeSet(doc,
         "//text[. = 'Table' or . = 'TABLE' or starts-with(., 'TABLE') or starts-with(., 'Table') or (. = 'T' and following-sibling::text[1] ='ABLE')]")
-browser()
+
     # Discard tables Table S1 (etc.) and if it is in the "section" named 'Supporting Online Material'
     # This doesn't show up as an actual section header, so we just look for it.  But it has to be on the same
     # page as the Table S text node so that we don't pick one up from another article.
@@ -38,8 +38,8 @@ function(node, page = xmlParent(node),
          perPage = TRUE,
          spansWithin = 20, ...)
 {
-if(pageOf(page) == 4) browser()
-    
+#if(pageOf(page) == 4) browser()
+browser()    
     if(!perPage && length(getColPositions(page, perPage)) < 2)
         colNodes = getTextByCols(page, asNodes = TRUE, perPage = TRUE)
     

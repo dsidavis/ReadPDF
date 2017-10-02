@@ -53,6 +53,9 @@ isCentered =
 function(node, cols = getTextByCols(xmlParent(node), asNodes = TRUE),
          threshold = .2, colNum = inColumn(node, cols))
 {
+  if(length(cols) == 0)
+      return(FALSE)
+    
      # find out which column the node is in and get those columns and
      # their bounding boxes
 
