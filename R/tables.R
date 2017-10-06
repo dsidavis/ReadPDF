@@ -2,7 +2,7 @@
 # or a rectangle?
 
 getTables =
-function(doc)
+function(doc, ...)
 {
     if(is.character(doc))
         doc = readPDFXML(doc)
@@ -26,20 +26,20 @@ function(doc)
     
 
       # Now find those that are in text and not part of a separate block
-    tbls = lapply(tableNodes, findTable)
+    tbls = lapply(tableNodes, findTable, ...)
     names(tbls) = sapply(tableNodes, xmlValue)
     tbls
 }
 
 findTable =
 function(node, page = xmlParent(node),
-         colNodes = getTextByCols(page, asNodes = TRUE, perPage = perPage, docFont = docFont), # breaks = getColPositions(page, perPage = perPage, docFont = TRUE)),
+         colNodes = getTextByCols(page, asNodes = TRUE, perPage = perPage), # docFont = docFont), # breaks = getColPositions(page, perPage = perPage, docFont = TRUE)),
          docFont = getDocFont(node),
          perPage = TRUE,
          spansWithin = 20, ...)
 {
 #if(pageOf(page) == 4) browser()
-browser()    
+#browser()    
     if(!perPage && length(getColPositions(page, perPage)) < 2)
         colNodes = getTextByCols(page, asNodes = TRUE, perPage = TRUE)
     
@@ -225,4 +225,19 @@ function(bbox, locs, within = 4) # within was 2 but somewhat arbitrary. Needed 4
        bbox[,3] - bbox[,1] >=  diff(locs)*within
     else
       abs(locs[1] - bbox[,1]) < within & abs(locs[2] - bbox[,3]) < within
+}
+
+
+
+
+
+nodesToTable =
+function(nodes, colPos = getColPositions.PDFToXMLPage( txtNodes = unlist(nodes)), bind = TRUE)
+{
+    anodes = unlist(nodes)
+    rows = lapply(nodes, function(x) getTextByCols( txtNodes = x, breaks = colPos))
+    if(bind)
+        do.call(rbind, rows)
+    else
+        rows
 }
