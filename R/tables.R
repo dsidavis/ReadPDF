@@ -71,7 +71,7 @@ function(node, page = xmlParent(node),
 
     bb = combineBBoxLines(bb)    
 
-browser()
+#browser()
 #    doesSpan = rep(FALSE, nrow(bb))    
     if(centered == 1 || (colNum == length(colNodes))) {
        # Could span all columns.
@@ -234,10 +234,13 @@ function(bbox, locs, within = 4) # within was 2 but somewhat arbitrary. Needed 4
 nodesToTable =
 function(nodes, colPos = getColPositions.PDFToXMLPage( txtNodes = unlist(nodes)), bind = TRUE)
 {
+    if(length(nodes) == 0)
+       return(NULL)
+
     anodes = unlist(nodes)
     rows = lapply(nodes, function(x) getTextByCols( txtNodes = x, breaks = colPos))
-    if(bind)
-        do.call(rbind, rows)
+    if(bind) 
+        as.data.frame(unname( do.call(rbind, rows) ), stringsAsFactors = FALSE)
     else
         rows
 }
