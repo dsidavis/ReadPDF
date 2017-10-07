@@ -92,7 +92,7 @@ function(node, page = xmlParent(node),
 
       if(!any(doesSpan)) {
           # See if there are any text nodes to the right
-
+          
           # get the widest lines
           m = max(bb$x1 - bb$x0)
           i = (bb$x1 - bb$x0 == m)
@@ -139,7 +139,7 @@ function(node, page = xmlParent(node),
              if(centered == 0) {
                  w = abs(bb[, "x0"] - colInfo[colNum,1]) < 10 & abs(bb[, "x1"] - colInfo[colNum,2]) < 10
                  doesSpan = w
-                 spansCols= colNum
+                 spansCols = colNum
              }
              
              # Are there are text nodes to the right???  CHECK.
@@ -237,7 +237,6 @@ function(nodes, colPos = getColPositions.PDFToXMLPage( txtNodes = unlist(nodes))
     if(length(nodes) == 0)
        return(NULL)
 
-    anodes = unlist(nodes)
     rows = lapply(nodes, function(x) getTextByCols( txtNodes = x, breaks = colPos))
     if(bind) 
         as.data.frame(unname( do.call(rbind, rows) ), stringsAsFactors = FALSE)

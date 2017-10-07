@@ -72,7 +72,18 @@ function(p, threshold = .1,
     # or change cut to be include.lowest = TRUE
     ans = as.numeric(names(tt [ tt > nrow(bbox)*threshold])) - 2
 
-    w = which(diff(ans) < 5)
+    minDiff = 5
+    if(length(ans) > 2 && any(delta <- (diff(ans) <= 20))) {
+        tt = split(sapply(txtNodes, xmlValue), cut(bbox[,1], c(ans, Inf)))
+        w = sapply(tt, function(x) any(grepl("References", x)))
+        if(any(w)) {
+              # Need to check it is the References column
+           minDiff = 20
+        }
+
+    }
+    
+    w = which(diff(ans) < minDiff)
     if(length(w))
        ans = ans[ - (w+1)]
     

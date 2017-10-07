@@ -30,7 +30,7 @@ function(doc, asNodes = TRUE, page = doc[[1 + hasCoverPage(doc) ]], byLine = TRU
 
       # Start by finding a declaration of an abstract: Abstract or Summary
     a = findAbstractDecl(page)
-browser()
+#browser()
 
 
     rect = getNodeSet(page, ".//rect | .//line")
@@ -74,7 +74,7 @@ browser()
             nodes = getNodesBetween(a[[1]], rect[[which(w)[1]]])
         else if(length(kw)) {
             nodes = getNodesBetween(kw[[1]], rect[[which(w)[1]]])
-browser()            
+#browser()            
         } else {
 #           browser()
         }
