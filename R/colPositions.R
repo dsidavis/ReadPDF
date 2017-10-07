@@ -74,6 +74,7 @@ function(p, threshold = .1,
 
     minDiff = 5
     if(length(ans) > 2 && any(delta <- (diff(ans) <= 20))) {
+        # See Forrester-2008
         tt = split(sapply(txtNodes, xmlValue), cut(bbox[,1], c(ans, Inf)))
         w = sapply(tt, function(x) any(grepl("References", x)))
         if(any(w)) {
