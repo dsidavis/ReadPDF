@@ -31,15 +31,31 @@ function(doc, ...)
     tbls
 }
 
+getRotation =
+function(node)
+{
+    if(xmlName(node) != "page")
+        node = pageOf(node, TRUE)
+
+    xmlGetAttr(node, "rotation", 0, as.numeric)
+}
+
 findTable =
 function(node, page = xmlParent(node),
          colNodes = getTextByCols(page, asNodes = TRUE, perPage = perPage), # docFont = docFont), # breaks = getColPositions(page, perPage = perPage, docFont = TRUE)),
          docFont = getDocFont(node),
          perPage = TRUE,
-         spansWithin = 20, ...)
+         spansWithin = 20,
+         rotated = !(getRotation(page) %in% c(0, 180)),
+         ...)
 {
 #if(pageOf(page) == 4) browser()
-#browser()    
+    #browser()
+
+    if(rotated)
+        return(getRotatedTable(node))
+
+    
     if(!perPage && length(getColPositions(page, perPage)) < 2)
         colNodes = getTextByCols(page, asNodes = TRUE, perPage = TRUE)
     
@@ -236,10 +252,36 @@ function(nodes, colPos = getColPositions.PDFToXMLPage( txtNodes = unlist(nodes))
 {
     if(length(nodes) == 0)
        return(NULL)
-
+    browser()
+    if(length(colPos) == 0) {
+        ll = nodesByLine(unlist(nodes))
+        
+    }
+    
     rows = lapply(nodes, function(x) getTextByCols( txtNodes = x, breaks = colPos))
     if(bind) 
         as.data.frame(unname( do.call(rbind, rows) ), stringsAsFactors = FALSE)
     else
         rows
+}
+
+
+getGap =
+    # nodes organized by lines.
+function(nodes, bbox = getBBox2(nodes))
+{
+    r = bbox[,1] + bbox[, 3]
+    r[-1] - bbox[-length(r), 1]
+}
+
+
+getRotatedTable =
+function(node, page = pageOf(node, TRUE), nodes = getNodeSet(page, ".//text"), bbox = getBBox2(nodes, asDataFrame = TRUE))
+{
+    browser()
+    colPos = getColPositions(page, bbox = bbox)
+    cols = getTextByCols(page, txtNodes = nodes, bbox = bbox, breaks = colPos, asNodes = TRUE)
+    v = lapply(cols, function(x) sapply(nodesByLine(x), function(x) paste(xmlValue(x), collapse = " ")))
+    class(v) = "RotatedTableColumns"
+    v
 }
