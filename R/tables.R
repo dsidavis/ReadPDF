@@ -51,7 +51,7 @@ function(node, page = xmlParent(node),
          ...)
 {
 #if(pageOf(page) == 4) browser()
-    #browser()
+#browser()
 
     if(rotated)
         return(getRotatedTable(node, pageRotated = TRUE))
@@ -64,10 +64,10 @@ function(node, page = xmlParent(node),
       #XXXX if the table dominates the col positions, recompute with perPage = FALSE, docFont = TRUE to discard the table.
     # See Mehla-2009
 # getTextByCols() uses docFont = FALSE , perPage = TRUE and gets 76 and 220 for the breaks.    
-    colPos = getColPositions(page, perPage, docFont = TRUE)
+    colPos2 = getColPositions(page, perPage, docFont = TRUE)
 
     
-    if(!perPage && length(colPos) < 2)
+    if(!perPage && length(colPos2) < 2)
         colNodes = getTextByCols(page, asNodes = TRUE, perPage = TRUE)
     
     colNum = inColumn(node, colNodes)
@@ -98,7 +98,8 @@ function(node, page = xmlParent(node),
 
     bb = combineBBoxLines(bb)    
 
-
+#browser()
+    
 #    doesSpan = rep(FALSE, nrow(bb))    
     if(centered == 1 || (colNum == length(colNodes))) {
        # Could span all columns.
