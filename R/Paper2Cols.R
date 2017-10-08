@@ -39,7 +39,7 @@ isCenteredMargins =
 function(node, margins = margins(xmlParent(node)), bbox = getBBox2(list(node)))
 {
     mid = bbox[,1] + bbox[,3]/2
-browser()    
+
     abs(mid - mean(margins)) < .2 * diff(margins)
 }
 
@@ -110,11 +110,14 @@ function(nodes, asNodes = TRUE, bbox = getBBox2(nodes, TRUE),
        return(structure(unlist(tmp, recursive = FALSE, use.names = FALSE), names = unlist(lapply(tmp, names))))
     }
 
-   
+
+    if(rotate)
+        bbox = structure(bbox, names = c("top", "left", "height", "width", "text"))
+    
       # If useBase, then we work with the bottom position of each character/segment/node, i.e. the baseline.
     if(useBase)
        bbox$top = bbox$top + bbox$height
-browser()    
+
     intv = seq(0, max(bbox$top)+ fontSize - 1, by = fontSize)
     topBins = cut(bbox$top, intv)
     byLine = tapply(nodes, topBins, arrangeLineNodes, asNodes, simplify = FALSE)
