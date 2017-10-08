@@ -72,7 +72,8 @@ function(p, threshold = .1,
                   right = bbox$left + bbox$right,
                   center = (bbox$left + bbox$right)/2
                  )
-     tt = table(vals)
+    tt = table(vals)
+    
     # Subtract 2 so that we start slightly to the left of the second column to include those starting points
     # or change cut to be include.lowest = TRUE
     ans = as.numeric(names(tt [ tt > nrow(bbox)*threshold])) - 2

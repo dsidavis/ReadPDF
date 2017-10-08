@@ -95,7 +95,7 @@ nodesByLine =
 function(nodes, asNodes = TRUE, bbox = getBBox2(nodes, TRUE),
          baseFont = getDocFont(as(nodes[[1]], "XMLInternalDocument")),
          fontSize = if(nrow(baseFont) > 0) baseFont$size else 11,
-         addText = TRUE, useBase = TRUE
+         addText = TRUE, useBase = TRUE, rotate = FALSE
         )
 {
     if(length(nodes) == 1 && xmlName(nodes[[1]]) == "page")
@@ -106,14 +106,17 @@ function(nodes, asNodes = TRUE, bbox = getBBox2(nodes, TRUE),
 
     pgnum = sapply(nodes, pageOf)
     if(length(unique(pgnum)) > 1) {
-       tmp = tapply(nodes, pgnum, nodesByLine, asNodes, baseFont = baseFont, fontSize = fontSize, addText = addText)
+       tmp = tapply(nodes, pgnum, nodesByLine, asNodes, baseFont = baseFont, fontSize = fontSize, addText = addText, rotate = rotate)
        return(structure(unlist(tmp, recursive = FALSE, use.names = FALSE), names = unlist(lapply(tmp, names))))
     }
 
+    if(FALSE && rotate)
+        bbox = structure(bbox, names = c("top", "left", "height", "width", "text"))
+    
       # If useBase, then we work with the bottom position of each character/segment/node, i.e. the baseline.
     if(useBase)
        bbox$top = bbox$top + bbox$height
-    
+browser()    
     intv = seq(0, max(bbox$top)+ fontSize - 1, by = fontSize)
     topBins = cut(bbox$top, intv)
     byLine = tapply(nodes, topBins, arrangeLineNodes, asNodes, simplify = FALSE)

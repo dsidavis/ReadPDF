@@ -53,21 +53,31 @@ function(node, page = xmlParent(node),
     #browser()
 
     if(rotated)
-        return(getRotatedTable(node))
+        return(getRotatedTable(node, pageRotated = TRUE))
 
+     # check if page is regular but most of the text is rotated.
+    rot = table(unlist(getNodeSet(page, ".//text/@rotation")))
+    if(!(as.numeric(names(rot)[which.max(rot)]) %in% c(0, 180)))
+       return(getRotatedTable(node, pageRotated = FALSE, textRotated = TRUE))
+
+      #XXXX if the table dominates the col positions, recompute with perPage = FALSE, docFont = TRUE to discard the table.
+    # See Mehla-2009
+# getTextByCols() uses docFont = FALSE , perPage = TRUE and gets 76 and 220 for the breaks.    
+    colPos = getColPositions(page, perPage, docFont = TRUE)
+browser()    
     
-    if(!perPage && length(getColPositions(page, perPage)) < 2)
+    if(!perPage && length(colPos) < 2)
         colNodes = getTextByCols(page, asNodes = TRUE, perPage = TRUE)
     
     colNum = inColumn(node, colNodes)
     centered = isCentered(node, colNodes)
 
     if(!centered) {
-          # Check if centered in the page since not the column
+          # Check if the Table node is centered in the page since not the column
         pwidth = xmlGetAttr(page, "width",, as.integer)
         nwidth = xmlGetAttr(node, "width",, as.integer)
         nx = xmlGetAttr(node, "left",, as.integer)                
-        if(abs((nx + nwidth) - pwidth/2) < .1*pwidth) 
+        if(abs( (nx + nwidth - pwidth)/2) < .1*pwidth) 
             centered = 2
     }
 
@@ -87,7 +97,7 @@ function(node, page = xmlParent(node),
 
     bb = combineBBoxLines(bb)    
 
-#browser()
+browser()
 #    doesSpan = rep(FALSE, nrow(bb))    
     if(centered == 1 || (colNum == length(colNodes))) {
        # Could span all columns.
@@ -251,9 +261,10 @@ nodesToTable =
 function(nodes, colPos = getColPositions.PDFToXMLPage( txtNodes = unlist(nodes)), bind = TRUE)
 {
     if(length(nodes) == 0)
-       return(NULL)
-    browser()
+        return(NULL)
+    
     if(length(colPos) == 0) {
+    browser()
         ll = nodesByLine(unlist(nodes))
         
     }
@@ -276,12 +287,27 @@ function(nodes, bbox = getBBox2(nodes))
 
 
 getRotatedTable =
-function(node, page = pageOf(node, TRUE), nodes = getNodeSet(page, ".//text"), bbox = getBBox2(nodes, asDataFrame = TRUE))
+function(node, page = pageOf(node, TRUE), nodes = getNodeSet(page, ".//text"), bbox = getBBox2(nodes, asDataFrame = TRUE),
+         pageRotated =  FALSE, textRotated = NA, asNodes = TRUE)
 {
     browser()
-    colPos = getColPositions(page, bbox = bbox)
+    if(!pageRotated)
+        colPos = getColPositions(page, txtNodes = nodes, structure(bbox, names = c("top", "left", "height", "width", "text")), threshold = .05)
+    else
+        colPos = getColPositions(page, bbox = bbox)
+#XXX ROTATE  - WONG    
     cols = getTextByCols(page, txtNodes = nodes, bbox = bbox, breaks = colPos, asNodes = TRUE)
-    v = lapply(cols, function(x) sapply(nodesByLine(x), function(x) paste(xmlValue(x), collapse = " ")))
+
+    if(pageRotated) {
+        # Take out text that is rotated the same amount as the page's rotation
+        # e.g. Wekesa, although that is odd. That rotates the page 90, then rotates the text 180 and rotates
+        # the header for the page 90.  So this is only done here if the page is rotated.
+        prot = as.numeric(xmlGetAttr(page, "rotation"))
+        cols = lapply(cols, function(x) x[ as.numeric(sapply(x, xmlGetAttr, "rotation")) != prot ])
+        cols = cols[ sapply(cols, length) > 0 ]
+    }
+    
+    v = lapply(cols, nodesByLine, asNodes = asNodes, rotate = TRUE)
     class(v) = "RotatedTableColumns"
     v
 }
