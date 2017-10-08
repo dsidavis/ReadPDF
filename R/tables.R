@@ -42,11 +42,12 @@ function(node)
 
 findTable =
 function(node, page = xmlParent(node),
-         colNodes = getTextByCols(page, asNodes = TRUE, perPage = perPage), # docFont = docFont), # breaks = getColPositions(page, perPage = perPage, docFont = TRUE)),
+         colNodes = getTextByCols(page, asNodes = TRUE, perPage = perPage, breaks = colPos), # docFont = docFont), # 
          docFont = getDocFont(node),
          perPage = TRUE,
          spansWithin = 20,
          rotated = !(getRotation(page) %in% c(0, 180)),
+         colPos = getColPositions(page, perPage = perPage, docFont = docFont),         
          ...)
 {
 #if(pageOf(page) == 4) browser()
@@ -64,7 +65,7 @@ function(node, page = xmlParent(node),
     # See Mehla-2009
 # getTextByCols() uses docFont = FALSE , perPage = TRUE and gets 76 and 220 for the breaks.    
     colPos = getColPositions(page, perPage, docFont = TRUE)
-browser()    
+
     
     if(!perPage && length(colPos) < 2)
         colNodes = getTextByCols(page, asNodes = TRUE, perPage = TRUE)
@@ -97,7 +98,7 @@ browser()
 
     bb = combineBBoxLines(bb)    
 
-browser()
+
 #    doesSpan = rep(FALSE, nrow(bb))    
     if(centered == 1 || (colNum == length(colNodes))) {
        # Could span all columns.
@@ -264,9 +265,7 @@ function(nodes, colPos = getColPositions.PDFToXMLPage( txtNodes = unlist(nodes))
         return(NULL)
     
     if(length(colPos) == 0) {
-    browser()
         ll = nodesByLine(unlist(nodes))
-        
     }
     
     rows = lapply(nodes, function(x) getTextByCols( txtNodes = x, breaks = colPos))
@@ -290,7 +289,6 @@ getRotatedTable =
 function(node, page = pageOf(node, TRUE), nodes = getNodeSet(page, ".//text"), bbox = getBBox2(nodes, asDataFrame = TRUE),
          pageRotated =  FALSE, textRotated = NA, asNodes = TRUE)
 {
-    browser()
     if(!pageRotated)
         colPos = getColPositions(page, txtNodes = nodes, structure(bbox, names = c("top", "left", "height", "width", "text")), threshold = .05)
     else
