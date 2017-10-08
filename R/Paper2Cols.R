@@ -110,9 +110,7 @@ function(nodes, asNodes = TRUE, bbox = getBBox2(nodes, TRUE),
        return(structure(unlist(tmp, recursive = FALSE, use.names = FALSE), names = unlist(lapply(tmp, names))))
     }
 
-    if(FALSE && rotate)
-        bbox = structure(bbox, names = c("top", "left", "height", "width", "text"))
-    
+   
       # If useBase, then we work with the bottom position of each character/segment/node, i.e. the baseline.
     if(useBase)
        bbox$top = bbox$top + bbox$height
