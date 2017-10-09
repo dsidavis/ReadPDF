@@ -9,7 +9,7 @@ function(doc, ...)
 
       # Some docs have T able as two separate text elements
     tableNodes = getNodeSet(doc,
-        "//text[. = 'Table' or . = 'TABLE' or starts-with(., 'TABLE') or starts-with(., 'Table') or (. = 'T' and following-sibling::text[1] ='ABLE')]")
+        "//text[. = 'Table' or . = 'TABLE' or starts-with(., 'TABLE') or starts-with(., 'Table') or (. = 'T' and following-sibling::text[1] ='ABLE') or contains(., ' Table')]")
 
     # Discard tables Table S1 (etc.) and if it is in the "section" named 'Supporting Online Material'
     # This doesn't show up as an actual section header, so we just look for it.  But it has to be on the same
@@ -21,7 +21,8 @@ function(doc, ...)
     if(any(w))
        w[w] = z = sapply(tableNodes[w], function(x) length(getNodeSet(x, sprintf("./preceding::text[contains(., 'Supporting Online Material') and ../@number = %d]", pageOf(x)))) > 0)
 
-    w[!w] = grepl("\\(.*(online|Appendix)", label[!w])
+    # Table( ?[0-9])
+    w[!w] = grepl("\\(.*(online|Appendix)|see Table|Table [0-9] and\\)", label[!w])
     tableNodes = tableNodes[!w]
     
 
@@ -96,8 +97,10 @@ function(node, page = xmlParent(node),
        # recall we are going from top to bottom so these are below the node.
     bb = bb[pmin(bb$y0, bb$y1) >= nodeTop, ]
 
+#XXX one of these is redundant, or they need to be merged.    
     bb = combineBBoxLines(bb)    
-
+    bb = mergeLines(bb)
+    
 #browser()
     
 #    doesSpan = rep(FALSE, nrow(bb))    
@@ -120,17 +123,19 @@ function(node, page = xmlParent(node),
 
       if(!any(doesSpan)) {
           # See if there are any text nodes to the right
-          
+
           # get the widest lines
           m = max(bb$x1 - bb$x0)
           i = (bb$x1 - bb$x0 == m)
           wd = bb[i, ]
           right = max(wd$x1)
           ys = max(bb$y1)
+
+          # tor = to right
           tor = sapply(unlist(colNodes),
                        function(x) {
-                           b = getBBox2(list(x), TRUE)
-                           b$left > right & b$top > nodeTop & b$top < ys
+                           b = getBBox2(list(x), TRUE, rotation = TRUE)
+                           b$rotation == 0 & b$left > right & b$top > nodeTop & b$top < ys
                        })
           if(!any(tor)) {
               # nothing to the right
@@ -309,4 +314,35 @@ function(node, page = pageOf(node, TRUE), nodes = getNodeSet(page, ".//text"), b
     v = lapply(cols, nodesByLine, asNodes = asNodes, rotate = TRUE)
     class(v) = "RotatedTableColumns"
     v
+}
+
+
+
+getRotatedDownloadNodes =
+function(doc)
+{
+    nodes = getNodeSet(doc, "//text[@rotation = 90 and starts-with(., 'Downloaded from')]")
+    if(length(nodes)) {
+        unlist(lapply(nodes, function(x) {
+                         l = xmlGetAttr(x, "left")
+                         getNodeSet(xmlParent(x), sprintf(".//text[@rotation = 90 and @left >= %s]", l))
+                      }))
+    } else
+        NULL
+}
+
+
+mergeLines =
+function(df, y = "y0")
+{
+    h = split(df, df[[y]])
+    ll = lapply(h, collapseLine)
+    do.call(rbind, ll)
+}
+
+collapseLine =
+function(x, gap = 5)
+{
+    d = x$x0[-1] - x$x1[-nrow(x)]
+    do.call(rbind, by(x, cumsum(c(0, !(d < gap))), function(x) data.frame(x0 = min(x$x0), y0 = min(x$y0), x1 = max(x$x1), y1 = max(x$y1))))
 }
