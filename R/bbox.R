@@ -1,6 +1,6 @@
 getBBox2 =
     # For text, not rect or line nodes.
-function(nodes, asDataFrame = FALSE, attrs = c("left", "top"), pages = FALSE)
+function(nodes, asDataFrame = FALSE, attrs = c("left", "top", if(rotation) "rotation"), pages = FALSE, rotation = FALSE)
 {
     if(is(nodes, "XMLInternalElementNode"))
         if(xmlName(nodes) == "text")
