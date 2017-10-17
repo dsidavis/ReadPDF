@@ -22,7 +22,7 @@ function(doc, ...)
        w[w] = z = sapply(tableNodes[w], function(x) length(getNodeSet(x, sprintf("./preceding::text[contains(., 'Supporting Online Material') and ../@number = %d]", pageOf(x)))) > 0)
 
     # Table( ?[0-9])
-    w[!w] = grepl("\\(.*(online|Appendix)|see Table|Table [0-9] and\\)", label[!w])
+    w[!w] = grepl("\\(.*(online|Appendix)|(see|in) Table|Table [0-9] and\\)", label[!w])
     tableNodes = tableNodes[!w]
     
 
@@ -86,6 +86,11 @@ function(node, page = xmlParent(node),
 
       # also look at rectangles.  J Infect Dis. 2015 has no lines, just rect.
     lines = getNodeSet(page, ".//line | .//rect")
+
+
+    if(length(lines) == 0 && !is.null(node[["a"]]))
+        return(list())
+browser()    
     lw = as.numeric(sapply(lines, xmlGetAttr, "lineWidth", 1))
     lines = lines[ lw >= 0 & lw < 30]
     bb = getBBox(lines, TRUE)
@@ -97,11 +102,14 @@ function(node, page = xmlParent(node),
        # recall we are going from top to bottom so these are below the node.
     bb = bb[pmin(bb$y0, bb$y1) >= nodeTop, ]
 
-#XXX one of these is redundant, or they need to be merged.    
+    if(nrow(bb) == 0)
+       return(list())
+
+    #XXX one of these is redundant, or they need to be merged.
+
     bb = combineBBoxLines(bb)    
     bb = mergeLines(bb)
     
-#browser()
     
 #    doesSpan = rep(FALSE, nrow(bb))    
     if(centered == 1 || (colNum == length(colNodes))) {
