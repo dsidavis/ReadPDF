@@ -34,7 +34,7 @@ function(file, page = 1, doc = xmlParse(file), meta = FALSE, minWords = 1, ...)
       }
   }
   
-  if(missing(page) && (length(getNodeSet(doc, "//ulink[starts-with(@url, 'https://www.researchgate.net')]")) > 0  ||
+  if(missing(page) && (isResearchGate(doc)  ||
                         length(getNodeSet(doc, "//page[1]//text[. = 'PLEASE SCROLL DOWN FOR ARTICLE']")) > 0 ))
       page = 2
 
@@ -96,15 +96,15 @@ function(file, page = 1, doc = xmlParse(file), meta = FALSE, minWords = 1, ...)
 #      return(paste(names(txt), collapse = " "))
   }
       
-  
   while( (length(txt) == 1 && nchar(names(txt)) == 1) || all(w <- isTitleBad(txt, minWords = minWords))) {  
       # then a single character that is very large
       # get second largest font and
-
+#browser()  
       mx = max(fonts$size[fonts$size < mx ])
       w = (fonts$size == mx)
       id = fonts$id[w]
-         # if multiple ones, see if any are bold and restrict to that.
+# if multiple ones, see if any are bold and restrict to that.
+# Doesn't work for Van Der Poel-2005
       if(length(id) > 1 & any(fonts$isBold[w]))
           id = id[fonts$isBold[w]]
 
@@ -133,7 +133,7 @@ function(txtNodes, minWords = 3, filename = "")
 
     # Check to see if this is really a watermark, etc. at the extreme of  a page, e.g.
     # 3364361467/Majumder-2016-Utilizing Nontraditional Data So.xml
-#  browser()
+
   pos = as.numeric(sapply(txtNodes, xmlGetAttr, "top"))
   names(pos) = sapply(txtNodes, xmlValue)
   
@@ -145,7 +145,16 @@ function(txtNodes, minWords = 3, filename = "")
   w = opos[-i] > min(pos)
   if(sum(w) < 5)
      return(TRUE)
-  
+
+
+  bb = getBBox2(txtNodes, TRUE)
+#browser()
+  if(diff(range(bb$top)) > 2 * median(bb$height)) {
+      ll = nodesByLine(txtNodes, bbox = bb)
+      bad = sapply(names(ll), isTitleBad, minWords, filename)
+      if(!all(bad)) 
+         return(rep(bad, sapply(ll, length)))
+  }
     
 if(FALSE) {    
    w = sapply(txtNodes, isTitleBad, minWords, filename)
@@ -167,10 +176,16 @@ function(txtNodes, minWords = 3, filename = "", lowerCase = TRUE)
 {
 #  txtNodes = tolower(txtNodes)
   txtNodes = XML:::trim(txtNodes)
-  nchar(txtNodes) < 6 ||
-  grepl("Letters? to the Editor", txtNodes, ignore.case = lowerCase) ||
-  grepl("table of contents", txtNodes) ||
-  txtNodes %in% c("KEYWORDS", "ScienceDirect", "Occasional Papers", "HHS Public Access", "Newsdesk", "Case Report", "LETTERS", "No Job Name", "NIH Public Access", "Special Report  Rapport spÃ©cial", "W J C C") ||
+
+  
+  #Test:
+  grepl("Acta Veterinaria", txtNodes) ||
+  grepl("BMC Infectious Diseases", txtNodes) ||
+  nchar(txtNodes) < 6 ||   
+  grepl("Letters? to the Editor", txtNodes, ignore.case = lowerCase) || grepl("^BRIEF COMMUNICATIONS$", txtNodes) ||
+  grepl("^[-0-9, ]+$", txtNodes) ||          
+  grepl("^Letters$", txtNodes) || grepl("table of contents", txtNodes) || grepl("^[A-Za-z]+ +\\bJournal$", txtNodes) ||
+  txtNodes %in% c("DISPATCHES", "Research Paper", "KEYWORDS", "ScienceDirect", "Occasional Papers", "HHS Public Access", "Newsdesk", "Case Report", "LETTERS", "No Job Name", "NIH Public Access", "Special Report  Rapport spÃ©cial", "W J C C") ||
   grepl("Rapid Communications|Research Articles|Weekly issue|Vol\\.[0-9]+|Volume [0-9]+|ournal of|Science Journals", txtNodes) ||
   length(strsplit(txtNodes, " ")[[1]]) < minWords
 }
