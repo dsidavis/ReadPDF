@@ -5,8 +5,18 @@ isScanned2 =
 function(doc, threshold = 154.95, words = getDocWords(doc, numPages), numPages = getNumPages(doc))
 {
   if(is.character(doc))
-      doc = xmlParse(doc)
+      doc = readPDFXML(doc)
 
+    # Check if OIE document
+  if(length(getNodeSet(doc, "//text[contains(., 'www.oie.int/')]")))
+      return(FALSE)
+
+     # JVI.asm.org draft document with line numbers!
+  ll = names(nodesByLine(getNodeSet(doc[[1]], ".//text")))
+  if(length(grep("^[0-9]+ ", ll))/length(ll)  > .70)
+     return(FALSE)
+  
+  
   length(words)/numPages  < threshold
 }
 
