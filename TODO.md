@@ -17,6 +17,31 @@
 
 # Todo list for ReadPDF
 
+## getSectionText()
+1. When there are no section headers, except REFERENCES, collect the text from the body into its own
+   unnamed section. See Degiorgis-2000.
+   
+1. The findSectionHeader() function should order the sections according to column, not document
+   order.  See Becker-2012
+   
+1. Calzolari, Becker-2012
+     Picking up an author name with the same font as the sections header we were looking for.
+	 And the last one is on a line by itself because it is in the second column, but all the other
+     nodes on that line are in the first column. But the real problem is that these nodes span the
+     width of the page.  So  a) find the gap between the columns (end of one, start of next) and
+     then see which lines do not have this gap between adjacent nodes (in nodeByLine) and then mark
+     these as spanned. Or b) find any line that has text with content in the gap between the
+     columns. 
+	 So basically fix isOnLineBySelf() and pass it the getTextByCol()
+	 Hack: Also remove any node that occurs "before" Abstract.
+	 
+1. [Fixed] Figuerola - Conclusions is coming up not on a line by itself but it is.	 
+    Is it the table's columns throwing us off and going a little  too far to the right in defining
+    the start of the second column?
+	We weren't getting the column positions from the page, but from the doc.
+	  
+
+
 ## Abstract
 1. Fix getTextAfter to keep the text by column, e.g.  Tong...
 1. Detect cover page for mbio papers, see Algaili et al.
