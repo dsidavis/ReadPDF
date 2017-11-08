@@ -90,7 +90,7 @@ function(node, page = xmlParent(node),
 
     if(length(lines) == 0 && !is.null(node[["a"]]))
         return(list())
-browser()    
+#browser()    
     lw = as.numeric(sapply(lines, xmlGetAttr, "lineWidth", 1))
     lines = lines[ lw >= 0 & lw < 30]
     bb = getBBox(lines, TRUE)
