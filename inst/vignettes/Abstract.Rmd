@@ -14,37 +14,84 @@ be indented but spanning all columns but not to the margins.
 Look at the font for the abstract text and use that to know where we end.
 And a larger interlineskip between lines to indicate the start of a new section even if there is no section header.
  e.g. LatestDocs/PDF/1609915988/McIntosh-1976-Culex (Eumelanomyia) rubinotus T.xml
- 
+
+
+
+
+## Status
+Sep 16
+On 406 documents, 169 have 0 length, i.e. NULL/list()
+ 69 of these are scanned but not all.
+ So exactly 100 which are not scanned and for which we did not get an abstract
+
+ Some of these are letters.
+   e.g. Hofle-2013
+
+--------------------------
+# Not Working
 ## Examples - Manually Observed Patterns
 
+Calzolari-2012
+ Abstract in a rectangle and shaded box.
+ Recognize end of abstract by end of blue box, or large gap between then last line and the next one.
 
-LatestDocs/PDF/1609915988/McIntosh-1976-Culex (Eumelanomyia) rubinotus T.xml
-  Scanned but there is text.
-  
+LatestDocs/PDF/1727052847/Tong-2004-Ross River virus disease in Australi.xml
+ *** Not keeping the two columns separate and in the correct order.
+ including the address and probably a lot of the Introduction.
+  Lines delimit the abstract that consists of 2 columns.
+ getNodesBetween needs to recognize the horizontal line spanning the width of the page.
+
+"LatestDocs/PDF/0317393510/Chaudhuri-2013-First documented case of impor1.xml"
+
+Gulati-2011
+ Should be relatively easy. Add code at line 122 (approximately) just before calling spansColumns.
+   There aren't enough rows that span multiple columns - title, authors, affiliation.
+ Abstract in first column
+ No title for abstract
+ Different font
+ Followed by
+     Keywords: ...
+
+   With the current code (a8462add6c0d7), we get the two lines that span the 2 columns
+    These are the author and affiliation/address.
+   So we need to recognize these don't form an abstract.  The font changes so shouldn't be combining them, but we understand why.  (If each line has just one font and the lines are different, then not an abstract)
+   Instead, look for Keywords: and recognize that its text spans one column. Hence, presume that the abstract
+   is also in a single column.
+
+"LatestDocs/PDF/3089301912/Kading-2015-Detection of Entebbe Bat Virus Aft.xml"
+Gets the abstract but includes text from the regular text's 2 columns
+ Need to determine how far each line is from the others.
+
+
+The next 3 are very similar:
 "LatestDocs/PDF/1879820842/Memish-2010-Alkhurma haemorrhagic fever - a v1.xml"
  Should work. Was one of the earlier formats we implemented.
+ No, the keywords are to the left and getNodesBetween() fails.
+  Keywords are in one column (vertically) and the abstract is in a second columm.
+    (These columns are different form the regular text columns.)
 
 "LatestDocs/PDF/1754306302/Mackenzie-2009-The zoonotic flaviviruses of s1.xml"
  Interesting.
  The Keywords confue things as it is at the same approximate height but to the left of the Summary
  So in this case, we don't want to use it.
 
+Andriamandimby-2011-Crimean-Congo hemorrhagic.xml" 
+ Returns NULL. 
+  But like  Oliveira-2009 below which works.
 
-LatestDocs/PDF/1727052847/Tong-2004-Ross River virus disease in Australi.xml
- including the address and probably a lot of the Introduction.
-  Lines delimit the abstract that consists of 2 columns.
- getNodesBetween needs to recognize the horizontal line spanning the width of the page.
+
+LatestDocs/PDF/1523921251/Forrester-2008-Western equine encephalitis sub.xml
+
+
+"LatestDocs/PDF/1249277242/177-3-529.xml"                                     
+  Received is in the footer of the first column.
 
 LatestDocs/PDF/0567227266/Papa-2001-Isolation of Dobrava virus from Apo1.xml
   including text from institutional affiliation and Received, ...
-  Different font for abstract. Only 4 lines so won't "dominate".
+  Different font for abstract. 
+  Only 4 lines so won't "dominate".
 
 
-Switzer-2005
- Getting the margin wrong. The header is positioned incorrectly in the XML.
- 
- Abstract on separate line centered
- Bold text spanning two columns.
 
 Santiago-2005
  + now gettng all of the abstract, plus some content from the title,author affiliations.
@@ -65,65 +112,14 @@ Barrette-2009
  Under title and author list - these also span 2 columns.
 
 
-
-Gulati-2011
- Abstract in first column
- No title for abstract
- Different font
- Followed by
-     Keywords: ...
-
-   With the current code (a8462add6c0d7), we get the two lines that span the 2 columns
-    These are the author and affiliation/address.
-   So we need to recognize these don't form an abstract.  The font changes so shouldn't be combining them, but we understand why.  (If each line has just one font and the lines are different, then not an abstract)
-   Instead, look for Keywords: and recognize that its text spans one column. Hence, presume that the abstract
-   is also in a single column.
-
-
-Wernery-2015
- [Fix]  Missing the <fontspec> .  Error: Illegal entry in bfchar block in ToUnicode CMap
-  In first column,
-  under authors list which is centered
-  text for abstract is not centered
-  line underneath the abstract separating it from the text.
-
-
-
 Zou-2008
  Big box on left side of page for correspondence; title and abstract to the right of this.
+ * Lines before and after the abstract.
  Then two-columns.
- Lines before and after the abstract.
  Can recognize the affiliations/addresses with lines that start with a superscript number.
 
-[Scanned] 2987776261/Day-1996-Antibodies to arthropod-borne encepha.xml
-Nemeth-2010
- BioOne paper so have to skip first page.
- Scanned paper.
- Then abstract is identified by word.  In first column.
 
-
-[Works] Gilbert-2000
-  Cuts-off the first line.
- Includes the Key words.
-
-
-
-Calzolari-2012
- Abstract in a rectangle and shaded box.
- Recognize end by end of blue box, or large gap between then last line and the next one.
-
-Andriamandimby-2011-Crimean-Congo hemorrhagic.xml" 
- Returns NULL. 
-  But like  Oliveira-2009 below which works.
-
-3518639413/10072152.xml
-Gets the first line, but the rest has some from the abstract but skips lines and includes text not from the abstract.
- 
-
-3934412932/Rollin-1999-Ebola (Subtype Reston) Virus among.xml
-  get an error.
-
-0595442163/Buckley-2006-Detection of seroconversion to W1.xml"
+[very close] "0595442163/Buckley-2006-Detection of seroconversion to W1.xml"
  Previously close but includes some text from the second column below.
  But now gives only meta data about accepted, available from, open access
   This the change to use anyTextToLeft() which is FALSE. But there are no Key words: to end this.
@@ -137,6 +133,18 @@ Gets the first line, but the rest has some from the abstract but skips lines and
  Looks like a different font.
  There are lines above and below.
 
+
+
+[Scanned] 2987776261/Day-1996-Antibodies to arthropod-borne encepha.xml
+Nemeth-2010
+ BioOne paper so have to skip first page.
+ Scanned paper.
+ Then abstract is identified by word.  In first column.
+
+LatestDocs/PDF/1609915988/McIntosh-1976-Culex (Eumelanomyia) rubinotus T.xml
+  Scanned but there is text.
+
+----------------
 NOT IN sp.xml
 
 Murray-2013 - 
@@ -147,8 +155,47 @@ Aviles-1992
  nodesByLine gives error: Error in bbox$top : $ operator is invalid
  for atomic vectors. PDF is pixelated, but can be copied and pasted.
 
+
+
+===================================================================================
+
 WORKING
- "LatestDocs/PDF/2475418629/Iehlé-2007-Henipavirus and tioman virus antib1.xml"
+
+[almost] Switzer-2005
+ Works now, **but get page number at bottom.**
+ Getting the margin wrong. The header is positioned incorrectly in the XML.
+ Abstract on separate line centered
+ Bold text spanning two columns.
+
+"LatestDocs/PDF/2670165779/Khaiboullina-2004-Regulation of cellular gene1.xml"
+
+"LatestDocs/PDF/2507624756/Kim-2008-Isolation of tick-borne encephalitis.xml"
+
+3518639413/10072152.xml
+Gets the first line, but the rest has some from the abstract but skips lines and includes text not from the abstract.
+ Error now in getTextAfter()
+
+
+[Works] Gilbert-2000
+  [fixed] Cuts-off the first line.
+ Includes the Key words.
+
+[Works] 3934412932/Rollin-1999-Ebola (Subtype Reston) Virus among.xml
+  get an error.
+
+
+"LatestDocs/PDF/2475418629/Iehlé-2007-Henipavirus and tioman virus antib1.xml"
+
+"LatestDocs/PDF/0761508589/Buitrago-2012-Real-time fluorogenic reverse tr.xml"
+
+
+Wernery-2015
+ [Fix]  Missing the <fontspec> .  Error: Illegal entry in bfchar block in ToUnicode CMap
+  In first column,
+  under authors list which is centered
+  text for abstract is not centered
+  line underneath the abstract separating it from the text.
+
 
 "LatestDocs/PDF/0358861568/Alagaili et al_ 2014_Middle East Respiratory S.xml"
   Skips cover page.
@@ -361,3 +408,115 @@ c("In October 2012, a 3-year-old bullfinch ( Pyrrhula pyrrhula ) held in captivi
  
 
 [Scanned] "LatestDocs/PDF/1141406970/Rollin-1995-Isolation of black creek canal vir.xml"
+
+
+
+
+
+
+
+
+
+------------
+Returning length 0.
+
+  [1] "LatestDocs/PDF/2699927534/Jayme et al_2015_Molecular evidence of Ebola R.xml"
+  [2] "LatestDocs/PDF/1879820842/Memish-2010-Alkhurma haemorrhagic fever - a v1.xml"
+  [3] "LatestDocs/PDF/2475418629/Iehlé-2007-Henipavirus and tioman virus antib1.xml"
+  [4] "LatestDocs/PDF/1249277242/177-3-529.xml"                                     
+  [5] "LatestDocs/PDF/0840057771/Degiorgis-2000-Borna disease in a free-ranging.xml"
+  [6] "LatestDocs/PDF/3454570876/1-s2.0-S0042682200905634-main2.xml"                
+  [7] "LatestDocs/PDF/1347402211/Luis et al_2014_A comparison of bats and roden.xml"
+  [8] "LatestDocs/PDF/2306046655/Yuan 2012.xml"                                     
+  [9] "LatestDocs/PDF/1351986620/J Infect Dis.-2015-Ogawa-infdis-jiv063.xml"        
+ [10] "LatestDocs/PDF/3138036620/Philbey-2008-Inifection with Menangle virus in.xml"
+ [11] "LatestDocs/PDF/2498380585/REUSKIN JOrdan.xml"                                
+ [12] "LatestDocs/PDF/1655675668/Nelson-2010-Confirmation of Choclo Virus as th.xml"
+ [13] "LatestDocs/PDF/3475635737/Nakgoi-2014-Dengue, Japanese Encephalitis and.xml" 
+ [14] "LatestDocs/PDF/2896411763/Hubálek-2012-Tick-borne viruses in Europe1.xml"    
+ [15] "LatestDocs/PDF/0215227208/Klempa-2008-Hemorrhagic fever with renal synd1.xml"
+ [16] "LatestDocs/PDF/1436485989/Breman 1999.xml"                                   
+ [17] "LatestDocs/PDF/3982771992/Leroy-2004-Multiple Ebola virus transmission e.xml"
+ [18] "LatestDocs/PDF/2996827114/Leroy-2004-A serological survey of ebola viru1.xml"
+ [19] "LatestDocs/PDF/3243569497/Leroy-2004-A serological survey of Ebola virus.xml"
+ [20] "LatestDocs/PDF/2243954052/Milazzo-2012-Geographic distribution of hantav.xml"
+ [21] "LatestDocs/PDF/1635332606/Liu-2012-Genetic analysis of hantaviruses and1.xml"
+ [22] "LatestDocs/PDF/2987363901/Kirkland-2015-Hendra Virus Infection in Dog, A.xml"
+ [23] "LatestDocs/PDF/0649016555/1-s2.0-S0042682297988401-main.xml"                 
+ [24] "LatestDocs/PDF/3025013874/Blasdell-2008-Host range and genetic diversity.xml"
+ [25] "LatestDocs/PDF/0991626011/Formenty-1999-Ebola virus outbreak among wild.xml" 
+ [26] "LatestDocs/PDF/1827651569/Swanepoel-2007-Studies of reservoir hosts for.xml" 
+ [27] "LatestDocs/PDF/0278287729/Pan 2014.xml"                                      
+ [28] "LatestDocs/PDF/1217382941/Barrette-2009-Discovery of swine as a host fo1.xml"
+ [29] "LatestDocs/PDF/4154443567/Barrette-2009-Discovery of swine as a host for.xml"
+ [30] "LatestDocs/PDF/1785267685/Jeffrey Root-2013-West Nile virus associations.xml"
+ [31] "LatestDocs/PDF/0672362859/Bosch-2007-West Nile Virus, Venezuela.xml"         
+ [32] "LatestDocs/PDF/3267708254/Quaglia-2014-West Nile and st. Louis encephali.xml"
+ [33] "LatestDocs/PDF/0818313444/vir.0.81576-0-SuppTableEdited.xml"                 
+ [34] "LatestDocs/PDF/3528802597/Gordon-2012-Confirmed case of encephalitis cau.xml"
+ [35] "LatestDocs/PDF/3087284237/Gordon-2012-Confirmed case of encephalitis ca1.xml"
+ [36] "LatestDocs/PDF/1384762250/Yob-2001-Nipah virus infection in bats (order.xml" 
+ [37] "LatestDocs/PDF/3291406011/Okamoto-2000-Species-specific TT viruses and c.xml"
+ [38] "LatestDocs/PDF/1763393602/Puorger-2010-Distribution of Borna disease vir.xml"
+ [39] "LatestDocs/PDF/3217660183/Chan-2002-A survey of Nipah virus infection am.xml"
+ [40] "LatestDocs/PDF/1082165137/Nandi-2000-A novel type D Simian retrovirus n1.xml"
+ [41] "LatestDocs/PDF/0532875827/Peeters-2002-Risk to human health from a pleth.xml"
+ [42] "LatestDocs/PDF/1047437230/Neel-2010-Molecular epidemiology of simian im1.xml"
+ [43] "LatestDocs/PDF/1405478496/Nerrienet-2005-Simian immunodeficiency virus 1.xml"
+ [44] "LatestDocs/PDF/0178280078/Switzer-2008-Coinfection with HIV-1 and Simian.xml"
+ [45] "LatestDocs/PDF/0753887278/Blasse-2013-Mother-offspring transmission and1.xml"
+ [46] "LatestDocs/PDF/3867373015/Coffey-2006-Serologic evidence of widespread E.xml"
+ [47] "LatestDocs/PDF/0683734075/Tagliapietra-2009-Spatial and temporal dynamic.xml"
+ [48] "LatestDocs/PDF/1288179177/Asper-2001-First outbreak of callitrichid hepa.xml"
+ [49] "LatestDocs/PDF/2014039178/Sottosanti-2005-Serological study of the lymph.xml"
+ [50] "LatestDocs/PDF/1509211723/Becker-2007-Serological survey of virus infec1.xml"
+ [51] "LatestDocs/PDF/0305183784/Becker-2007-Serological survey of virus infect.xml"
+ [52] "LatestDocs/PDF/3602790318/Weaver-2001-Extreme genetic diversity among Pi.xml"
+ [53] "LatestDocs/PDF/1908586893/Aguilar-Setien-2008-Dengue virus in Mexican ba.xml"
+ [54] "LatestDocs/PDF/0382058825/Rihtaric-2010-Identification of SARS-like Coro.xml"
+ [55] "LatestDocs/PDF/0113022866/54664A345348.xml"                                  
+ [56] "LatestDocs/PDF/4226152061/Navarro-2005-Postepizootic persistence of Vene.xml"
+ [57] "LatestDocs/PDF/3607820776/Weaver-1997-Recombinational history and molecu.xml"
+ [58] "LatestDocs/PDF/1523921251/Forrester-2008-Western equine encephalitis sub.xml"
+ [59] "LatestDocs/PDF/0428028064/Zheng-2013-Molecular characterization of Japan.xml"
+ [60] "LatestDocs/PDF/1161594151/Wang-2009-Japanese encephalitis viruses from b.xml"
+ [61] "LatestDocs/PDF/2853897527/978-1-4020-6106-6.xml"                             
+ [62] "LatestDocs/PDF/3302321137/Aradaib-2010-Nosocomial outbreak of Crimean-C1.xml"
+ [63] "LatestDocs/PDF/1660786150/Sun-2009-Epidemiology and phylogenetic analysi.xml"
+ [64] "LatestDocs/PDF/1604673843/Andriamandimby-2011-Crimean-Congo hemorrhagic1.xml"
+ [65] "LatestDocs/PDF/3364104101/Ergönül-2006-Crimean-Congo haemorrhagic fever1.xml"
+ [66] "LatestDocs/PDF/2600713223/Laurenson-2007-Prevalence, spatial distributi1.xml"
+ [67] "LatestDocs/PDF/0702826432/Balogh-2010-Tick-borne encephalitis outbreak 1.xml"
+ [68] "LatestDocs/PDF/0567227266/Papa-2001-Isolation of Dobrava virus from Apo1.xml"
+ [69] "LatestDocs/PDF/3129993202/Smajlović-2012-Development and optimization of.xml"
+ [70] "LatestDocs/PDF/3856799428/Weidmann-2005-Identification of genetic eviden.xml"
+ [71] "LatestDocs/PDF/3420816638/Oliveira-2009-Genetic characterization of a J1.xml"
+ [72] "LatestDocs/PDF/2474625336/Song-2007-Muju virus, a novel hantavirus harbo.xml"
+ [73] "LatestDocs/PDF/0762393310/Golovljova-2004-Characterization of tick-born1.xml"
+ [74] "LatestDocs/PDF/0761508589/Buitrago-2012-Real-time fluorogenic reverse tr.xml"
+ [75] "LatestDocs/PDF/3017453207/Buitrago-2012-Real-time fluorogenic reverse t1.xml"
+ [76] "LatestDocs/PDF/1252989057/Rodrigues-2010-Molecular epidemiology of Saint.xml"
+ [77] "LatestDocs/PDF/0873940951/Cao-2011-Tembusu virus in ducks, china.xml"        
+ [78] "LatestDocs/PDF/3551992108/Dumpis 1999.xml"                                   
+ [79] "LatestDocs/PDF/3887698401/Chua-2001-Tioman virus, a novel paramyxovirus1.xml"
+ [80] "LatestDocs/PDF/1088457089/Yaiw-2008-Tioman virus, a paramyxovirus of bat.xml"
+ [81] "LatestDocs/PDF/0614018658/Manarolla-2010-Usutu virus in wild birds in no.xml"
+ [82] "LatestDocs/PDF/3922552911/Bakonyi-2007-Emergence of Usutu virus in Hunga.xml"
+ [83] "LatestDocs/PDF/2688324473/Beltrame-2006-Tickborne encephalitis virus, no.xml"
+ [84] "LatestDocs/PDF/0680938782/Casseb-2014-Seroprevalence of flaviviruses ant.xml"
+ [85] "LatestDocs/PDF/2255202025/1-s2.0-S0147957114000058-main.xml"                 
+ [86] "LatestDocs/PDF/0851236576/Chevalier-2010-Environmental risk factors of W.xml"
+ [87] "LatestDocs/PDF/1052790441/Weissenböck-2002-Emergence of Usutu virus, an.xml" 
+ [88] "LatestDocs/PDF/3536797541/Savini-2011-Usutu virus in Italy_ an emergence.xml"
+ [89] "LatestDocs/PDF/3078240457/Garigliany-2017-Usutu virus, Belgium, 2016.xml"    
+ [90] "LatestDocs/PDF/0253022084/Rijks-2016-Widespread Usutu virus outbreak in.xml" 
+ [91] "LatestDocs/PDF/0317393510/Chaudhuri-2013-First documented case of impor1.xml"
+ [92] "LatestDocs/PDF/4148748937/Steinmetz et al_2011_Emergence and establishme.xml"
+ [93] "LatestDocs/PDF/0247828304/Hofle-2013-Usutu virus in migratory song thrus.xml"
+ [94] "LatestDocs/PDF/2753262537/Yan-2011-An infectious disease of ducks caused.xml"
+ [95] "LatestDocs/PDF/3029943519/Balling-2014-Prevalence of antibodies against.xml" 
+ [96] "LatestDocs/PDF/1306081813/1-s2.0-S0147957115000788-main.xml"                 
+ [97] "LatestDocs/PDF/1460747898/1-s2.0-S0034528815300321-main.xml"                 
+ [98] "LatestDocs/PDF/3861143486/1-s2.0-S0147957116300972-main.xml"                 
+ [99] "LatestDocs/PDF/1674687958/Remmers-2000-Longitudinal studies in the epide.xml"
+[100] "LatestDocs/PDF/4004736606/Auguste-2010-Yellow fever virus maintenance i1.xml"
