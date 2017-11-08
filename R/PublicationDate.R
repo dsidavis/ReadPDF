@@ -74,7 +74,7 @@ gsub("\\.xml$", ".pdf", f)
 }
 
 
-getPublicationDate =
+getPublicationDate1 =
     # OLD VERSION - SEE BELOW
 function(doc, page = 1, words = c("accepted", "received", "volume", "copyright", "published", "submitted", "recebido", "aceito"))
 {
@@ -111,10 +111,10 @@ function(doc, page = 1, words = c("accepted", "received", "volume", "copyright",
            # Go to the last page
      npages = length(getNodeSet(doc, "//page"))
      if(npages > 1) {
-       ans = getPublicationDate(doc, npages, words)
+       ans = getPublicationDate1(doc, npages, words)
        if(length(ans) == 0 && npages > 2)
            # try second page
-          return(getPublicationDate(doc, 2, words))
+          return(getPublicationDate1(doc, 2, words))
     }
   }
 
@@ -338,6 +338,9 @@ getDocText =
     # Too simple. See the one in ReadPDF
 function(doc)
 {
+    if(is.character(doc))
+       doc = readPDFXML(doc)
+    
     paste(xpathSApply(doc, "//text", xmlValue), collapse = " ")
 }
 
