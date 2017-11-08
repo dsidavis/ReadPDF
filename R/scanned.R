@@ -6,14 +6,19 @@ function(doc, threshold = 154.95, words = getDocWords(doc, numPages), numPages =
 {
   if(is.character(doc))
       doc = readPDFXML(doc)
+  # else  - may want to put the class on the doc.
 
     # Check if OIE document
   if(length(getNodeSet(doc, "//text[contains(., 'www.oie.int/')]")))
       return(FALSE)
 
-     # JVI.asm.org draft document with line numbers!
-  ll = names(nodesByLine(getNodeSet(doc[[1]], ".//text")))
-  if(length(grep("^[0-9]+ ", ll))/length(ll)  > .70)
+  # JVI.asm.org draft document with line numbers!
+  ll = nodesByLine(getNodeSet(doc[[1]], ".//text"))
+
+  if(length(ll) == 0)
+      return(TRUE)
+  
+  if(length(grep("^[0-9]+ ", names(ll)))/length(ll)  > .70)
      return(FALSE)
   
   
