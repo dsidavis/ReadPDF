@@ -31,8 +31,9 @@ function(doc, numPages = getNumPages(doc), docFont = getDocFont(doc))
    if(is.character(doc))
       doc = xmlParsePDFTOHTML(doc)
    
-   lapply(getPages(doc)[seq(1, numPages)], getTextByCols, docFont = docFont)
+   lapply(getPages(doc)[seq(1, min(numPages, getNumPages(doc)))], getTextByCols, docFont = docFont)
 }
+
 
 
 isCenteredMargins =
