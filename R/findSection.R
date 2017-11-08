@@ -1,4 +1,8 @@
 getSectionText =
+    #
+    #
+    #
+    #
 function(doc, asNodes = FALSE, secHeaders = findSectionHeaders(doc, ...), maxNumPages = 30, ... )
 {
     if(is.character(doc))
