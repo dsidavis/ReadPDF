@@ -30,8 +30,6 @@ function(doc, asNodes = TRUE, page = doc[[1 + hasCoverPage(doc) ]], byLine = TRU
 
       # Start by finding a declaration of an abstract: Abstract or Summary
     a = findAbstractDecl(page)
-#browser()
-
 
     rect = getNodeSet(page, ".//rect | .//line")
     rect.bb = getBBox(rect, color = TRUE)    
