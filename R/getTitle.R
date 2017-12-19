@@ -17,7 +17,7 @@ getDocTitle =
     #
     #  See 1599857215/Learned-2005-Extended interhuman transmission.xml for a title in the meta that is just the name of the file.
     #
-function(file, page = 1, doc = xmlParse(file), meta = FALSE, minWords = 1, ...)
+function(file, page = 1, doc = readPDFXML(file), meta = FALSE, minWords = 1, ...)
 {
   if(missing(doc) && is(file, "XMLInternalDocument"))
       doc = file
