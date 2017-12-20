@@ -186,7 +186,6 @@ function(doc, checkAbstract = TRUE)
   if(is.character(doc))
      doc = readPDFXML(doc)
 
-
   if(checkAbstract) {
       abstract = try(findAbstract(doc, FALSE))
 
@@ -200,8 +199,8 @@ function(doc, checkAbstract = TRUE)
       }
   }
   
-  if(isBioOne(doc))
-      return(textAboveTitle(doc, 2))
+  if(isBioOne(doc) && !is.na(tmp <- textAboveTitle(doc, 2)))
+      return(tmp)
 
   if(isScanned2(doc)) {
       y = getYearFromFileName(basename(docName(doc)))
@@ -278,20 +277,20 @@ function(doc, checkAbstract = TRUE)
   g = gregexpr(rx, txt, ignore.case = TRUE)
   if(g[[1]][1] > 0) {
       tt = unique(regmatches(txt, g)[[1]])
-      return(structure(tt, names = rep("TextRegEx", length(tt))))
+      return(structure(tt, names = rep("MonthNameYear.TextRegEx", length(tt))))
   }
 
   # Could go to the second page and start over with the headers, etc.
 
   tt = getNodeSet(doc, "//text[isDate(string(.))]",
                   xpathFuns = list(isDate = containsDate))
-  if(length(tt)) 
-      return(unique(extractDate(sapply(tt, xmlValue))))
+  if(length(tt)) #XXX Put the match type here.
+      return(c(TextDate = unique(extractDate(sapply(tt, xmlValue)))))
 
 
   fname = basename(docName(doc))
   y = getYearFromFileName(fname)
-  if(length(y))
+  if(length(y)) 
      return(c(filename = y))
   
   NA
@@ -304,16 +303,18 @@ function(fname)
 {
   #   "(^|[^0-9])[0-9]{4}([^[0-9]|$)"
   # But need to not include characters within the () ()
-  m = gregexpr("\\b(19[0-9]{2}|20[01][0-9]{1})\\b", fname, perl = TRUE)
+  m = gregexpr("(\\b|_)(19[0-9]{2}|20[01][0-9]{1})(\\b|_)", fname, perl = TRUE)
   if(any(m[[1]] > -1))
-     regmatches(fname, m)[[1]]
+     gsub("(^_|_$)", "", regmatches(fname, m)[[1]])
   else
      character()
 }
 
 getMonthNames =
-function(format = "%B")    
+function(format = c("%b.", "%b", "%B"))
+{    
   unlist(lapply(format, function(f) format(ISOdate(2017, 1:12, 1), f)))
+}
 
 containsDate =
 function(str)
