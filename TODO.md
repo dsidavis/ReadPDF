@@ -17,6 +17,54 @@
 
 # Todo list for ReadPDF
 
+## Spreadsheets of results
+
+
+
+## getPublicationDate
+
+1. Footer is not pulling in all information, e.g. when multiple fonts
+   occur, getPageFooter() only returns one font/bounding box baseline
+   set. Add some "wiggle" room to match close enough bboxes
+   
+1. Currently bails out after a "successful" match. May want to return
+   all possible places where there could be a match, but this might
+   result in too many overall matches. Revisit if we have issues with
+   the single match/ current approach.
+   
+1. TextRegex: actually MonthName Year match, does not match any year. 
+
+1. Check if the page number is in footers/headers looks like a
+   date. "1997.pdf"
+
+1. Check title before abstract, etc. Title is most often correct.
+
+1. Long dash is converted to A-, messing up some functions but not
+   others.
+
+Notes/Issues:
+
+Title is a lock, abstract seems to be less reliable, 
+
+- Okamoto-2002: Picking up "2064 neuclotides" from abstract, NLP
+  should help with this.
+- Naish-2009: published in 2009, abstract lists 1992-2001.
+- Brauburger-2012: not sure what the correct answer is here - the
+  title has "45 years" of the virus
+- Weissenbock-2013, pulling out of the abstract. 
+- Heang-2012 Abstract broken. "To the Editor:" - don't look for
+   abstracts. 
+- Header issues: WENSMAN_et_al-2008
+- Bennett-2000: not actually the footer (but correct answer!)
+- Puorger-2010: "between 2004 and 2006" should catch this
+- J Infect Dis.-2000-Papa: Picking up the reference on 1st page as
+  footnote
+- Linden-2012 : "Downloaded from XXXX" in header
+- Nitatpattana: left hand side of dash not returned
+- Adrian Diaz-2008: To the editor, got correct answer, but don't know
+  why. Check
+- [INVESTIGATE] read.csv: "# blah blah, blah" read in after the comma as a cell
+
 ## getSectionText()
 1. When there are no section headers, except REFERENCES, collect the text from the body into its own
    unnamed section. See Degiorgis-2000.
