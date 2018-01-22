@@ -1,6 +1,10 @@
-exportPattern(".*")
+#exportPattern(".*")
 import(XML)
+import(methods)
 
+export(readPDFXML)
+export(findAbstract)
+export(getSectionText, getDocText)
 
 export(pdfText, pdf_text)
 
@@ -41,5 +45,13 @@ S3method(getNumCols,PDFToXMLDoc)
 
 export(getColPositions)
 S3method(getColPositions,character)
+S3method(getColPositions,XMLInternalElementNode)
 S3method(getColPositions,PDFToXMLPage)
 S3method(getColPositions,PDFToXMLDoc)
+
+export(pageOf)
+S3method(pageOf, list)
+S3method(pageOf, XMLInternalNode)
+S3method(pageOf, XMLInternalElementNode)
+
+

@@ -63,7 +63,7 @@ function(node, asNode = FALSE)
     sapply(node, pageOf, asNode)
 }
 
-pageOf.XMLInternalNode =
+pageOf.XMLInternalNode = pageOf.XMLInternalElementNode =
 function(node, asNode = FALSE)
 {    
     p = getNodeSet(node, ".//ancestor::page")[[1]]

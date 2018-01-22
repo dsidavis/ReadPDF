@@ -59,7 +59,7 @@ function(p, threshold = .1,
 }
 
 
-getColPositions.PDFToXMLPage = getColPositions.XMLInternalNode =
+getColPositions.PDFToXMLPage = getColPositions.XMLInternalNode =  getColPositions.XMLInternalElementNode =
     # For a single page
 function(p, threshold = .1,
          txtNodes = getNodeSet(p, getXPathDocFontQuery(p, docFont)),
