@@ -105,6 +105,49 @@ b = b[!isNumbered]
 order(sapply(tmp, length))
 ```
 
+1. ```
+sections = lapply(sp.xml, function(x) try(findSectionHeaders(x)))
+table(sapply(sections, class))
+```
+```
+     array       list       NULL  try-error XMLNodeSet 
+        31        257         84          5         31 
+```
+
+The errors
+```
+[1] "LatestDocs/PDF/2828631744/art%253A10.1023%252FA%253A1008199800011.xml"       
+[2] "LatestDocs/PDF/3529243761/Pattnaik-2006-Kyasanur Forest disease_ an epid.xml"
+[3] "LatestDocs/PDF/2999137579/Wong et al 2007 supplement.xml"                    
+[4] "LatestDocs/PDF/0148058638/Wong_et_al-2007-Reviews_in_Medical_Virology.xml"   
+[5] "LatestDocs/PDF/3246714993/bok%253A978-3-540-70962-6.xml"                     
+```
+```
+is.scanned = sapply(sp.xml[sapply(sections, is.null)], function(x) try(isScanned(x)))
+table(is.scanned)
+```
+
+The documents for which we got NULL for the sections and which are NOT scanned:
+```
+sp.xml[sapply(sections, is.null)][!is.scanned]
+ [1] "LatestDocs/PDF/1601876396/OIE Iran.xml"                                      
+ [2] "LatestDocs/PDF/2430316441/OIE Kuwait.xml"                                    
+ [3] "LatestDocs/PDF/3814962940/OIE Oman.xml"                                      
+ [4] "LatestDocs/PDF/3982771992/Leroy-2004-Multiple Ebola virus transmission e.xml"
+ [5] "LatestDocs/PDF/2364497871/leroy et al 2005.xml"                              
+ [6] "LatestDocs/PDF/1217382941/Barrette-2009-Discovery of swine as a host fo1.xml"
+ [7] "LatestDocs/PDF/4154443567/Barrette-2009-Discovery of swine as a host for.xml"
+ [8] "LatestDocs/PDF/3267708254/Quaglia-2014-West Nile and st. Louis encephali.xml"
+ [9] "LatestDocs/PDF/0818313444/vir.0.81576-0-SuppTableEdited.xml"                 
+[10] "LatestDocs/PDF/3342055963/08-0359_appT-s1 (2).xml"                           
+[11] "LatestDocs/PDF/1502738312/Lundkvist-1998-Human Dobrava hantavirus infect.xml"
+[12] "LatestDocs/PDF/0613064798/Plyusnin-1999-Dobrava hantavirus in Russia.xml"    
+```
+1. For NULL values returned, indicate no sections, perhaps list().
+
+
+1. Get keywords as a section.
+
 1. [fixed] Leroy-2004  - finding "Materials and Methods" under the "Supporting Online Material". 
    For the same paper, we run into this with the "Table S1" - see below.
 
