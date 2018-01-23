@@ -55,3 +55,9 @@ S3method(pageOf, XMLInternalNode)
 S3method(pageOf, XMLInternalElementNode)
 
 
+export(isTitleBad)
+S3method(isTitleBad, character)
+S3method(isTitleBad, XMLInternalNode)
+S3method(isTitleBad, list)
+
+
