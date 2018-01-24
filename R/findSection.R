@@ -3,11 +3,10 @@ getSectionText =
     #
     #
     #
-function(doc, asNodes = FALSE, secHeaders = findSectionHeaders(doc, ...), maxNumPages = 30, ... )
+function(doc, asNodes = FALSE, secHeaders = findSectionHeaders(doc, ...), maxNumPages = 30, cleanSectionNums = TRUE, ... )
 {
     if(is.character(doc))
         doc = readPDFXML(doc)
-
 
     if(getNumPages(doc) > maxNumPages)
         return(list())
@@ -21,11 +20,15 @@ function(doc, asNodes = FALSE, secHeaders = findSectionHeaders(doc, ...), maxNum
                   function(i)
                     getNodesBetween(secHeaders[[i]], if(i == length(secHeaders)) NULL else secHeaders[[i+1]]))
     names(secs) = sapply(secHeaders, xmlValue)
+
+
+    if(cleanSectionNums)
+      names(secs) = removeNumPrefixes(names(secs))
     
     if(asNodes)
        return(secs)
     
-    txt = sapply(secs, xmlValue)    
+    txt = sapply(secs, xmlValue)
 }
 
 
@@ -108,7 +111,6 @@ function(doc, sectionName = c('introduction', 'background',
 
     if(length(intro))
         intro = intro[ ! isLowerCase(sapply(intro, xmlValue)) ]
-
 
 
     if(length(intro)) {
@@ -450,4 +452,12 @@ function(nodes, columnNum = sapply(nodes, inColumn, colNodes),
         colPos = x
     
     nodes[order(columnNum)]
+}
+
+
+removeNumPrefixes =
+  #  removeNumPrefixes(c("1.2 abc", "  1.2 abc def", "1.x abc", " abc def") )
+function(x)
+{
+  gsub("^[[:space:]]*[0-9.]+ ?", "", x)
 }
