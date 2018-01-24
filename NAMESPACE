@@ -10,13 +10,9 @@ export(pdfText, pdf_text)
 
 export(getTextFonts, getFontInfo)
 
-
 export(bodyLine)
-    
-
 
 export(getPageFooter)
-
 
 export(getDocTitle, getDocTitleString)
 
@@ -33,31 +29,24 @@ exportMethods(length)
 export(dim)
 exportMethods(dim)
 
+S3method("[", "ConvertedPDFDoc")
+S3method("[[", "ConvertedPDFDoc")
+
 export(plot)
 S3method(plot, PDFToXMLPage)
 
 
 export(getNumCols)
 S3method(getNumCols,character)
-S3method(getNumCols,PDFToXMLPage)
-S3method(getNumCols,PDFToXMLDoc)
 
 
 export(getColPositions)
 S3method(getColPositions,character)
-S3method(getColPositions,XMLInternalElementNode)
-S3method(getColPositions,PDFToXMLPage)
-S3method(getColPositions,PDFToXMLDoc)
 
-export(pageOf)
 S3method(pageOf, list)
-S3method(pageOf, XMLInternalNode)
-S3method(pageOf, XMLInternalElementNode)
 
 
-export(isTitleBad)
 S3method(isTitleBad, character)
-S3method(isTitleBad, XMLInternalNode)
-S3method(isTitleBad, list)
+
 
 
