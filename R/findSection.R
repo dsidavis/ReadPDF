@@ -14,7 +14,9 @@ function(doc, asNodes = FALSE, secHeaders = findSectionHeaders(doc, ...), maxNum
 
     if(separateTables) {
         tbls = getTables(doc)
-        removeNodes(unlist(tbls))
+        nn = unlist(tbls)
+        if(!is.null(nn))
+          removeNodes(nn[!sapply(nn, is.null)])
     }
     
     if(length(secHeaders) == 0)
@@ -37,11 +39,15 @@ function(doc, asNodes = FALSE, secHeaders = findSectionHeaders(doc, ...), maxNum
     txt = sapply(secs, xmlValue)
 
     if(addOmitted) {
-        onodes = getNodesBetween(doc[[1]][["text"]], secHeaders[[1]])
+        start = doc[[1]][["text"]]
+        if(!is( a <- try(findAbstract(doc), silent = TRUE), 'try-error') && length(a))
+            start = rev(unlist(a))[[1]]
+#        try( { start = rev(unlist(findAbstract(doc)))[[1]]})
+        onodes = getNodesBetween(start, secHeaders[[1]])
         txt["<other>"] = paste(sapply(onodes, xmlValue), collapse = " ")
     }
 
-    if(separateTables)
+    if(separateTables && length(tbls)) 
         txt[paste0("Table", seq(along = tbls))] = names(tbls)
     
     txt
@@ -321,9 +327,15 @@ function(x = NULL, to = NULL, before = FALSE, useLines = TRUE)
     page = xmlParent(if(!is.null(x)) x else to)
     cols = getTextByCols(page, asNodes = TRUE)
 
+    if(!is.null(x) && !is.null(to) && pageOf(to) < pageOf(x)) {
+        warning("to node in getTextAfter() is on earlier page (", pageOf(to) , " versus ",  pageOf(x), "  Ignoring to node")
+        to = NULL
+    }
+
     original.to = to
     
     if(useLines) {
+          # If to is a rect/line, find its location, otherwise find any lines on this page.
        if(!is.null(to) && xmlName(to) %in% c('rect', 'line')) {
            bb = getBBox(list(to))
 
@@ -351,11 +363,14 @@ function(x = NULL, to = NULL, before = FALSE, useLines = TRUE)
                      cols[[to.colNum]][ seq(1, length = j[[to.colNum]] - 1) ]))
     }
 
+
     if(is.null(to)) {
         nodes = cols[[colNum]][ - (1:(i[[colNum]]-1)) ]
         if(colNum < length(cols))
             nodes = c(nodes, cols[(colNum+1):length(cols)])
     } else {
+
+        
         if(colNum == to.colNum) {
            nn = cols[[ colNum ]]
            nodes = nn[  seq(i[[colNum]], j[[to.colNum]] - 1) ] 
@@ -381,8 +396,11 @@ function(x = NULL, to = NULL, before = FALSE, useLines = TRUE)
         if(!is.null(to))
             tmp[[2]] = to
         bb2 = getBBox2(tmp)
-                     # Was > .6 not .53
+        # bb is for rect/line.  So we are looking for lines that span at least half the page
+        # and are further "down" the page than our x node (which is located at bb2[1,])
+        # Was > .6 not .53
         w = (bb[,3] - bb[,1])/as.numeric(xmlGetAttr(page, "width")) > .53 & bb[,2] > bb2[1,2]
+
         if(any(w)) {
             bot = max(bb[w, 4])
             f = function(x) {
@@ -395,9 +413,12 @@ function(x = NULL, to = NULL, before = FALSE, useLines = TRUE)
             
             nodes = if(length(nodes) != length(cols)) f(unlist(nodes)) else lapply(nodes, f) 
         } else if(!is.null(original.to)) {
-            tmp2 = c((bb[,3] - bb[,1])/as.numeric(xmlGetAttr(page, "width")) > .53, bb[,2] > bb2[1,2])
-            if(any(tmp2))
-                stop("check the threshold")
+            # This is different from w above. This is the which rect/line in bb and then
+            # append which lines are below the first node.
+            tmp2 = c((bb[,3] - bb[,1])/as.numeric(xmlGetAttr(page, "width")) > .53, bb[,2] > bb2[1,2])        
+       #     if(any(tmp2))
+       #        stop("check the threshold")
+            #XXX  finish this off.
         }
     } 
 
@@ -410,7 +431,8 @@ getLastNode =
     # Use this when getting the content for the last section
 function(node, doc = as(node, "XMLInternalDocument"))
 {
-    ans = getNodeSet(doc, "//page[last()]/text[last()]")[[1]]
+    #    ans = getNodeSet(doc, "//page[last()]/text[last()]")[[1]]
+    ans = getNodeSet(doc, "//text[last() and ancestor::page]")[[1]]    
     if(pageOf(ans) == pageOf(node)) {
         # if on the same page, then we need to check which column node is in
         # and ensure that the ans node is in the same column.
