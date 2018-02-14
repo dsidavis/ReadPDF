@@ -4,17 +4,22 @@ getSectionText =
     #
     #
 function(doc, asNodes = FALSE, secHeaders = findSectionHeaders(doc, ...), maxNumPages = 30, cleanSectionNums = TRUE,
-             addOmitted = TRUE, ... )
+             addOmitted = TRUE, separateTables = TRUE, ... )
 {
     if(is.character(doc))
         doc = readPDFXML(doc)
 
     if(getNumPages(doc) > maxNumPages)
         return(list())
+
+    if(separateTables) {
+        tbls = getTables(doc)
+        removeNodes(unlist(tbls))
+    }
     
     if(length(secHeaders) == 0)
         return(list())
-    
+
     secHeaders = orderNodes(unlist(secHeaders))
 
     secs = lapply(seq(along = secHeaders),
@@ -36,6 +41,9 @@ function(doc, asNodes = FALSE, secHeaders = findSectionHeaders(doc, ...), maxNum
         txt["<other>"] = paste(sapply(onodes, xmlValue), collapse = " ")
     }
 
+    if(separateTables)
+        txt[paste0("Table", seq(along = tbls))] = names(tbls)
+    
     txt
 }
 
