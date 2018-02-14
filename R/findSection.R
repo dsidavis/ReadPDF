@@ -3,7 +3,8 @@ getSectionText =
     #
     #
     #
-function(doc, asNodes = FALSE, secHeaders = findSectionHeaders(doc, ...), maxNumPages = 30, cleanSectionNums = TRUE, ... )
+function(doc, asNodes = FALSE, secHeaders = findSectionHeaders(doc, ...), maxNumPages = 30, cleanSectionNums = TRUE,
+             addOmitted = TRUE, ... )
 {
     if(is.character(doc))
         doc = readPDFXML(doc)
@@ -29,6 +30,13 @@ function(doc, asNodes = FALSE, secHeaders = findSectionHeaders(doc, ...), maxNum
        return(secs)
     
     txt = sapply(secs, xmlValue)
+
+    if(addOmitted) {
+        onodes = getNodesBetween(doc[[1]][["text"]], secHeaders[[1]])
+        txt["<other>"] = paste(sapply(onodes, xmlValue), collapse = " ")
+    }
+
+    txt
 }
 
 
@@ -304,12 +312,13 @@ function(x = NULL, to = NULL, before = FALSE, useLines = TRUE)
 {
     page = xmlParent(if(!is.null(x)) x else to)
     cols = getTextByCols(page, asNodes = TRUE)
-#browser()
+
+    original.to = to
     
     if(useLines) {
        if(!is.null(to) && xmlName(to) %in% c('rect', 'line')) {
            bb = getBBox(list(to))
-#           browser()
+
            bb[1,2] = bb[1,4]
            to = NULL
 #           useLines = FALSE
@@ -363,8 +372,9 @@ function(x = NULL, to = NULL, before = FALSE, useLines = TRUE)
         tmp = list(x)
         if(!is.null(to))
             tmp[[2]] = to
-        bb2 = getBBox2(tmp)        
-        w = (bb[,3] - bb[,1])/as.numeric(xmlGetAttr(page, "width")) > .6 & bb[,2] > bb2[1,2]
+        bb2 = getBBox2(tmp)
+                     # Was > .6 not .53
+        w = (bb[,3] - bb[,1])/as.numeric(xmlGetAttr(page, "width")) > .53 & bb[,2] > bb2[1,2]
         if(any(w)) {
             bot = max(bb[w, 4])
             f = function(x) {
@@ -376,6 +386,10 @@ function(x = NULL, to = NULL, before = FALSE, useLines = TRUE)
             # or
             
             nodes = if(length(nodes) != length(cols)) f(unlist(nodes)) else lapply(nodes, f) 
+        } else if(!is.null(original.to)) {
+            tmp2 = c((bb[,3] - bb[,1])/as.numeric(xmlGetAttr(page, "width")) > .53, bb[,2] > bb2[1,2])
+            if(any(tmp2))
+                stop("check the threshold")
         }
     } 
 
