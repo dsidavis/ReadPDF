@@ -13,8 +13,9 @@ function(doc, asNodes = FALSE, secHeaders = findSectionHeaders(doc, ...), maxNum
         return(list())
 
     if(separateTables) {
-        tbls = getTables(doc)
-        nn = unlist(tbls)
+        tblNodes = getTables(doc)
+        tbls = sapply(tblNodes, function(x) paste(names(x), collapse = "\n"))
+        nn = unlist(tblNodes)
         if(!is.null(nn))
           removeNodes(nn[!sapply(nn, is.null)])
     }
@@ -32,7 +33,8 @@ function(doc, asNodes = FALSE, secHeaders = findSectionHeaders(doc, ...), maxNum
 
     if(cleanSectionNums)
       names(secs) = removeNumPrefixes(names(secs))
-    
+
+    #XXX deal with the tables.
     if(asNodes)
        return(secs)
     
@@ -48,7 +50,7 @@ function(doc, asNodes = FALSE, secHeaders = findSectionHeaders(doc, ...), maxNum
     }
 
     if(separateTables && length(tbls)) 
-        txt[paste0("Table", seq(along = tbls))] = names(tbls)
+        txt[paste0("Table", seq(along = tbls))] = tbls
     
     txt
 }
