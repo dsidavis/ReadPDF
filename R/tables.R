@@ -1,16 +1,29 @@
 # Look at Buckley-2003  Rectangle around the table 1. Are these lines
 # or a rectangle?
 
-getTables =
-function(doc, ...)
+getTableNodes =
+function(doc, drop = TRUE)
 {
     if(is.character(doc))
         doc = readPDFXML(doc)
-
+    
       # Some docs have T able as two separate text elements
-    tableNodes = getNodeSet(doc,
-        "//text[. = 'Table' or . = 'TABLE' or starts-with(., 'TABLE') or starts-with(., 'Table') or (. = 'T' and following-sibling::text[1] ='ABLE') or contains(., ' Table')]")
+    tt = getNodeSet(doc,
+                     "//text[. = 'Table' or . = 'TABLE' or starts-with(., 'TABLE') or starts-with(., 'Table') or (. = 'T' and following-sibling::text[1] ='ABLE') or contains(., ' Table')]")
 
+    if(!drop)
+       return(tt)
+    
+    txt = sapply(tt, xmlValue)
+    tt[ !grepl("(tables|in table|table [0-9]+\\.?\\))", txt, ignore.case = TRUE) ]
+}
+
+getTables =
+function(doc, tableNodes = getTableNodes(doc), ...)
+{
+    if(is.character(doc))
+        doc = readPDFXML(doc)
+    
     # Discard tables Table S1 (etc.) and if it is in the "section" named 'Supporting Online Material'
     # This doesn't show up as an actual section header, so we just look for it.  But it has to be on the same
     # page as the Table S text node so that we don't pick one up from another article.
@@ -353,4 +366,38 @@ function(x, gap = 5)
 {
     d = x$x0[-1] - x$x1[-nrow(x)]
     do.call(rbind, by(x, cumsum(c(0, !(d < gap))), function(x) data.frame(x0 = min(x$x0), y0 = min(x$y0), x1 = max(x$x1), y1 = max(x$y1))))
+}
+
+
+showTableNodes =
+function(nodes)
+{
+    pages = sapply(nodes, pageOf, TRUE)
+    pg = unique(pages)
+    if(length(pg) > 1) {
+        opar = par(no.readonly = TRUE)
+        on.exit(par(opar))
+        par(mfrow = c(1, length(pg)))
+    }
+
+    mapply(
+           function(tt, page) {
+               plot(page)
+               showNode(tt, page)
+           }, split(nodes, sapply(nodes, pageOf)), pg)
+}
+
+showNode =
+function(node, page = pageOf(node, TRUE), ...)    
+{
+#    if(is.list(x))
+#        sapply(x, showNode, page = page, ...)
+
+    h = dim(page)["height"]
+    bb = getBBox2(node)
+#browser()    
+    x = bb[,1] + bb[,3]/2
+    y = h - (bb[,2] + bb[,4]/2)
+    text(x, y, sapply(node, xmlValue), col = "red", cex = 2)
+    symbols(x, y, circle = rep(mean(bb[,4])*2, length(x)), fg = "red", lwd = 2, add = TRUE)
 }
