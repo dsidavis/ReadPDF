@@ -106,3 +106,5 @@ export(getTextByCols)
 # ,removeRotated
 # ,combineBBoxLines
 #)
+
+export(getPageLines)
