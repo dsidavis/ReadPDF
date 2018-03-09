@@ -1,8 +1,31 @@
 # Look at Buckley-2003  Rectangle around the table 1. Are these lines
 # or a rectangle?
 
+
+# A collection of alternative terms in a regular expression which we use
+# to discard matches that are not the actual definition of a table
+# but references to a table.
+TableNodeRegex = c(
+    "table[a-z]",
+    "online .* table",
+    "table of contents",
+    "(using|also|and|with|for|in|from|to|by)( the)? +table",
+    "table ([0-9]+ )?also", 
+    "\\( ?table ([0-9]+)?\\)?",
+    "cdc.gov/",
+    "table ([0-9]+|I|II|III|IV|V|VI|VII|VIII|IX|X) *\\)",
+    "see (online",
+    "table)",
+    "(tables",
+    "supplementa(l|ry) table",
+    "\\(available online", 
+    "table [0-9]+\\.?\\))",
+    "table ([0-9]+ +)?shows +th", 
+    "[,;] table")
+
 getTableNodes =
-function(doc, drop = TRUE, useSiblings = c(FALSE, TRUE), dropHref = FALSE)
+function(doc, drop = TRUE, useSiblings = c(FALSE, TRUE), dropHref = FALSE,
+           rejectRegex = TableNodeRegex)
 {
     if(is.character(doc))
         doc = readPDFXML(doc)
@@ -14,15 +37,16 @@ function(doc, drop = TRUE, useSiblings = c(FALSE, TRUE), dropHref = FALSE)
     if(!drop)
        return(tt)
 
-#XX useSiblings    
     txt = sapply(tt, getTextAround, useSiblings = rep(useSiblings, length = 2))
-    rx = "table[a-z]|online .* table|table of contents|(also|and|for|in|from)( the)? table|table ([0-9]+ )?also|\\( ?table ([0-9]+)?\\)?|table [0-9]+ *\\)|see (online|table)|(tables|supplementa(l|ry) table|\\(available online|in +table|table [0-9]+\\.?\\))|table ([0-9]+ +)?shows +th|[,;] table"
+#    rx = "table[a-z]|online .* table|table of contents|(also|and|for|in|from)( the)? table|table ([0-9]+ )?also|\\( ?table ([0-9]+)?\\)?|table [0-9]+ *\\)|see (online|table)|(tables|supplementa(l|ry) table|\\(available online|in +table|table [0-9]+\\.?\\))|table ([0-9]+ +)?shows +th|[,;] table"
+
+    rx = paste(rejectRegex, collapse = "|")
     w = grepl(rx, txt, ignore.case = TRUE) 
     if(dropHref) {
         hasHref = sapply(tt, function(x) "a" %in% names(x))
         w = w | hasHref
     }
-   browser()    
+#   browser()    
     tt[ !w ]
 }
 
