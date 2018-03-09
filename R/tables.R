@@ -2,20 +2,37 @@
 # or a rectangle?
 
 getTableNodes =
-function(doc, drop = TRUE)
+function(doc, drop = TRUE, useSiblings = c(FALSE, TRUE), dropHref = FALSE)
 {
     if(is.character(doc))
         doc = readPDFXML(doc)
     
       # Some docs have T able as two separate text elements
     tt = getNodeSet(doc,
-                     "//text[. = 'Table' or . = 'TABLE' or starts-with(., 'TABLE') or starts-with(., 'Table') or (. = 'T' and following-sibling::text[1] ='ABLE') or contains(., ' Table')]")
+                     "//text[. = 'Table' or . = 'TABLE' or starts-with(., 'TABLE') or starts-with(., 'Table') or (. = 'T' and lower-case(following-sibling::text[1]) ='able') or contains(., ' Table')]")
 
     if(!drop)
        return(tt)
-    
-    txt = sapply(tt, xmlValue)
-    tt[ !grepl("(tables|in table|table [0-9]+\\.?\\))", txt, ignore.case = TRUE) ]
+
+#XX useSiblings    
+    txt = sapply(tt, getTextAround, useSiblings = rep(useSiblings, length = 2))
+    rx = "table[a-z]|online .* table|table of contents|(also|and|for|in|from)( the)? table|table ([0-9]+ )?also|\\( ?table ([0-9]+)?\\)?|table [0-9]+ *\\)|see (online|table)|(tables|supplementa(l|ry) table|\\(available online|in +table|table [0-9]+\\.?\\))|table ([0-9]+ +)?shows +th|[,;] table"
+    w = grepl(rx, txt, ignore.case = TRUE) 
+    if(dropHref) {
+        hasHref = sapply(tt, function(x) "a" %in% names(x))
+        w = w | hasHref
+    }
+   browser()    
+    tt[ !w ]
+}
+
+getTextAround =
+function(x, useSiblings = c(TRUE, TRUE))
+{
+    v = c(if(useSiblings[1]) xmlValue(getSibling(x, FALSE)) else character(),
+            xmlValue(x),
+          if(useSiblings[2]) xmlValue(getSibling(x)))
+    paste(v, collapse = " ")
 }
 
 getTables =
@@ -369,9 +386,12 @@ function(x, gap = 5)
 }
 
 
-showTableNodes =
-function(nodes)
+showNodes =
+function(nodes, showCircle = TRUE, ...)
 {
+    if(length(nodes) == 0)
+        return(NULL)
+    
     pages = sapply(nodes, pageOf, TRUE)
     pg = unique(pages)
     if(length(pg) > 1) {
@@ -381,23 +401,29 @@ function(nodes)
     }
 
     mapply(
-           function(tt, page) {
+           function(tt, page, ...) {
                plot(page)
-               showNode(tt, page)
+               showNode(tt, page, showCircle = showCircle, ...)
            }, split(nodes, sapply(nodes, pageOf)), pg)
 }
 
 showNode =
-function(node, page = pageOf(node, TRUE), ...)    
+function(node, page = pageOf(node, TRUE), showCircle = TRUE, text = sapply(node, xmlValue), ...)    
 {
-#    if(is.list(x))
-#        sapply(x, showNode, page = page, ...)
+
+ #XX Deal with rotation.
 
     h = dim(page)["height"]
     bb = getBBox2(node)
 #browser()    
     x = bb[,1] + bb[,3]/2
     y = h - (bb[,2] + bb[,4]/2)
-    text(x, y, sapply(node, xmlValue), col = "red", cex = 2)
-    symbols(x, y, circle = rep(mean(bb[,4])*2, length(x)), fg = "red", lwd = 2, add = TRUE)
+    if(length(text))
+       text(x, y, sapply(node, xmlValue), col = "red", cex = 2)
+    if(showCircle)
+       symbols(x, y, circle = rep(mean(bb[,4])*2, length(x)), fg = "red", lwd = 2, add = TRUE)
 }
+
+
+
+showTb = function(file, dropHref = FALSE, ...) { tt = getTableNodes(file, dropHref = dropHref); showNodes(tt, ...); tt}
