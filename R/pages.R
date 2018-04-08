@@ -68,7 +68,7 @@ function(node, asNode = FALSE)
 {    
     p = getNodeSet(node, ".//ancestor::page")[[1]]
     if(asNode)
-        p
+        structure(p, class = c("PDFToXMLPage", class(p)))
     else
         xmlGetAttr(p, "number", converter = as.integer)
 }

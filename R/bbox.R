@@ -1,6 +1,21 @@
 getBBox2 =
     # For text, not rect or line nodes.
 function(nodes, asDataFrame = FALSE, attrs = c("left", "top", if(rotation) "rotation"), pages = FALSE, rotation = FALSE)
+    UseMethod("getBBox2")
+
+getBBox2.PDFToXMLPage =
+    # For text, not rect or line nodes.
+function(nodes, asDataFrame = FALSE, attrs = c("left", "top", if(rotation) "rotation"), pages = FALSE, rotation = FALSE)
+    getBBox2(getNodeSet(nodes, ".//text"), asDataFrame, color)
+
+
+getBBox2.XMLInternalNode =
+function(nodes, asDataFrame = FALSE, attrs = c("left", "top", if(rotation) "rotation"), pages = FALSE, rotation = FALSE)
+    getBBox2(list(nodes), asDataFrame, attrs, pages, rotation)
+
+getBBox2.XMLNodeSet = getBBox2.list = 
+    # For text, not rect or line nodes.
+function(nodes, asDataFrame = FALSE, attrs = c("left", "top", if(rotation) "rotation"), pages = FALSE, rotation = FALSE)
 {
     if(is(nodes, "XMLInternalElementNode"))
         if(xmlName(nodes) == "text")
@@ -39,6 +54,17 @@ getBBox =
     # This bbox function expects an attribute named bbox
     #
 function(nodes, asDataFrame = FALSE, color = FALSE)
+    UseMethod("getBBox")
+
+getBBox.XMLInternalNode =
+function(nodes, asDataFrame = FALSE, color = FALSE)    
+    getBBox(list(nodes), asDataFrame, color)
+
+getBBox.XMLNodeSet = getBBox.list =
+    #
+    # This bbox function expects an attribute named bbox
+    #
+function(nodes, asDataFrame = FALSE, color = FALSE)    
 {
     if(length(nodes) == 0) {
         if(asDataFrame)
@@ -61,3 +87,17 @@ function(nodes, asDataFrame = FALSE, color = FALSE)
         bb
     }
 }
+
+
+getBBox.PDFToXMLPage =
+    #
+    # This bbox function expects an attribute named bbox
+    #
+function(nodes, asDataFrame = FALSE, color = FALSE)
+{
+  getBBox(getNodeSet(nodes, ".//line| .//rect"), asDataFrame, color)
+}
+
+
+
+

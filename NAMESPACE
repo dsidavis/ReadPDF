@@ -10,13 +10,9 @@ export(pdfText, pdf_text)
 
 export(getTextFonts, getFontInfo)
 
-
 export(bodyLine)
-    
-
 
 export(getPageFooter)
-
 
 export(getDocTitle, getDocTitleString)
 
@@ -33,25 +29,82 @@ exportMethods(length)
 export(dim)
 exportMethods(dim)
 
+S3method("[", "ConvertedPDFDoc")
+S3method("[[", "ConvertedPDFDoc")
+
 export(plot)
 S3method(plot, PDFToXMLPage)
 
 
 export(getNumCols)
 S3method(getNumCols,character)
-S3method(getNumCols,PDFToXMLPage)
-S3method(getNumCols,PDFToXMLDoc)
 
 
-export(getColPositions)
+
 S3method(getColPositions,character)
 S3method(getColPositions,XMLInternalElementNode)
+S3method(getColPositions,XMLInternalDocument)
 S3method(getColPositions,PDFToXMLPage)
-S3method(getColPositions,PDFToXMLDoc)
 
-export(pageOf)
 S3method(pageOf, list)
-S3method(pageOf, XMLInternalNode)
-S3method(pageOf, XMLInternalElementNode)
+S3method(pageOf,XMLInternalElementNode)
+
+export(columnOf)
+
+S3method(isTitleBad, character)
 
 
+
+export(getBBox, getBBox2)
+S3method(getBBox2, XMLNodeSet)
+S3method(getBBox2, list)
+S3method(getBBox2, XMLInternalNode)
+S3method(getBBox2, PDFToXMLPage)
+
+S3method(getBBox, XMLNodeSet)
+S3method(getBBox, list)
+S3method(getBBox, PDFToXMLPage)
+S3method(getBBox, XMLInternalNode)
+
+export(getPageHeader)
+
+
+export(getPublicationDate, getDatePublished)
+
+
+export(getPages)
+export(getTables)
+
+
+
+
+export(inColumn)
+
+export(isCentered)
+
+
+
+export(showPage)
+
+
+export(convertPDF2XML)
+
+export(findTable)
+
+
+export(getDocFont)
+export(getDocWords)
+
+export(getTextByCols)
+
+
+
+# export(
+#assembleLine
+# ,gapBetweenSegments
+# ,getTextAfter
+# ,removeRotated
+# ,combineBBoxLines
+#)
+
+export(getPageLines)

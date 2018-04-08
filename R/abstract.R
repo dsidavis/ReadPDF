@@ -21,6 +21,7 @@ function(doc, asNodes = TRUE, page = doc[[1 + hasCoverPage(doc) ]], byLine = TRU
         doc = readPDFXML(doc)
     
     if(isBioOne(doc) && missing(page))
+          # skip the first page and start at the second page
         page = doc[[2]]
     
     if(is.numeric(page))
@@ -32,14 +33,14 @@ function(doc, asNodes = TRUE, page = doc[[1 + hasCoverPage(doc) ]], byLine = TRU
     a = findAbstractDecl(page)
 
     rect = getNodeSet(page, ".//rect | .//line")
-    rect.bb = getBBox(rect, color = TRUE)    
+    rect.bb = getBBox(rect, color = TRUE, asDataFrame = TRUE)    
 
+browser()    
     if(length(a) && any(w <- isNodeIn(a[[1]], rect.bb))) {
         # Calzolari
         # Is the Abstract within a colored box. If so, get the text in that box.
 
         #XXX Only taking one. Generalize
-#    browser()        
         nodes = getNodesBetween(a[[1]], rect[[which(w)[1]]])
         return(cleanAbstract(nodes, asNodes = asNodes, byLine = byLine))
     }

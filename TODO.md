@@ -1,10 +1,13 @@
 # pdftohtml
 
+
+1. In Easterbrook-2007, p4  The figure has lines and is PDF but we don't see the lines in the plot
+   when we plot that page in R.
 1. Beta character in Wong et al  supplement.  See BadCharacters in pdftohtml for analysis. 
 1. The + characters in table3 of Leroy-2004 are not present in the XML. No <text> node for them at
    all.
 1. Also in Leroy-2004 words are put together LossiDec 2002 when should be 
-1. findTable().  FOr Aguilar-2007, missing the >= in table 3. Not in XML. This is not just > but a
+1. findTable().  For Aguilar-2007, missing the >= in table 3. Not in XML. This is not just > but a
    symbol in  font. And it is getting ignored/dropped!
 1. Are the image locations and dimensions (x, y) correct?  Do we need to transform them?
    See Klein-2011
@@ -19,13 +22,15 @@
 
 ## Spreadsheets of results
 
-
+## Misc
+1. Find super and subscripts.
 
 ## getPublicationDate
 
 1. Footer is not pulling in all information, e.g. when multiple fonts
    occur, getPageFooter() only returns one font/bounding box baseline
    set. Add some "wiggle" room to match close enough bboxes
+   ??Example doc in which problem occurs?
    
 1. Currently bails out after a "successful" match. May want to return
    all possible places where there could be a match, but this might

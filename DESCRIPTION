@@ -9,3 +9,4 @@ Imports: XML, methods
 Extra: (>= 3.99.0)
 System: Modified version of pdftohtml available at 
    https://github.com:dsidavis/pdftohtml
+

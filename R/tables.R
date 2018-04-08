@@ -1,16 +1,70 @@
 # Look at Buckley-2003  Rectangle around the table 1. Are these lines
 # or a rectangle?
 
-getTables =
-function(doc, ...)
+
+# A collection of alternative terms in a regular expression which we use
+# to discard matches that are not the actual definition of a table
+# but references to a table.
+TableNodeRegex = c(
+    "table[a-z]",
+    "online .* table",
+    "table of contents",
+    "(using|also|and|with|for|in|from|to|by)( the)? +table",
+    "table ([0-9]+ )?also", 
+    "\\( ?table ([0-9]+)?\\)?",
+    "cdc.gov/",
+    "table ([0-9]+|I|II|III|IV|V|VI|VII|VIII|IX|X) *\\)",
+    "see (online",
+    "table)",
+    "(tables",
+    "supplementa(l|ry) table",
+    "\\(available online", 
+    "table [0-9]+\\.?\\))",
+    "table ([0-9]+ +)?shows +th", 
+    "[,;] table")
+
+getTableNodes =
+function(doc, drop = TRUE, useSiblings = c(FALSE, TRUE), dropHref = FALSE,
+           rejectRegex = TableNodeRegex)
 {
     if(is.character(doc))
         doc = readPDFXML(doc)
-
+    
       # Some docs have T able as two separate text elements
-    tableNodes = getNodeSet(doc,
-        "//text[. = 'Table' or . = 'TABLE' or starts-with(., 'TABLE') or starts-with(., 'Table') or (. = 'T' and following-sibling::text[1] ='ABLE') or contains(., ' Table')]")
+    tt = getNodeSet(doc,
+                     "//text[. = 'Table' or . = 'TABLE' or starts-with(., 'TABLE') or starts-with(., 'Table') or (. = 'T' and lower-case(following-sibling::text[1]) ='able') or contains(., ' Table')]")
 
+    if(!drop)
+       return(tt)
+
+    txt = sapply(tt, getTextAround, useSiblings = rep(useSiblings, length = 2))
+#    rx = "table[a-z]|online .* table|table of contents|(also|and|for|in|from)( the)? table|table ([0-9]+ )?also|\\( ?table ([0-9]+)?\\)?|table [0-9]+ *\\)|see (online|table)|(tables|supplementa(l|ry) table|\\(available online|in +table|table [0-9]+\\.?\\))|table ([0-9]+ +)?shows +th|[,;] table"
+
+    rx = paste(rejectRegex, collapse = "|")
+    w = grepl(rx, txt, ignore.case = TRUE) 
+    if(dropHref) {
+        hasHref = sapply(tt, function(x) "a" %in% names(x))
+        w = w | hasHref
+    }
+#   browser()    
+    tt[ !w ]
+}
+
+getTextAround =
+function(x, useSiblings = c(TRUE, TRUE))
+{
+    v = c(if(useSiblings[1]) xmlValue(getSibling(x, FALSE)) else character(),
+            xmlValue(x),
+          if(useSiblings[2]) xmlValue(getSibling(x)))
+    paste(v, collapse = " ")
+}
+
+getTables =
+function(doc, tableNodes = getTableNodes(doc), ...)
+{
+    if(is.character(doc))
+        doc = readPDFXML(doc)
+    
     # Discard tables Table S1 (etc.) and if it is in the "section" named 'Supporting Online Material'
     # This doesn't show up as an actual section header, so we just look for it.  But it has to be on the same
     # page as the Table S text node so that we don't pick one up from another article.
@@ -354,3 +408,46 @@ function(x, gap = 5)
     d = x$x0[-1] - x$x1[-nrow(x)]
     do.call(rbind, by(x, cumsum(c(0, !(d < gap))), function(x) data.frame(x0 = min(x$x0), y0 = min(x$y0), x1 = max(x$x1), y1 = max(x$y1))))
 }
+
+
+showNodes =
+function(nodes, showCircle = TRUE, ...)
+{
+    if(length(nodes) == 0)
+        return(NULL)
+    
+    pages = sapply(nodes, pageOf, TRUE)
+    pg = unique(pages)
+    if(length(pg) > 1) {
+        opar = par(no.readonly = TRUE)
+        on.exit(par(opar))
+        par(mfrow = c(1, length(pg)))
+    }
+
+    mapply(
+           function(tt, page, ...) {
+               plot(page)
+               showNode(tt, page, showCircle = showCircle, ...)
+           }, split(nodes, sapply(nodes, pageOf)), pg)
+}
+
+showNode =
+function(node, page = pageOf(node, TRUE), showCircle = TRUE, text = sapply(node, xmlValue), ...)    
+{
+
+ #XX Deal with rotation.
+
+    h = dim(page)["height"]
+    bb = getBBox2(node)
+#browser()    
+    x = bb[,1] + bb[,3]/2
+    y = h - (bb[,2] + bb[,4]/2)
+    if(length(text))
+       text(x, y, sapply(node, xmlValue), col = "red", cex = 2)
+    if(showCircle)
+       symbols(x, y, circle = rep(mean(bb[,4])*2, length(x)), fg = "red", lwd = 2, add = TRUE)
+}
+
+
+
+showTb = function(file, dropHref = FALSE, ...) { tt = getTableNodes(file, dropHref = dropHref); showNodes(tt, ...); tt}

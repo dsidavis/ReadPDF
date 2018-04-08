@@ -5,18 +5,30 @@ function()
 }
 
 
+QQuote =
+function(x)
+    sprintf("'%s'", x)
+
 convertPDF2XML =
     # Convert a PDF document to XML using stdout
-function(file, pdftohtml = getOption("PDFTOHTML", Sys.getenv("PDFTOHTML", 'pdftohtml')))
+function(file, out = character(), args = c("-q", "-xml"), pdftohtml = getOption("PDFTOHTML", Sys.getenv("PDFTOHTML", 'pdftohtml')))
 {
       # -q - quiet
       # -xml - convert to xml
-      # No -c with -stdout!!!
-    cmd = sprintf("%s -q -xml -stdout '%s'", pdftohtml, path.expand(file))
+    # No -c with -stdout!!!
+    if(length(out) == 0)
+        args = c(args, "-stdout")
 
-    out = system(cmd, intern = TRUE)
+    if(grepl("\\.xml$", out))
+        out = gsub("\\.xml$", "", out)
     
-    doc = xmlParsePDFTOHTML(out, asText = TRUE)
+    cmd = sprintf("%s %s '%s' %s", pdftohtml, paste(args, collapse = " "), path.expand(file), if(length(out)) QQuote(out) else "")
+
+    ans = system(cmd, intern = TRUE)
+    if(length(out))
+        return(paste0(out, ".xml"))
+
+    doc = xmlParsePDFTOHTML(ans, asText = TRUE)
     docName(doc) = file
     
     doc
