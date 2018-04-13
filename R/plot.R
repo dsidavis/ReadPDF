@@ -33,6 +33,18 @@ function(f, pageNum = 1, doc = xmlParse(f), page = getNodeSet(doc, "//page")[[pa
 
 plot.PDFToXMLPage = showPage
 
+plot.PDFToXMLDoc =
+function(x, y, ...)
+{
+    np = getNumPages(x)
+    r = ceiling(sqrt(np))
+    c = np/r
+    opar = par(no.readonly = TRUE)
+    on.exit(par(opar))
+    par(mfrow = c(r, c))
+    invisible(sapply(getPages(doc), renderPage))
+}
+
 pageTitle =
 function(page, docname = docName(page), fullName = TRUE)
 {
