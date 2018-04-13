@@ -50,7 +50,7 @@ function(file, page = 1, doc = readPDFXML(file), meta = FALSE, minWords = 1, ...
   if(length(getNodeSet(p1, ".//text")) == 0)
       return(list())
 
-  if(isScanned2(doc))
+  if(isScanned2(doc)) # Should we use isScanned() ?
       return(NA_character_)
   
   fonts = getFontInfo(p1)
