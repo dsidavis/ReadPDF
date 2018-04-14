@@ -47,7 +47,7 @@ function(file, page = 1, doc = readPDFXML(file), meta = FALSE, minWords = 1, asN
     # For what documents is this necessary - e.g. Puzelli et al
     # But need to be more specific for this cover page as other docs, e.g., A case of Crimean-Congo Ham.... .xml doesn't
     # have the cover page but does have the www.euro...org link.
-  if(length(getNodeSet(doc, "//page[1][./text[contains(., 'www.eurosurveillance.org')] and ./text[contains(., 'Weekly')] ]")))
+  if(missing(page) && length(getNodeSet(doc, "//page[1][./text[contains(., 'www.eurosurveillance.org')] and ./text[contains(., 'Weekly')] ]")))
       page = 2
   
      # handle case where the first page is a cover sheet
