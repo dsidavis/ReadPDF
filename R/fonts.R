@@ -137,7 +137,24 @@ function(doc)
 
 
 isBold =
-function(obj)
+function(x, ...)
+    UseMethod("isBold")
+
+isBold.XMLInternalNode =
+function(x, fontInfo = getFontInfo(as(x, "XMLInternalDocument")), ...)    
 {
 
+}
+
+isBold.character =
+function(x, ...)    
+{
+    grepl("Bold", x)
+}
+
+
+isBold.data.frame =
+function(x, ...)    
+{
+   x$isBold | isBold(x$name)
 }
