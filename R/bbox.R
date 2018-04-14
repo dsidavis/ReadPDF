@@ -45,6 +45,14 @@ function(nodes, asDataFrame = FALSE, attrs = c("left", "top", if(rotation) "rota
           m = cbind(m, page = pageNums)
        rownames(m) = txt
    }
+
+   if(color) {
+       cols = getTextNodeColors(nodes, m)
+       if(asDataFrame)
+           m$color = cols
+       else
+           m = cbind(m, color = cols)
+   }
    m
 }
 
@@ -90,15 +98,9 @@ function(nodes, asDataFrame = FALSE, color = FALSE, diffs = FALSE)
         bb
     }
 
-    if(color) {
-        cols = lapply(c("fill.color", "stroke.color"), function(at) sapply(nodes, xmlGetAttr, at))
-        if(asDataFrame) {
-            ans$fill = cols[[1]]
-            ans$stroke = cols[[2]]            
-        } else {
-            ans = cbind(ans, cols[[1]], cols[[2]])
-        }
-    }
+    if(color) 
+        ans = addBBoxColors(nodes, ans)
+
 
     if(diffs) {
         ans[3:4] = ans[3:4] - ans[1:2]
@@ -108,6 +110,24 @@ function(nodes, asDataFrame = FALSE, color = FALSE, diffs = FALSE)
     ans
 }
 
+addBBoxColors =
+function(nodes, ans)    
+{
+        cols = lapply(c("fill.color", "stroke.color"), function(at) sapply(nodes, xmlGetAttr, at))
+        if(is.data.frame(ans)) {
+            ans$fill = cols[[1]]
+            ans$stroke = cols[[2]]            
+        } else 
+            ans = cbind(ans, cols[[1]], cols[[2]])
+
+        ans
+}
+
+getTextNodeColors =
+function(nodes, fontIds = sapply(nodes, xmlGetAttr, "font"), fontInfo = getFontInfo(doc), doc = as(nodes[[1]], "XMLInternalDocument"))
+{
+    fontInfo[fontIds, "color"]
+}
 
 getBBox.PDFToXMLPage =
     #
