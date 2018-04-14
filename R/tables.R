@@ -411,7 +411,7 @@ function(x, gap = 5)
 
 
 showNodes =
-function(nodes, showCircle = TRUE, text = sapply(text, xmlValue), ...)
+function(nodes, showCircle = TRUE, text = sapply(nodes, xmlValue), ...)
 {
     if(length(nodes) == 0)
         return(NULL)
