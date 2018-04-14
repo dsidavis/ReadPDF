@@ -1,11 +1,10 @@
-isEmergingInfectDisease =
+isEID = isEmergingInfectDisease =
 function(doc)
 {
-    if(is.character(doc))
-        doc = readPDFXML(doc)
+    doc = as(doc, "PDFToXMLDoc")
 
     foot = getPageFooter(doc[[1]])
-    length(foot) && nchar(foot) && grepl("Emerging Infectious Dieseases", foot)
+    length(foot) && nchar(foot) && grepl("Emerging Infectious Diseases", foot)
 }
 
 
