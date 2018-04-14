@@ -411,7 +411,7 @@ function(x, gap = 5)
 
 
 showNodes =
-function(nodes, showCircle = TRUE, ...)
+function(nodes, showCircle = TRUE, text = sapply(text, xmlValue), ...)
 {
     if(length(nodes) == 0)
         return(NULL)
@@ -423,31 +423,50 @@ function(nodes, showCircle = TRUE, ...)
         on.exit(par(opar))
         par(mfrow = c(1, length(pg)))
     }
-
-    mapply(
-           function(tt, page, ...) {
+    po = sapply(nodes, pageOf)
+    invisible(mapply(function(tt, page, text, ...) {
                plot(page)
-               showNode(tt, page, showCircle = showCircle, ...)
-           }, split(nodes, sapply(nodes, pageOf)), pg)
+               showNode(tt, page, text = text, showCircle = showCircle, ...)
+           }, split(nodes, po), pg, split(text, po)))
 }
 
 showNode =
 function(node, page = pageOf(node, TRUE), showCircle = TRUE, text = sapply(node, xmlValue), ...)    
 {
-
- #XX Deal with rotation.
-
+    #XX Deal with rotation.
+    #XX Deal with line and rect nodes
+    
+    isText = (sapply(node, xmlName) == "text")
+    if(length(unique(isText)) > 1) {
+        showNode(node[isText], page, showCircle, text[isText])
+        showNode(node[!isText], page, FALSE, text[!isText])
+        invisible(return(NULL))
+    }
+    
     h = dim(page)["height"]
-    bb = getBBox2(node)
-#browser()    
-    x = bb[,1] + bb[,3]/2
-    y = h - (bb[,2] + bb[,4]/2)
+                 
+    bb = if(any(isText)) getBBox2(node) else getBBox(node)
+
+    if(any(isText)) {
+        x = bb[,1] + bb[,3]/2
+        y = h - (bb[,2] + bb[,4]/2)
+    } else {
+        x = (bb[,1] + bb[,3])/2
+        y = h - (bb[,2] + bb[,4])/2        
+    }
+    
     if(length(text))
-       text(x, y, sapply(node, xmlValue), col = "red", cex = 2)
+       text(x, y, text, col = "red", cex = 2)
+    
     if(showCircle)
        symbols(x, y, circle = rep(mean(bb[,4])*2, length(x)), fg = "red", lwd = 2, add = TRUE)
 }
 
 
-
-showTb = function(file, dropHref = FALSE, ...) { tt = getTableNodes(file, dropHref = dropHref); showNodes(tt, ...); tt}
+showTb =
+function(file, dropHref = FALSE, ...)
+{
+    tt = getTableNodes(file, dropHref = dropHref)
+    showNodes(tt, ...)
+    tt
+}
