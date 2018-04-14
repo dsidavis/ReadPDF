@@ -213,7 +213,8 @@ function(txtNodes, minWords = 3, filename = "", lowerCase = TRUE)
 
   
   #Test:
-  grepl("^Review$", txtNodes)  ||
+   grepl("^Review$", txtNodes)  ||
+  grepl("^viruses$", txtNodes)  ||        
   grepl("Acta Veterinaria", txtNodes) ||
   grepl("BMC Infectious Diseases", txtNodes) ||
   nchar(txtNodes) < 6 ||   
