@@ -17,7 +17,7 @@ getDocTitle =
     #
     #  See 1599857215/Learned-2005-Extended interhuman transmission.xml for a title in the meta that is just the name of the file.
     #
-function(file, page = 1, doc = readPDFXML(file), meta = FALSE, minWords = 1, ...)
+function(file, page = 1, doc = readPDFXML(file), meta = FALSE, minWords = 1, asNode = FALSE, scanned = isScanned2(doc), ...)
 {
   if(missing(doc) && is(file, "XMLInternalDocument"))
       doc = file
@@ -50,7 +50,7 @@ function(file, page = 1, doc = readPDFXML(file), meta = FALSE, minWords = 1, ...
   if(length(getNodeSet(p1, ".//text")) == 0)
       return(list())
 
-  if(isScanned2(doc)) # Should we use isScanned() ?
+  if(scanned) # Should we use isScanned() ?
       return(NA_character_)
   
   fonts = getFontInfo(p1)
@@ -91,6 +91,8 @@ function(file, page = 1, doc = readPDFXML(file), meta = FALSE, minWords = 1, ...
         # See why we are doing this in 4214927259/A case of Crimean-Congo haemorrhagic fever in.xml
         # 
       tmp = mkLines(txt, p1)
+      if(asNode) return(tmp)
+      
       title = paste(sapply(tmp, function(x) paste(if(is.list(x)) sapply(x, xmlValue) else xmlValue(x), collapse = " ")), collapse = "\n")
       return(title)
 #      return(paste(names(txt), collapse = " "))
@@ -148,7 +150,7 @@ function(txtNodes, minWords = 3, filename = "")
 
 
   bb = getBBox2(txtNodes, TRUE)
-#browser()
+
   if(diff(range(bb$top)) > 2 * median(bb$height)) {
       ll = nodesByLine(txtNodes, bbox = bb)
       bad = sapply(names(ll), isTitleBad, minWords, filename)
@@ -179,6 +181,7 @@ function(txtNodes, minWords = 3, filename = "", lowerCase = TRUE)
 
   
   #Test:
+  grepl("^Review$", txtNodes)    
   grepl("Acta Veterinaria", txtNodes) ||
   grepl("BMC Infectious Diseases", txtNodes) ||
   nchar(txtNodes) < 6 ||   
