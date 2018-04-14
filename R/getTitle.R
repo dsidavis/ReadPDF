@@ -17,10 +17,16 @@ getDocTitle =
     #
     #  See 1599857215/Learned-2005-Extended interhuman transmission.xml for a title in the meta that is just the name of the file.
     #
-function(file, page = 1, doc = readPDFXML(file), meta = FALSE, minWords = 1, asNode = FALSE, scanned = isScanned2(doc), ...)
+function(file, page = 1, doc = readPDFXML(file), meta = FALSE, minWords = 1, asNode = FALSE, scanned = isScanned(doc), ...)
 {
   if(missing(doc) && is(file, "XMLInternalDocument"))
       doc = file
+
+
+  if(isOIEDoc(doc)) 
+     return(getOIETitle(doc, asNode = asNode))
+
+
 
   if(meta) {
       meta = getNodeSet(doc, "//docinfo/META[@name = 'title']")
@@ -51,7 +57,7 @@ function(file, page = 1, doc = readPDFXML(file), meta = FALSE, minWords = 1, asN
       return(list())
 
   if(scanned) # Should we use isScanned() ?
-      return(NA_character_)
+      return(if(asNode) list() else NA_character_)
   
   fonts = getFontInfo(p1)
   if(is.null(fonts))
@@ -74,7 +80,7 @@ function(file, page = 1, doc = readPDFXML(file), meta = FALSE, minWords = 1, asN
 
   isElsevier = isElsevierDoc(doc)
   if(isElsevier && !isTitleBad(txt)) {
-      return(splitElsevierTitle(txt, p1))
+      return(splitElsevierTitle(txt, p1, asNode = asNode))
 #     tt = names(txt)
 #     if(grepl("Journal", tt[1]))
 #         tt = tt[-1]
@@ -181,7 +187,7 @@ function(txtNodes, minWords = 3, filename = "", lowerCase = TRUE)
 
   
   #Test:
-  grepl("^Review$", txtNodes)    
+  grepl("^Review$", txtNodes)  ||
   grepl("Acta Veterinaria", txtNodes) ||
   grepl("BMC Infectious Diseases", txtNodes) ||
   nchar(txtNodes) < 6 ||   
@@ -205,7 +211,7 @@ splitElsevierTitle =
     # e.g. Kelly-2008-NIH
     #  Lau-2007 has no grey box and no line.  So we have to do further checks on the shaded box  to see it is large enough.
     #
-function(nodes, page)
+function(nodes, page, asNode = FALSE)
 {
     y = as.numeric(sapply(nodes, xmlGetAttr, "top"))
     lines = getNodeSet(page, ".//line")
@@ -235,6 +241,9 @@ function(nodes, page)
        # if none of the nodes are above the line, don't filter. See 0809541268/Kitajima-2009-First%20detection%20of%20genotype%203%20he.xml"
     if(any(y > yl))
         nodes = nodes[y > yl]
+
+    if(asNode)
+       return(nodes)
     
     paste(names(nodes), collapse = " ")
 
@@ -301,7 +310,7 @@ function(txt, page)
 {
     pos = unique(as.numeric(sapply(txt, xmlGetAttr, "top")))
     h = max(as.numeric(sapply(txt, xmlGetAttr, "height")))    
-    sapply(pos, mkLine, page, h)
+    lapply(pos, mkLine, page, h)
 }
 
 mkLine =
@@ -319,3 +328,41 @@ function(pos, page, height)
     w = abs(pos - bb[, "top"]) < .33*height & bb[, "height"]/height > .7
     textNodes[w]
 }
+
+
+
+
+isOIEDoc =
+function(doc)      
+{
+    doc = as(doc, "PDFToXMLDoc")
+    
+    length(getNodeSet(doc, "//text[contains(., 'www.oie.int/')]")) > 0
+}
+
+
+getOIETitle =
+function(doc, asNode = FALSE)
+{
+    doc = as(doc, "PDFToXMLDoc")
+     # Find the image on page 1 and then the text that is not black that is to the right of the image"    
+    p1 = doc[[1]]
+    img = getNodeSet(p1, ".//img")[[1]]                                       #    bbi = getBBox2()
+    atNames = c("x", "y", "width", "height")
+    bbi = structure(as(xmlAttrs(img)[atNames], "numeric"), names = atNames)
+    # not(@color = '#000000') and 
+    xp = sprintf(".//text[@left > %f and @top > %f and @top < %f ]", bbi["x"] + bbi["width"], bbi["y"], bbi["y"] + bbi["height"])
+    ans = getNodeSet(p1, xp)
+    colors = getTextNodeColors(ans, doc = doc)
+
+    ans = ans[colors != "#ababab"]
+
+    if(asNode)
+       ans
+    else
+       paste( sapply(ans, xmlValue), collapse = " ")
+
+}
+
+
+# Date of start of the event
