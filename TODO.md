@@ -1,5 +1,6 @@
 # pdftohtml
 
+1. Figure out what the coordinates are in an image.
 
 1. In Easterbrook-2007, p4  The figure has lines and is PDF but we don't see the lines in the plot
    when we plot that page in R.
@@ -20,10 +21,14 @@
 
 # Todo list for ReadPDF
 
++ FIX fixTitleNodes().
+
++ Generally, fix the getDocTitle() function to be more accurate. See Status/TitleStatus.md
+
 
 1. pdfText messes up text in different columns.  Check.
 
-1. showNode for lines|rect.
+1. [check - think done]showNode for lines|rect.
      location and color
 	 
 1. getNodesBetween():  work with a line/rect node.	 
