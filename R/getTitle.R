@@ -365,7 +365,7 @@ function(doc)
 {
     doc = as(doc, "PDFToXMLDoc")
     
-    length(getNodeSet(doc, "//text[contains(., 'www.oie.int/')]")) > 0
+    length(getNodeSet(doc, "//text[contains(., 'http://www.oie.int/wahis_2/')]")) > 0
 }
 
 
