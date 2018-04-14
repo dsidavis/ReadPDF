@@ -306,6 +306,105 @@ We want to see if any of the changes break the results for documents
 we thought were originally correct.
 
 
+```
+titles = structure(lapply(sp.xml[!err], function(x) try(getDocTitle(x, asNode = TRUE))), names = sp.xml[!err])
+```
+
+How many of these are not in ti.orig.  Recall that ti.org contains
+only document titles which have one or more nodes in the titles.
+In other words, these are the words with length 0.
+Do our new title results match these?
+We look for the names of the documents that are not in ti.orig
+as these are 0 for ti.orig.
+So looking at the lengths, we see these are all 0, matching the originals.
+```
+m = !(names(titles) %in% names(ti.orig))
+table(sapply(titles[m], length))
+```
+
+
+For the documents that had an non-zero number of nodes in the original,
+how many now have a different number of nodes than before?
+```
+len.orig = sapply(ti.orig, len)
+len = sapply(titles[!m], length)
+w = (len == len.orig)
+names(len)[!w]
+```
+
+Let's compare the text
+```
+txt.orig = sapply(ti.orig, function(x) paste(sapply(unlist(x), xmlValue), collapse = " "))
+len = sapply(titles, length)
+ti = titles[len > 0]
+
+stopifnot(length(ti.orig) == length(ti))
+stopifnot(all(names(ti.orig) == names(ti)))
+```
+
+```
+txt = sapply(ti, function(x) paste(sapply(unlist(x), xmlValue), collapse = " "))
+```
+
+```
+w = nchar(txt) == nchar(txt.orig)
+names(txt)[!w]
+```
+These are again the same 8 documents:
+```
+[1] "LatestDocs/PDF/1601876396/OIE Iran.xml"                           "LatestDocs/PDF/2430316441/OIE Kuwait.xml"                        
+[3] "LatestDocs/PDF/3814962940/OIE Oman.xml"                           "LatestDocs/PDF/4252077711/J. Virol.-2013-Galvin-JVI.03555-12.xml"
+[5] "LatestDocs/PDF/2255202025/1-s2.0-S0147957114000058-main.xml"      "LatestDocs/PDF/1306081813/1-s2.0-S0147957115000788-main.xml"     
+[7] "LatestDocs/PDF/3861143486/1-s2.0-S0147957116300972-main.xml"      "LatestDocs/PDF/1214934190/Baak et al SWE Mar 2016.xml"           
+```
+
+
+We still have a few long titles:
+```
+txt[tail(order(nchar(txt)))]
+```
+
+
+The document LatestDocs/PDF/2459101188/9621185.xml has the same title repeated multiple time:
+"Epidemiological aspects of Nipah virus infection Epidemiological aspects of Nipah virus infection Epidemiological aspects of Nipah virus infection Epidemiological aspects of Nipah virus infection Epidemiological aspects of Nipah virus infection"
+
+This is a ResearchGate cover page, but is not scanned. The cover page really has the text repeated.
+If we skip to the second page, we find that the PDF has the same  repetitions of the title with
+exactly the same locations.
+So we could identify duplicate nodes, or duplicate text and remove these redundancies.
+
+
+
+## Short Titles
+We also need to examine the short titles
+```
+txt[head(order(nchar(txt)), 50)]
+```
+```
+unname(txt[head(order(nchar(txt)), 50)])
+ [1] "viruses"                                          "MERSCoV, Oman"                                    "MERSCoV, Kuwait"                                 
+ [4] "Macaca sylvanus"                                  "Pteropus vampyrus "                               "Borna disease virus"                             
+ [7] "Nipah virus and bats"                             "ARBOVIRUS INFECTIONS"                             "Vesicular Stomatitis"                            
+[10] "Vesicular Stomatitis"                             "Apodemus   sylvaticus"                            "ABSTRACT INTRODUCTION"                           
+[13] "Tick-Borne Encephalitis"                          "Encephalitic alphaviruses"                        "Usutu Virus,  Italy, 1996"                       
+[16] "Bat Nipah Virus, Thailand "                       " Zika Virus Outside Africa"                       "Usutu virus, Belgium, 2016"                      
+[19] "The Brazilian flaviviruses"                       "West Nile Virus, Venezuela "                      "Reviews in Medical Virology"                     
+[22] "Tick-borne viruses in Europe"                     "Dobrava hantavirus in Russia"                     "Henipavirus Pteropus  giganteus"                 
+[25] "Detection of  Lassa Virus, Mali"                  "Crimean-Congo haemorrhagic fever"                 "  Tembusu Virus in  Ducks, China"                
+[28] "Hantavirus infection in East Asia"                "Nipah v irus outbreak in Malaysia"                "Louping Ill in  Goats, Spain, 2011"              
+[31] "Marburg Virus in  Fruit Bat, Kenya "              "Emergence of Usutu Virus in Hungary"              "West Nile Virus in  Birds, Argentina"            
+[34] "Reston virus in domestic pigs in China"           "Zika Virus  Infection,  Cambodia, 2010"           "Fruit bats as reservoirs of Ebola virus"         
+[37] "SHORT REPORT Dengue virus in Mexican bats"        "Infection with coronavirus in camels, Iran"       "Tick-Borne  Encephalitis  Virus, Kyrgyzstan"     
+[40] "Tick-borne Encephalitis in Southern Norway "      "Usutu virus activity in Austria, 2001Â­2002"      "Mayaro Virus in Wild Mammals, French Guiana "    
+[43] "Studies of Reservoir Hosts for  Marburg Virus"    "Detection of Entebbe Bat Virus after 54 Years"    "Hendra Virus Infection in Dog, Australia, 2013"  
+[46] "Dengue Infection in Neotropical Forest Mammals"   "Usutu Virus in  Migratory Song  Thrushes, Spain"  "Shrews as Reservoir Hosts of Borna Disease Virus"
+[49] "Epidemiology of tick-borne encephalitis in Japan" "Tickborne Encephalitis Virus, Northeastern Italy"
+```
+
+
+The first - viruses - is the name of a journal.
+So we add this to our isBadTitle()
+
 ## Checking the Titles are Correct.
 
 Eventhough we have some content for the title, we have to check it is correct.
