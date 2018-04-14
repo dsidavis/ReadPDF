@@ -34,6 +34,7 @@ S3method("[[", "ConvertedPDFDoc")
 
 export(plot)
 S3method(plot, PDFToXMLPage)
+S3method(plot, PDFToXMLDoc)
 
 
 export(getNumCols)
