@@ -104,7 +104,8 @@ function(doc, sectionName = c('introduction', 'background',
          otherSectionNames = c('references', 'acknowledgements', 'acknowledgments', 'results', 'methods'),
          checkCentered = TRUE,
          discardAfterReferences = TRUE,
-         allowRotated = FALSE, onlyFirst = FALSE
+         allowRotated = FALSE, onlyFirst = FALSE,
+         order = TRUE, groupByLine = FALSE
          )
 {
     if(is.character(doc))
@@ -189,7 +190,19 @@ function(doc, sectionName = c('introduction', 'background',
             i = sapply(secs, isOnLineBySelf)
             secs = secs[ i ]
         }
-        return(nodesByLine(secs))
+
+        if(order) { # Do we need to do this?? 
+            o = order(sapply(secs, pageOf), sapply(secs, inColumn))
+            secs = secs[o]
+        }
+        if(groupByLine) {
+            # XXX This changes the order of the nodes.
+            # We really should group these by page and within column, except those that span multiple columns.
+            # We now turn this off. What does this do to getSectionText().
+           secs = nodesByLine(secs)
+        }
+        
+        secs
     }
 }
 
@@ -346,7 +359,6 @@ function(x = NULL, to = NULL, before = FALSE, useLines = TRUE, ...)
           # If to is a rect/line, find its location, otherwise find any lines on this page.
        if(!is.null(to) && xmlName(to) %in% c('rect', 'line')) {
            bb = getBBox(list(to))
-
            bb[1,2] = bb[1,4]
            to = NULL
 #           useLines = FALSE
