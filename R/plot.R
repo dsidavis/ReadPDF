@@ -71,7 +71,7 @@ renderPage =
 
     plot(0, type = "n", xlab = "", ylab = "", xlim = c(0, psize[2]), ylim = c(0, psize[1]))
     title(title)
-    
+
     rr = getNodeSet(page, ".//rect ")
     if(length(rr)) {
         bb = getBBox(rr)
