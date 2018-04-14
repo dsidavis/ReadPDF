@@ -59,6 +59,8 @@ function(file, page = 1, doc = readPDFXML(file), meta = FALSE, minWords = 1, asN
   if(scanned) # Should we use isScanned() ?
       return(if(asNode) list() else NA_character_)
   
+
+  
   fonts = getFontInfo(p1)
   if(is.null(fonts))
      return(NULL)
@@ -104,17 +106,18 @@ function(file, page = 1, doc = readPDFXML(file), meta = FALSE, minWords = 1, asN
 #      return(paste(names(txt), collapse = " "))
   }
       
-  while( (length(txt) == 1 && nchar(names(txt)) == 1) || all(w <- isTitleBad(txt, minWords = minWords))) {  
+  while( (length(txt) == 1 && nchar(names(txt)) == 1) || all(w <- isTitleBad(txt, minWords = minWords))) {
+
       # then a single character that is very large
       # get second largest font and
-#browser()  
+
       mx = max(fonts$size[fonts$size < mx ])
       w = (fonts$size == mx)
       id = fonts$id[w]
 # if multiple ones, see if any are bold and restrict to that.
 # Doesn't work for Van Der Poel-2005
-      if(length(id) > 1 & any(fonts$isBold[w]))
-          id = id[fonts$isBold[w]]
+      if(length(id) > 1 & any(isb <- isBold(fonts[w,]))) #fonts$isBold[w]))
+          id = id[isb]
 
       if(length(id) == 0)
           break  #XXXX
@@ -125,6 +128,29 @@ function(file, page = 1, doc = readPDFXML(file), meta = FALSE, minWords = 1, asN
 
   orderByLine(txt)
 }
+
+
+fixTitleNodes =
+    ## We can compute the locations of the resulting nodes (with getBBox2),
+    ## sort them and compute the differences. Or order them by line
+    ## and see how far apart they are, OR see if there are other nodes in between lines.
+    ## 
+    ## We should compute the line spacing for the entire page or document and compare to that.
+    ## For now, we'll use a threshold of 3 which is 3 height of text in a line, so that allows double spacing.
+function(nodes, threshold = 3)
+{
+    ll = nodesByLine(nodes)
+    txt = sapply(ll, function(x) trim(paste(sapply(unlist(x), xmlValue), collapse = " ")))
+    ll = ll [ txt != ""]
+
+    bb = lapply(ll, getBBox2)
+    h = median(getBBox2(nodes)[,"height"])
+    top = sapply(bb, function(x) median(x[, "top"]))
+     ##XXX This is broken!
+    d = diff(c(top[1] - h, top))
+
+    unlist(ll[ d < h*threshold ])
+}   
 
 
 isTitleBad =
@@ -214,12 +240,14 @@ splitElsevierTitle =
 function(nodes, page, asNode = FALSE)
 {
     y = as.numeric(sapply(nodes, xmlGetAttr, "top"))
-    lines = getNodeSet(page, ".//line")
+    lines = getNodeSet(page, ".//line") #XX??  and .//rect
     lw = as.numeric(sapply(lines, xmlGetAttr, "lineWidth", 0))
     yl = 0
+
     if(any(lw > 10)) {
         i = which.max(lw)
-        yl = as.numeric(strsplit(xmlGetAttr(lines[[i]], "bbox"), ",")[[1]])[2]
+           # Is the 
+        yl = as.numeric(strsplit(xmlGetAttr(lines[[i]], "bbox"), ",")[[1]])[2] + lw[i]/2
     } else {
 
         r = getNodeSet(page, ".//rect[@fill.color != '0,0,0']")

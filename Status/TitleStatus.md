@@ -218,6 +218,11 @@ Of the 9 articles with 20 or more nodes in the title, 3 start with "and Infectio
 grep("^and Infectious Diseases", txt[len >= 20])
 ```
 So we can resolve these simultaneously.
+```
+[1] "LatestDocs/PDF/2255202025/1-s2.0-S0147957114000058-main.xml"
+[2] "LatestDocs/PDF/1306081813/1-s2.0-S0147957115000788-main.xml"
+[3] "LatestDocs/PDF/3861143486/1-s2.0-S0147957116300972-main.xml"
+```
 
 
 The other 6 are
@@ -253,11 +258,52 @@ We are collecting up the entire first page. But the title is clearly in bold.
 So there several things to fix
 1. The "and Infectious Diseases" prefix.
 2. [done] OIE reports 
-3. "4252077711/J. Virol.-2013-Galvin-JVI.03555-12.xml" & "LatestDocs/PDF/1214934190/Baak et al SWE
+3. [done] "4252077711/J. Virol.-2013-Galvin-JVI.03555-12.xml" & "LatestDocs/PDF/1214934190/Baak et al SWE
 Mar 2016.xml" to get the title correctly and not include the other material.
 
 
+## #1 "and Infectious Diseases".
+
+It is clear that this text inside the grey box at the top of the page.
+The splitElsevierTitle() function attempts to find this.
+It does find the box and computes where it is so we keep nodes below that.
+The box is actually a line with a large line width.
+We were not adding 1/2 the line width to the line's horizontal location
+which is the center of the box. So adding .5 * linewidth gives us the bottom
+of the box and now the "and Infectious Disease" nodes are above that.
+Problem solved.
+
+
+## #2
+
 See getOIETitle() for #2
+
+
+
+### #3, 
+We implemented the isBold() methods so that we can guess if a font is bold.
+This allows us to get the title for 4252077711/J. Virol.-2013-Galvin-JVI.03555-12.xml.
+It includes * and space much futher down the page. We can remove those later if necessary
+but for our purposes, it is not worth the effort now.
+
+oThis also mostly fixes "LatestDocs/PDF/1214934190/Baak et al SWE Mar 2016.xml".
+Again, we pick up other nodes using that font that are further down the page.
+
+
+We can compute the locations of the resulting nodes (with getBBox2),
+sort them and compute the differences. Or order them by line
+and see how far apart they are, OR see if there are other nodes in between lines.
+(This could get more complex if we are have columns.)
+fixTitleNodes() does this now.
+
+
+
+## Verify
+
+The next step is to rerun getDocTitle on all of the documents
+and see how the results have changed.
+We want to see if any of the changes break the results for documents
+we thought were originally correct.
 
 
 ## Checking the Titles are Correct.
