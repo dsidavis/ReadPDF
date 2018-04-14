@@ -20,6 +20,15 @@
 
 # Todo list for ReadPDF
 
+
+1. pdfText messes up text in different columns.  Check.
+
+1. showNode for lines|rect.
+     location and color
+	 
+1. getNodesBetween():  work with a line/rect node.	 
+     + done but fix the hard coding of the col and index as 1 in findSection.R:getTextAfter().
+	 
 ## Spreadsheets of results
 
 ## Misc
