@@ -54,7 +54,7 @@ and watching them dispaly), we recognize that many of them are papers
 from the Emerging Infectious Disease journal. We already have an
 isEID() function to check for these.
 ```
-w= sapply(bad.groups[[4]], isEID)
+w = sapply(bad.groups[[4]], isEID)
 table(w)
 ```
 ```
@@ -63,11 +63,17 @@ FALSE  TRUE
 ```
 So we can deal with these with special code.
 
+## EID Documents
 The abstract is in the first column
 and it is below the author list which is below the title,
 but above a horizontal line in the first column.
 So we can write a function to extract this.
 
+In fact, 
+"LatestDocs/PDF/3569325249/Scherret-2001-The relationships between West N.pdf"
+does not have this pattern. It uses a different format, but is an EID article.
+Here the abstract is more traditionally centered.
+So  we want to use the regular mechanism.
 
 
 Of the remaining 7, the last (LatestDocs/PDF/2608848674/1663497.xml)
@@ -95,6 +101,7 @@ For Plowright, the abstract is above Keywords and below the author list and affi
 and is centered and slightly indented relative to the regular text.
 
 
+
 ## Checking Abstracts
 
 1. Text length too small
@@ -102,3 +109,126 @@ and is centered and slightly indented relative to the regular text.
 1. Text is all or significant % of the first page.
 1. Fonts in abstract appear to be section formatting, etc.,  rather than italics
 1. Nodes have bold fonts.
+
+
+
+Let's start by looking at the abstracts for which we did not get an error.
+```
+table(sapply(abs[!err], class))
+```
+```
+array  list 
+  264   117 
+```
+
+The array comes from nodesByLine() and specifically the call to tapply().
+Even with `simplify = FALSE`, this returns an array.  
+So we move to lapply(split()) to ensure a list.
+
+
+
+```
+len = sapply(abs[!err], length)
+summary(len)
+```
+```
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+   0.00    0.00    9.00   12.42   18.00  127.00 
+```
+113 of these have 0 elements.
+Some of these we miss; some legitimately have no abstract; and 72 are scanned (so probably we cannot
+extract the abstract  with these tools).
+
+There are only 45 that 
+```
+scanned = sapply(names(abs)[!err], isScanned); names(scanned) = names(abs)[!err]
+```
+
+There are 45 documents which have no error, are not scanned and have 0 elements in the abstract we recovered:
+```
+names(scanned)[ !scanned & len == 0 ]
+```
+
+These are listed below and divided into which have an ab
+ [1] "LatestDocs/PDF/3342055963/08-0359_appT-s1 (2).xml" - 1 page table                           
+ [5] "LatestDocs/PDF/2853897527/978-1-4020-6106-6.xml"   - book
+[10] "LatestDocs/PDF/2688324473/Beltrame-2006-Tickborne encephalitis virus, no.xml" - no abstract,short doc.
+[13] "LatestDocs/PDF/0672362859/Bosch-2007-West Nile Virus, Venezuela.xml"          - no abstract,short doc
+[22] "LatestDocs/PDF/0247828304/Hofle-2013-Usutu virus in migratory song thrus.xml"  - no abstract,short doc
+[40] "LatestDocs/PDF/0818313444/vir.0.81576-0-SuppTableEdited.xml"                  - tables only supplementary material.
+
+Ambiguous
+[36] "LatestDocs/PDF/2498380585/REUSKIN JOrdan.xml"      - first paragraph in a different color.
+[37] "LatestDocs/PDF/0253022084/Rijks-2016-Widespread Usutu virus outbreak in.xml" - same as REUSKIN above
+
+
+
+
+Has an Abstract
+
+ [2] "LatestDocs/PDF/3454570876/1-s2.0-S0042682200905634-main2.xml"          Virology centered
+ across 2 columns
+ [3] "LatestDocs/PDF/0649016555/1-s2.0-S0042682297988401-main.xml"                 virology
+ [4] "LatestDocs/PDF/1249277242/177-3-529.xml"                                     
+ [6] "LatestDocs/PDF/3302321137/Aradaib-2010-Nosocomial outbreak of Crimean-C1.xml" - EID document. S
+ [7] "LatestDocs/PDF/1288179177/Asper-2001-First outbreak of callitrichid hepa.xml" - virology again.
+ [8] "LatestDocs/PDF/1217382941/Barrette-2009-Discovery of swine as a host fo1.xml" - 3 columns with title and abstract spanning the first two. Calculate the number of columns, find text that spans  more than one. This will work for 2 columns with abstract spanning both.
+ [9] "LatestDocs/PDF/4154443567/Barrette-2009-Discovery of swine as a host for.xml" - duplicate of previous one with a back cover page
+[12] "LatestDocs/PDF/0753887278/Blasse-2013-Mother-offspring transmission and1.xml" - spans 2 columns
+[14] "LatestDocs/PDF/1436485989/Breman 1999.xml"                                   centered across 2
+         cols. Complicated by author affiliation above in 2 separate horizontal blocks 
+[16] "LatestDocs/PDF/3887698401/Chua-2001-Tioman virus, a novel paramyxovirus1.xml" - centered and  indented a little.
+[18] "LatestDocs/PDF/0840057771/Degiorgis-2000-Borna disease in a free-ranging.xml" - centered,
+      indented ends with a horizontal line.
+[19] "LatestDocs/PDF/3551992108/Dumpis 1999.xml"                               like Breman above.
+[20] "LatestDocs/PDF/3364104101/Ergönül-2006-Crimean-Congo haemorrhagic fever1.xml" - spans 2    columns. Complicated by 3rd "margin" column with text.
+[21] "LatestDocs/PDF/0991626011/Formenty-1999-Ebola virus outbreak among wild.xml"  - like Breman
+[24] "LatestDocs/PDF/4252077711/J. Virol.-2013-Galvin-JVI.03555-12.xml"            abstract on page 2.  Proofs version
+[27] "LatestDocs/PDF/3982771992/Leroy-2004-Multiple Ebola virus transmission e.xml" - spans 2 of 3 columns
+[33] "LatestDocs/PDF/0532875827/Peeters-2002-Risk to human health from a pleth.xml" - centered. is EID but different
+[29] "LatestDocs/PDF/3475635737/Nakgoi-2014-Dengue, Japanese Encephalitis and.xml" - indented on  left, but not right. Spans 2 columns
+[30] "LatestDocs/PDF/1082165137/Nandi-2000-A novel type D Simian retrovirus n1.xml" - spans 2 cols, centered and indented
+[31] "LatestDocs/PDF/3291406011/Okamoto-2000-Species-specific TT viruses and c.xml" - spans 2 cols, centered and indented
+[32] "LatestDocs/PDF/0567227266/Papa-2001-Isolation of Dobrava virus from Apo1.xml" - spans 2 cols, centered and indented and ends with a line
+[34] "LatestDocs/PDF/3138036620/Philbey-2008-Inifection with Menangle virus in.xml" - info in left column. Has sections within this such as Results, Conclusions, Wildlife& Zoos
+[35] "LatestDocs/PDF/1674687958/Remmers-2000-Longitudinal studies in the epide.xml" - spans 2 cols, centered and indented
+[42] "LatestDocs/PDF/3607820776/Weaver-1997-Recombinational history and molecu.xml" - spans 2 cols, centered and indented
+[43] "LatestDocs/PDF/3602790318/Weaver-2001-Extreme genetic diversity among Pi.xml" - spans 2 cols, centered and indented
+[44] "LatestDocs/PDF/1052790441/Weissenböck-2002-Emergence of Usutu virus, an.xml"  - EID but different format. Spans 2 columns, centered.
+[45] "LatestDocs/PDF/1384762250/Yob-2001-Nipah virus infection in bats (order.xml"  - EID but different format. Spans 2 columns, centered.
+
+
+
+### Working EID
+"LatestDocs/PDF/3025013874/Blasdell-2008-Host range and genetic diversity.xml" 
+"LatestDocs/PDF/0873940951/Cao-2011-Tembusu virus in ducks, china.xml"       
+"LatestDocs/PDF/2475418629/Iehlé-2007-Henipavirus and tioman virus antib1.xml" 
+"LatestDocs/PDF/1161594151/Wang-2009-Japanese encephalitis viruses from b.xml"
+"LatestDocs/PDF/0215227208/Klempa-2008-Hemorrhagic fever with renal synd1.xml" 
+"LatestDocs/PDF/2243954052/Milazzo-2012-Geographic distribution of hantav.xml"
+"LatestDocs/PDF/1827651569/Swanepoel-2007-Studies of reservoir hosts for.xml" 
+"LatestDocs/PDF/0683734075/Tagliapietra-2009-Spatial and temporal dynamic.xml"
+   getColPositions() is giving only one value, not 2. So failing to get the text.
+
+Different format.
+"LatestDocs/PDF/2987363901/Kirkland-2015-Hendra Virus Infection in Dog, A.xml"
+
+
+
+
+
+
+[17] "LatestDocs/PDF/3867373015/Coffey-2006-Serologic evidence of widespread E.xml" EID, but title and author list span 2 cols, lot of space between abstract text and title.
+
+
+
+
+
+
+
+### len == 2 & !scanned
+
++ XXX  "LatestDocs/PDF/4090273238/ch4.xml"  An introduction, but no abstract.
+  But we get the title and author names in the abstract which is wrong.
+
++ "LatestDocs/PDF/4090273238/ch4.xml"]]  Accepted... and SUMMARY
