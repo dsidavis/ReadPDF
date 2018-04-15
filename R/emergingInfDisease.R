@@ -61,8 +61,21 @@ function(doc, asNodes = TRUE, byLine = TRUE, colPos = getColPositions(doc[[1]]))
 {
     doc = as(doc, "PDFToXMLDoc")
     p1 = doc[[1]]
-    lines = getBBox(p1)
+    lines = getBBox(p1, asDataFrame = TRUE)
 
+    if(nrow(lines) == 0 || max(lines$x1 - lines$x0) < dim(p1)["width"]*.5) {
+        ## XXX So we use a different strategy when we implement it.
+        warning("this is not a regular EID paper. No horizontal line at top")
+        return(list())
+    }
+    
+
+    if(length(colPos) == 0)
+        stop("getColPosition() failed for this page")
+
+    if(length(colPos) == 3)
+        stop("This is a very different EID paper")
+    
     if(length(colPos) == 1) 
        colPos = c(margins(p1)[1], colPos)
 
