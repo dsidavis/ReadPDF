@@ -19,6 +19,9 @@ function(doc, asNodes = TRUE, page = doc[[1 + hasCoverPage(doc) ]], byLine = TRU
 {
     if(is.character(doc))
         doc = readPDFXML(doc)
+
+    if(isEID(doc))
+        return(findEIDAbstract(doc, asNodes, byLine))
     
     if(isBioOne(doc) && missing(page))
           # skip the first page and start at the second page
@@ -404,3 +407,6 @@ function(node, boxes, pos = getBBox2(list(node)))
 {
     pos[,1] >= boxes[,1] & pos[,2] > boxes[,2] & (pos[,1] + pos[,3]) < boxes[,3] & (pos[,2] + pos[,4]) < boxes[,4] 
 }
+
+
+
