@@ -1,3 +1,9 @@
+# EID Abstracts
+1. Handle the foot note markers in the author list in EID abstracts.
+1. [done] generalize findEIDAbstract() not to use specific font number but get the text in column 1 above the horizontal
+ line that is not bold.
+ [6] "LatestDocs/PDF/3302321137/Aradaib-2010-Nosocomial outbreak of Crimean-C1.xml"
+
 # pdftohtml
 
 1. Figure out what the coordinates are in an image.
