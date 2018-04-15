@@ -129,7 +129,8 @@ function(nodes, asNodes = TRUE, bbox = getBBox2(nodes, TRUE),
 
     intv = seq(0, max(bbox$top)+ fontSize - 1, by = fontSize)
     topBins = cut(bbox$top, intv)
-    byLine = tapply(nodes, topBins, arrangeLineNodes, asNodes, simplify = FALSE)
+##    byLine = tapply(nodes, topBins, arrangeLineNodes, asNodes, simplify = FALSE)
+    byLine = lapply(split(nodes, topBins), arrangeLineNodes, asNodes)
 
     names(byLine) = sapply(byLine, arrangeLineNodes, FALSE)
     byLine[ sapply(byLine, length) > 0]
