@@ -63,18 +63,18 @@ getBBox =
     #
     # This bbox function expects an attribute named bbox
     # This is for rect and line nodes, not <text> nodes. Use getBBox2() for that.
-function(nodes, asDataFrame = FALSE, color = FALSE, diffs = FALSE)
+function(nodes, asDataFrame = FALSE, color = FALSE, diffs = FALSE, dropCropMarks = TRUE)
     UseMethod("getBBox")
 
 getBBox.XMLInternalNode =
-function(nodes, asDataFrame = FALSE, color = FALSE, diffs = FALSE)    
-    getBBox(list(nodes), asDataFrame, color, diffs)
+function(nodes, asDataFrame = FALSE, color = FALSE, diffs = FALSE, dropCropMarks = TRUE)    
+    getBBox(list(nodes), asDataFrame, color, diffs, dropCropMarks)
 
 getBBox.XMLNodeSet = getBBox.list =
     #
     # This bbox function expects an attribute named bbox
     #
-function(nodes, asDataFrame = FALSE, color = FALSE, diffs = FALSE)    
+function(nodes, asDataFrame = FALSE, color = FALSE, diffs = FALSE, dropCropMarks = TRUE)    
 {
     if(length(nodes) == 0) {
         ans = if(asDataFrame)
@@ -91,6 +91,13 @@ function(nodes, asDataFrame = FALSE, color = FALSE, diffs = FALSE)
     els = strsplit(tmp, ",")
     bb = matrix(as.numeric(unlist(els)), , 4, byrow = TRUE)
     colnames(bb) = c("x0", "y0", "x1", "y1")
+
+    if(dropCropMarks) {
+        ok = apply(bb, 1, function(x) all(x != 0))
+        bb = bb[ ok, ]
+        nodes = nodes[ok]
+    }
+    
     ty = sapply(nodes, xmlName)
     ans = if(asDataFrame) {
         ans = as.data.frame(bb)
