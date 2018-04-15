@@ -18,11 +18,12 @@ getBBox2.XMLNodeSet = getBBox2.list =
     #XXX Add support for color.
 function(nodes, asDataFrame = FALSE, attrs = c("left", "top", if(rotation) "rotation"), pages = FALSE, rotation = FALSE, color = FALSE)
 {
-    if(is(nodes, "XMLInternalElementNode"))
+    if(is(nodes, "XMLInternalElementNode")) {
         if(xmlName(nodes) == "text")
             nodes = list(nodes)
         else
             nodes = getNodeSet(nodes, ".//text")
+    }
 
    ats = c(attrs, "width", "height")    
    if(length(nodes) == 0)
@@ -82,6 +83,8 @@ function(nodes, asDataFrame = FALSE, color = FALSE, diffs = FALSE)
                  matrix(0, nrow = 0, ncol = 4 + if(color) 2 else 0, dimnames = list(NULL, c("x0", "y0", "x1", "y1", if(color) c("fill", "stroke"))))
         if(diffs)
             names(ans)[3:4] = c("width", "height")
+
+        return(ans)
     }
     
     tmp = sapply(nodes, xmlGetAttr, "bbox")
