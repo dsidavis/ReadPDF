@@ -94,7 +94,7 @@ function(nodes, asDataFrame = FALSE, color = FALSE, diffs = FALSE, dropCropMarks
 
     if(dropCropMarks) {
         ok = apply(bb, 1, function(x) all(x != 0))
-        bb = bb[ ok, ]
+        bb = bb[ ok, , drop = FALSE]
         nodes = nodes[ok]
     }
     
