@@ -35,7 +35,7 @@ function(doc, asNodes = TRUE, page = doc[[1 + hasCoverPage(doc) ]], byLine = TRU
     rect = getNodeSet(page, ".//rect | .//line")
     rect.bb = getBBox(rect, color = TRUE, asDataFrame = TRUE)    
 
-browser()    
+#browser()    
     if(length(a) && any(w <- isNodeIn(a[[1]], rect.bb))) {
         # Calzolari
         # Is the Abstract within a colored box. If so, get the text in that box.
