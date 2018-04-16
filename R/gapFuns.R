@@ -68,3 +68,12 @@ function(nodes, col = getColPositions(xmlParent(node[[1]])), bbox = getBBox2(nod
    d = start[-1] - end[-n]
    browser()
 }
+
+
+getPageGroups =
+function(page, lineskip = 20)
+{
+    ll = pageNodesByLine(page)
+    g = groupLines(ll, lineskip)
+}
+
