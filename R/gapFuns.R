@@ -23,6 +23,8 @@ function(ll, lineskip = 16) # 18 didn't separate the abstract from columns in Ma
     
     grps = cumsum(c(0, d) > 2*lineskip)
     blocks = split(ll, grps)
+    names(blocks) = seq(along = blocks)
+    blocks
 }
 
 

@@ -1,0 +1,108 @@
+
+
+# Finding the Abstract
+
+Look for the "title" Abstract or Summary,
+possibly with all capitals.
+The text may follow this on the same line or on a line below.
+
+The abstract may be to the right of content providing, e.g.,
+metadata about the paper, e.g., publication date, accepted date, etc.
+
+The text of the abstract may span the entire width of the page or may
+be indented but spanning all columns but not to the margins.
+
+
+Look at the font for the abstract text and use that to know where we end.
+And a larger interlineskip between lines to indicate the start of a new section even if there is no section header.
+ e.g. LatestDocs/PDF/1609915988/McIntosh-1976-Culex (Eumelanomyia) rubinotus T.xml
+
+
+
+
+For some documents, e.g. Weaver-2001,
+the abstract is a centered rectangle of text  with
+larger margins than the rest of the doument.
+In other words, the text starts and ends at approximately the same location
+on each of the lines, but there is extra space before and after each line.
+One way we can identify this is
+```
+doc = readPDFXML("LatestDocs/PDF/3602790318/Weaver-2001-Extreme genetic diversity among Pi.xml")
+g = getPageGroups(doc[[1]], 14)
+t(sapply(g, margins))
+```
+```
+  [,1] [,2]
+1   76  464
+2   81  827
+3   91  818
+4   78  831
+5  130  778
+6   76  833
+7   77  463
+```
+
+We can see that item 5 has a larger first value and a smaller second value.
+The first and last rows correspond to header and footer text which do not span the page.
+
+We can compare these to the overall page margins:
+```
+margins(doc[[1]])
+```
+```
+[1]  76 833
+```
+All but the 5th row above are close to 76.
+The 3rd row corresponds to the block of text listing the author names.
+This too is indented a little. It might be a candidate for an abstract.
+However, we can look at its lines via g[[3]].
+This is a list with 4 elements. The names of the elements give the text
+for each line.
+Each element itself is a list with one or more nodes, i.e., they are grouped by line.
+We can calcuate the margins of each line:
+```
+lapply(g[[3]], margins)
+```
+```
+$`Scott C. Weaver,* ,1 Rosa Alba Salas, Nuris de Manzione, Charles F. Fulhorst,* Amelia P. A. Travasos da Rosa,*`
+[1]  91 818
+
+$`, Â¶ Â¶`
+[1] 270 635
+
+$`Gloria Duno, Â§ Antonio Utrera,Â§ James N. Mills, Thomas G. Ksiazek, Duilia Tovar,`
+[1] 181 727
+
+$`Hilda Guzman,* Wenli Kang,* and Robert B. Tesh*`
+[1] 293 615
+```
+The second "line" corresponds to superscripts (connecting the author to an affiliation listed later).
+If we had used a different interline-skip to group the lines, this could have been absorbed into the line for which it is a superscript.
+
+We see from these margins that the lines do not start at the same horizontal position.
+They are in fact centered.
+
+Compare this with the lines in our would-be abstract:
+```
+t(sapply(unname(g[[5]]), margins))
+```
+```
+      [,1] [,2]
+ [1,]  142  778
+ [2,]  130  777
+ [3,]  130  777
+ [4,]  130  777
+ [5,]  130  777
+ [6,]  130  777
+ [7,]  130  777
+ [8,]  130  777
+ [9,]  130  777
+[10,]  130  777
+[11,]  130  777
+[12,]  130  694
+```
+All but the first line starts at 130.  This first line is slightly indented corresponding to the first line of
+a paragraph.
+All the lines end at the same horizontal position (+1); the final line is shorter.
+
+So the 5th block looks like an abstract.
