@@ -106,7 +106,7 @@ function(doc, local = FALSE)
         doc = readPDFXML(doc)
 
     xp = "//fontspec/@id"
-    if(local)  xp = paste(".", xp)
+#    if(local)  xp = paste(".", xp)
 
     fontIds = unlist(getNodeSet(doc, xp))
     txt = lapply(fontIds, function(id) sapply(textByFont(doc, id, local), xmlValue))

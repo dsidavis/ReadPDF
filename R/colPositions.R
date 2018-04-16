@@ -73,7 +73,7 @@ function(p, threshold = .1,
                   center = (bbox$left + bbox$right)/2
                  )
     tt = table(vals)
-    
+#browser()    
     if(missing(txtNodes) && nrow(bbox) == 0 && !local) {
         # Use the page-specific font count
         return(getColPositions(p, threshold, docFont = docFont, align = align, local = TRUE, ...))

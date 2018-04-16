@@ -4,6 +4,17 @@
  line that is not bold.
  [6] "LatestDocs/PDF/3302321137/Aradaib-2010-Nosocomial outbreak of Crimean-C1.xml"
 
+# getColPositions
+1. getColPositions("LatestDocs/PDF/2682627390/Adrian Diaz-2008-West Nile virus in birds, Arg.xml")
+
+1. getNumCols() gives 0 for Adrian ... above. Should be at least 2, but 3 is correct.
+   Now get 2 columns but the 2nd page is quite different. The table throws it.
+   
+1. "NewPDFs/Seoul Virus/Zhang-2009-Hantaviruses in rodents and humans.xml" 
+   + 3rd page has an image.  Take image and the text in caption being in a different font.
+   + [fixed] Yields -2 for last page.  Now gives 4 values corresponding to the numbers and the text
+      of the references in each column.
+
 # pdftohtml
 
 1. Figure out what the coordinates are in an image.
@@ -31,14 +42,13 @@
 
 + Generally, fix the getDocTitle() function to be more accurate. See Status/TitleStatus.md
 
-
-1. pdfText messes up text in different columns.  Check.
+1. XXX pdfText messes up text in different columns.  Check.
 
 1. [check - think done]showNode for lines|rect.
      location and color
 	 
 1. getNodesBetween():  work with a line/rect node.	 
-     + done but fix the hard coding of the col and index as 1 in findSection.R:getTextAfter().
+     + XXX done but fix the hard coding of the col and index as 1 in findSection.R:getTextAfter().
 	 
 ## Spreadsheets of results
 
