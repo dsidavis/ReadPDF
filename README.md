@@ -19,6 +19,8 @@ The functionality includes
 
 ## Installation
 
+1. Install dev version of the XML package
+
 Currently, ReadPDF requires the development/Github version of the XML
 package. This can be installed in R using the devtools package:
 
@@ -26,9 +28,38 @@ package. This can be installed in R using the devtools package:
 devtools::install_github("omegahat/XML")
 ```
 
+1. (Recommended) Install extended version of pdftohtml
+
 Additionally, while the package will work with other versions of
-pdftohtml, some functions will not work without our  [extended
-version](https://github.com/dsidavis/pdftohtml). You can move the
-binary (once built) to your system directory (e.g., `/usr/bin` on Unix
-systems) or you can specify the location of this binary in R via the
+pdftohtml, some functions will not work without our extended
+version.
+
+Clone or download [our extended version of pdftohtml](https://github.com/dsidavis/pdftohtml)
+
+Then, build the binary executible (requires `make` and a C++ compiler),
+
+```
+cd pdftohtml
+make
+```
+
+You can move the binary (once built) to your system directory (e.g., `/usr/bin` on Unix
+systems),
+
+```
+cp src/pdftohtml /usr/bin
+```
+
+or you can specify the location of this binary in R via the
 env variable PDFTOHTML.
+
+```{r}
+options(PDFTOHTML = "path/to/pdftohtml")
+```
+
+1. Install ReadPDF
+
+```
+devtools::install_github("dsidavis/ReadPDF")
+```
+
