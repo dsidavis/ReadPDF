@@ -291,7 +291,7 @@ function(page, nodes = getNodeSet(page, ".//text"), bb = getBBox2(nodes, TRUE),
 
 
 getNodesBetween =
-function(x = NULL, y = NULL, useLines = TRUE)
+function(x = NULL, y = NULL, useLines = TRUE, exclude = FALSE, ...)
 {
     if(is.null(x) && is.null(y))
         stop("need to specify either x or y or both")
@@ -309,7 +309,7 @@ function(x = NULL, y = NULL, useLines = TRUE)
     s = pageOf(x)
     e = pageOf(y)
 
-    if(e > s) {
+    ans = if(e > s) {
         # get all the nodes on each page up to e
         p1 = getTextAfter(x, useLines = useLines)
         if(e - s > 1) {
@@ -320,8 +320,15 @@ function(x = NULL, y = NULL, useLines = TRUE)
         pe = getTextAfter(, y, useLines = useLines)
         c(p1, unlist(pgs, recursive = FALSE), pe)
     } else {
-        getTextAfter(x, y, useLines = useLines)
+        getTextAfter(x, y, useLines = useLines, ...)
     }
+
+    if(exclude) 
+           # drop x and y.  XXX need to handle if y is null in call and keep then.
+        ans = ans[-c(1, length(ans))]
+
+    ans
+    
 }
 
 getTextAfter =
@@ -334,13 +341,12 @@ getTextAfter =
     # specify either x OR to so it can get the nodes before the to node.
     # One can specify x and not to, x and to, or just to.
     #
-    #
 
 #XXX FIX THIS TO KEEP THE TEXT BY COLUMN.
-function(x = NULL, to = NULL, before = FALSE, useLines = TRUE)
+function(x = NULL, to = NULL, before = FALSE, useLines = TRUE, ...)
 {
     page = xmlParent(if(!is.null(x)) x else to)
-    cols = getTextByCols(page, asNodes = TRUE)
+    cols = getTextByCols(page, asNodes = TRUE, ...)
 
     if(!is.null(x) && !is.null(to) && pageOf(to) < pageOf(x)) {
         warning("to node in getTextAfter() is on earlier page (", pageOf(to) , " versus ",  pageOf(x), "  Ignoring to node")
@@ -362,9 +368,15 @@ function(x = NULL, to = NULL, before = FALSE, useLines = TRUE)
     
     if(!is.null(x)) {
         # find the column and the index of the node matching x
-        i = lapply(cols, function(n) if(length(n)) which(sapply(n, identical,  x)) else integer())
-        colNum = which(sapply(i, length) > 0)        
-#        colNum = which(sapply(cols, identicalInColumn, x))
+        if(xmlName(x) == "text") {        
+           i =  lapply(cols, function(n) if(length(n)) which(sapply(n, identical,  x)) else integer())
+           colNum = which(sapply(i, length) > 0)        
+                                        #        colNum = which(sapply(cols, identicalInColumn, x))
+        } else {
+            ## Force for now!!!
+            i = 1L
+            colNum = 1L          
+        }
     }
 
     if(!is.null(to)) {
@@ -410,6 +422,16 @@ function(x = NULL, to = NULL, before = FALSE, useLines = TRUE)
         if(!is.null(to))
             tmp[[2]] = to
         bb2 = getBBox2(tmp)
+###!!!!!        
+        isShape = sapply(tmp, xmlName) != "text"
+        if(any(isShape)) {
+             # Convert getBBox to x0, y0, width and height, not x0, y0, x1, y1
+             # Do this in getBBox() as an option.
+            
+            vv = getBBox(tmp[isShape], diffs = TRUE)
+            bb2[isShape,] = vv
+
+        }
         # bb is for rect/line.  So we are looking for lines that span at least half the page
         # and are further "down" the page than our x node (which is located at bb2[1,])
         # Was > .6 not .53

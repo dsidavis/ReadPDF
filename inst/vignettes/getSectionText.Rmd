@@ -1,0 +1,26 @@
+# Find the Sections
+
+
+Currently, getSectionText()/findSectionHeaders() finds
+the sections and returns their text.
+However, this ignores the text before any starting header.
+
+So we will adapt getSectionText() to have an option that 
+collects not just the sections in the paper, but also
+the 
++ title
++ abstract
++ author list
++ affiliations
++ sections
+
+
+Additionally, we will attempt to find the tables and make them separate sections
+(or perhaps insert them within the section that refers to each table).
+
+
+
+We can use getDocTitle() and getDocTitleString() to get the title.
+
+findAbstract() attempts to find the abstract.
+

@@ -27,11 +27,30 @@ function(p,  bbox = getBBox2(getNodeSet(p, ".//text")), ignorePageNumber = TRUE)
 }
 
 getPageHeader =
-function(p,  bbox = getBBox2(getNodeSet(p, ".//text")))
+    #' @param p an XML page node from the document
+    #' @param bbox the
+    #' @param nodes the list of XML nodes of interest in which to find possible header nodes. This allows us to filter the nodes, e.g., by font type/name/size, position.
+    #' @lineThreshold integer vertical distance within which nodes are considered on the same line.
+    #' interlineThreshold
+function(p, bbox = getBBox2(nodes),
+         nodes = getNodeSet(p, ".//text"),
+         lineThreshold = 4, asNodes = FALSE,
+         interlineThreshold = min(getDocFont(p)$size) * 2)
 {
-    mx = min(bbox[, "top"], na.rm = TRUE)
-    w = bbox[, "top"] == mx
-    rownames(bbox)[w]
+    mn = min(bbox[, "top"], na.rm = TRUE)
+    w = bbox[, "top"] - mn <= lineThreshold
+    #XXX Now check it is actually a header.
+    # Find how far the nodes are from the other nodes not within the threshold
+    # If this is sufficiently large (relative to the size of the text), then this is
+    # a header.
+    delta = min(bbox[!w, "top"] - mn)
+    if(delta < interlineThreshold)
+       return(if(asNodes) list() else character())
+        
+    if(asNodes)
+       nodes[w]
+    else
+      rownames(bbox)[w]
 }
 
 

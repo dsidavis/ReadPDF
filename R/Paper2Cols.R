@@ -25,7 +25,11 @@ nchar(cols)
 # Headers and footers on the pages.
 
 
-pdfText = pdf_text =
+pdfText = 
+function(doc, numPages = getNumPages(doc), docFont = getDocFont(doc))
+    UseMethod("pdfText")
+
+pdfText.PDFToXMLDoc = pdfText.PDFToXMLDoc.character = pdf_text =
 function(doc, numPages = getNumPages(doc), docFont = getDocFont(doc))
 {
    if(is.character(doc))
@@ -34,7 +38,11 @@ function(doc, numPages = getNumPages(doc), docFont = getDocFont(doc))
    lapply(getPages(doc)[seq(1, min(numPages, getNumPages(doc)))], getTextByCols, docFont = docFont)
 }
 
-
+pdfText.PDFToXMLPage = 
+function(doc, numPages = getNumPages(doc), docFont = getDocFont(doc))
+{
+   getTextByCols(doc, docFont = docFont)
+}
 
 isCenteredMargins =
 function(node, margins = margins(xmlParent(node)), bbox = getBBox2(list(node)))
@@ -121,7 +129,8 @@ function(nodes, asNodes = TRUE, bbox = getBBox2(nodes, TRUE),
 
     intv = seq(0, max(bbox$top)+ fontSize - 1, by = fontSize)
     topBins = cut(bbox$top, intv)
-    byLine = tapply(nodes, topBins, arrangeLineNodes, asNodes, simplify = FALSE)
+##    byLine = tapply(nodes, topBins, arrangeLineNodes, asNodes, simplify = FALSE)
+    byLine = lapply(split(nodes, topBins), arrangeLineNodes, asNodes)
 
     names(byLine) = sapply(byLine, arrangeLineNodes, FALSE)
     byLine[ sapply(byLine, length) > 0]

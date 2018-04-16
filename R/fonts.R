@@ -92,21 +92,24 @@ function(page, fontID, rotation = 0)
 
 textByFont =
     # Get all the text nodes for a single font identifier
-function(doc, font)
+function(doc, font, local = FALSE)
 {
-   getNodeSet(doc, sprintf("//text[@font = '%s']", font))
+   getNodeSet(doc, sprintf("%s//text[@font = '%s']", if(local) "." else "", font))
 }
 
 
 textByFonts =
     # Get all the text strings for each font in the document.
-function(doc)
+function(doc, local = FALSE)
 {
     if(is.character(doc))
         doc = readPDFXML(doc)
 
-    fontIds = unlist(getNodeSet(doc, "//fontspec/@id"))
-    txt = lapply(fontIds, function(id) sapply(textByFont(doc, id), xmlValue))
+    xp = "//fontspec/@id"
+#    if(local)  xp = paste(".", xp)
+
+    fontIds = unlist(getNodeSet(doc, xp))
+    txt = lapply(fontIds, function(id) sapply(textByFont(doc, id, local), xmlValue))
     names(txt) = fontIds
     txt
 }
@@ -117,18 +120,21 @@ getDocFont = getTextFont =
     # which is assumed to be that of the text.
     # There are cases in which the most common font may not be that of the text.
     # 
-function(doc)
+function(doc, local = FALSE, byNumChars = TRUE, fontInfo = getFontInfo(as(doc, "XMLInternalDocument")))
 {
       # If we don't take into account the number of characters, but just the number of text nodes:
-      #   sort(table(unlist(getNodeSet(doc, "//text/@font"))))
-    txt = textByFonts(doc)
+      # 
+    txt = textByFonts(doc, local)
     if(length(txt) == 0)
         return(data.frame(size = integer(), id = character()))
+
+    ctr = if(byNumChars)
+              sapply(txt, function(x) sum(nchar(x)))
+          else
+              sapply(txt, length)
     
-    ctr = sapply(txt, function(x) sum(nchar(x)))
-    info = getFontInfo(as(doc, "XMLInternalDocument"))
     id = names(ctr)[which.max(ctr)]
-    info[info[,"id"] == id, ]
+    fontInfo[fontInfo[,"id"] == id, ]
 } 
 
 
@@ -137,7 +143,24 @@ function(doc)
 
 
 isBold =
-function(obj)
+function(x, ...)
+    UseMethod("isBold")
+
+isBold.XMLInternalNode =
+function(x, fontInfo = getFontInfo(as(x, "XMLInternalDocument")), ...)    
 {
 
+}
+
+isBold.character =
+function(x, ...)    
+{
+    grepl("Bold", x)
+}
+
+
+isBold.data.frame =
+function(x, ...)    
+{
+   x$isBold | isBold(x$name)
 }
