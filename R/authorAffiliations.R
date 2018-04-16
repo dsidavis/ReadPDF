@@ -7,17 +7,22 @@ getAuthorAffil =
 function(doc)
 {
     if(is.character(doc))
-       doc = readPDFXML(doc)
+        doc = readPDFXML(doc)
+
+    if(isEID(doc)) 
+        return(list(author = getEIDAuthors(doc), affiliations = getBelowLine(doc)))
+
 
     ti = getDocTitle(doc, asNode = TRUE)
     if(length(ti) == 0 || is.character(ti)) {
-        message("No title")
+        stop("No title")
         return(NULL)
     }
     ab = findAbstract(doc)
     
     if(length(ab) == 0 || is.character(ab))
-        return(NULL)
+        stop("no abstract")
+#        return(NULL)
 
     getNodesBetween(ti[[length(ti)]], ab[[1]], exclude = TRUE)
                                         #sapply(xs, xmlValue)
@@ -49,7 +54,29 @@ function(doc, col = 1, colPos = getColPositions(p1))
         tlines = tlines[1,]
 
     xpath.query = sprintf(".//text[ @top > %f and (@left + @width ) < %f]", tlines["y0"], colPos[2] )
-    getNodeSet(p1, xpath.query)
+    txt = getNodeSet(p1, xpath.query)
+    ## Check these are all in a different font than the document's regular text.
+
+    txt
 }
 
 
+
+
+authorsAfterTitle =
+    ## This is  currently a very simple minded function
+    ## to group the nodes by line and then group those lines
+    ## by interline skip to get blocks.
+    ## Then we can take the block after the title. 
+function(doc, lineskip = 20, title = getDocTitle(doc))
+{
+    g = getPageGroups(doc, lineskip)
+    combine = function(x) paste(names(x), collapse = "\n")
+    g.txt = sapply(g, combine)
+    i = match(title, g.txt)
+    
+    if(is.na(i))
+        g
+    else
+        g[[i + 1L]]
+}
