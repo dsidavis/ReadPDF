@@ -32,7 +32,7 @@
 1. spaces in Table 2 of Aguilar-2007  The 5 and 80 run together.
 1. Spaces within a string are getting lost in pdftohotml - e.g., Fulhorst-2002  - page 1 - 'TexasParksand'
 1. Check the links in pdftohtml. In Lahm, we only get 14 links to the bibliography items.
-  There are 519 /Link elements in the uncompressed PDF.
+    There are 519 /Link elements in the uncompressed PDF.
 1. Are the dimensions for the shaded rectangles correct from pdftohtml. Is linewidth transformed also?
    See Lahm[[ page 5]]  
 
@@ -44,7 +44,7 @@
 
 1. XXX pdfText messes up text in different columns.  Check.
 
-1. [check - think done]showNode for lines|rect.
+1. [check - think done]showNode() for lines|rect.
      location and color
 	 
 1. getNodesBetween():  work with a line/rect node.	 
