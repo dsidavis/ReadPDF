@@ -28,7 +28,7 @@ package. This can be installed in R using the devtools package:
 devtools::install_github("omegahat/XML")
 ```
 
-1. (Recommended) Install extended version of pdftohtml
+2. (Recommended) Install extended version of pdftohtml
 
 Additionally, while the package will work with other versions of
 pdftohtml, some functions will not work without our extended
@@ -57,7 +57,7 @@ env variable PDFTOHTML.
 options(PDFTOHTML = "path/to/pdftohtml")
 ```
 
-1. Install ReadPDF
+3. Install ReadPDF
 
 ```
 devtools::install_github("dsidavis/ReadPDF")
