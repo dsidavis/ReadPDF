@@ -149,7 +149,10 @@ There are 45 documents which have no error, are not scanned and have 0 elements 
 names(scanned)[ !scanned & len == 0 ]
 ```
 
-These are listed below and divided into which have an ab
+These are listed below and divided into which have an abstract and which do  not.
+
+### Do not have an abstract.
+
  [1] "LatestDocs/PDF/3342055963/08-0359_appT-s1 (2).xml" - 1 page table                           
  [5] "LatestDocs/PDF/2853897527/978-1-4020-6106-6.xml"   - book
 [10] "LatestDocs/PDF/2688324473/Beltrame-2006-Tickborne encephalitis virus, no.xml" - no abstract,short doc.
@@ -157,20 +160,17 @@ These are listed below and divided into which have an ab
 [22] "LatestDocs/PDF/0247828304/Hofle-2013-Usutu virus in migratory song thrus.xml"  - no abstract,short doc
 [40] "LatestDocs/PDF/0818313444/vir.0.81576-0-SuppTableEdited.xml"                  - tables only supplementary material.
 
-Ambiguous
+
+### Ambiguous
 [36] "LatestDocs/PDF/2498380585/REUSKIN JOrdan.xml"      - first paragraph in a different color.
 [37] "LatestDocs/PDF/0253022084/Rijks-2016-Widespread Usutu virus outbreak in.xml" - same as REUSKIN above
 
 
+### Has an Abstract
 
-
-Has an Abstract
-
- [2] "LatestDocs/PDF/3454570876/1-s2.0-S0042682200905634-main2.xml"          Virology centered
- across 2 columns
+ [2] "LatestDocs/PDF/3454570876/1-s2.0-S0042682200905634-main2.xml"          Virology centered across 2 columns
  [3] "LatestDocs/PDF/0649016555/1-s2.0-S0042682297988401-main.xml"                 virology
  [4] "LatestDocs/PDF/1249277242/177-3-529.xml"                                     
- [6] "LatestDocs/PDF/3302321137/Aradaib-2010-Nosocomial outbreak of Crimean-C1.xml" - EID document. S
  [7] "LatestDocs/PDF/1288179177/Asper-2001-First outbreak of callitrichid hepa.xml" - virology again.
  [8] "LatestDocs/PDF/1217382941/Barrette-2009-Discovery of swine as a host fo1.xml" - 3 columns with title and abstract spanning the first two. Calculate the number of columns, find text that spans  more than one. This will work for 2 columns with abstract spanning both.
  [9] "LatestDocs/PDF/4154443567/Barrette-2009-Discovery of swine as a host for.xml" - duplicate of previous one with a back cover page
@@ -207,22 +207,85 @@ Has an Abstract
 "LatestDocs/PDF/0215227208/Klempa-2008-Hemorrhagic fever with renal synd1.xml" 
 "LatestDocs/PDF/2243954052/Milazzo-2012-Geographic distribution of hantav.xml"
 "LatestDocs/PDF/1827651569/Swanepoel-2007-Studies of reservoir hosts for.xml" 
+"LatestDocs/PDF/3302321137/Aradaib-2010-Nosocomial outbreak of Crimean-C1.xml"
 "LatestDocs/PDF/0683734075/Tagliapietra-2009-Spatial and temporal dynamic.xml"
    getColPositions() is giving only one value, not 2. So failing to get the text.
+
+NewPDFs/El Moro Canyon Virus/Milazzo-2012.xml
 
 Different format.
 "LatestDocs/PDF/2987363901/Kirkland-2015-Hendra Virus Infection in Dog, A.xml"
 
 
 
-
-
-
-[17] "LatestDocs/PDF/3867373015/Coffey-2006-Serologic evidence of widespread E.xml" EID, but title and author list span 2 cols, lot of space between abstract text and title.
+"LatestDocs/PDF/3867373015/Coffey-2006-Serologic evidence of widespread E.xml" EID, but title and author list span 2 cols, lot of space between abstract text and title.
 
 
 
 
+NewPDFs/Australian Bat Lyssavirus/Arai-2003.xml
+NewPDFs/Australian Bat Lyssavirus/Arguin-2002.xml
+NewPDFs/Australian Bat Lyssavirus/Mackenzie-2001.xml
+NewPDFs/Australian Bat Lyssavirus/Warrilow-2003.xml
+NewPDFs/Barmah Forest Virus/Lindsay-1995.xml
+NewPDFs/Crimean Congo Hemorrhagic Fever Virus/Leblebicioglu-2014.xml
+NewPDFs/Crimean Congo Hemorrhagic Fever Virus/Mustafa-2011.xml
+NewPDFs/Crimean Congo Hemorrhagic Fever Virus/Nabeth-2004.xml
+NewPDFs/Crimean Congo Hemorrhagic Fever Virus/Palomar-2013.xml
+NewPDFs/Dobrava Virus/Oktem-2014.xml
+NewPDFs/Dobrava Virus/Papa-2006.xml
+NewPDFs/Dobrava Virus/Schlegel-2009.xml
+NewPDFs/Duvenhage Virus/Paweska-2006.xml
+NewPDFs/European Bat Lyssavirus 1/Serra-Cobo-2002.xml
+NewPDFs/European Bat Lyssavirus 1/Van der Poel-2005.xml
+NewPDFs/European Bat Lyssavirus 1/Vazquez-Moron-2011.xml
+NewPDFs/Getah Virus/Nemoto-2015.xml
+NewPDFs/Granada Virus/Arai-2003.xml
+NewPDFs/Granada Virus/Lumlertdacha-2005.xml
+NewPDFs/Guaroa Virus/Groseth-2015.xml
+NewPDFs/Irkut Virus/Lumlertdacha-2005.xml
+NewPDFs/Khujand Virus/Lumlertdacha-2005.xml
+NewPDFs/Lagos Bat Virus/Hayman-2008.xml
+NewPDFs/Lagos Bat Virus/Markotter-2006 2.xml
+NewPDFs/Lagos Bat Virus/Markotter-2006.xml
+NewPDFs/Lagos Bat Virus/Sabeta-2007.xml
+NewPDFs/Laguna Negra Virus/Suzuki-2004.xml
+NewPDFs/Laguna Negra Virus/Travassos da Rosa-2012.xml
+NewPDFs/Mayaro Virus/de Thoisy-2003.xml
+NewPDFs/New York Virus/Knust-2013.xml
+NewPDFs/Oropouche/Nunes-2005.xml
+NewPDFs/Seoul Virus/Wang-2016-Hemorrhagic Fever with Renal Syndrom.xml
+NewPDFs/Seoul Virus/Zhang-2009-Hantaviruses in rodents and humans.xml
+NewPDFs/Seoul Virus/Zhang-2010-Hantavirus infections in humans and.xml
+NewPDFs/Tahyna Virus/Gould-2006.xml
+NewPDFs/Tula Virus/Oktem-2014.xml
+NewPDFs/West Causcasian Bat Virus/Kuzmin-2008.xml
+NewPDFs/Western equine encephalitis/Roth-2010.xml
+
+
+#### These three are quite different and have a centered, indented regular abstract
+NewPDFs/Australian Bat Lyssavirus/Field-1999.xml
+NewPDFs/Dobrava Virus/Scharninghausen-1999.xml
+NewPDFs/Monongahela Virus/Rhodes-2000.xml
+
+#### 3 column EID document.
+NewPDFs/Seoul Virus/Yao-2013-Seoul virus in rats (Rattus norvegicu.xml
+
+
+#### Bad getColPositions()
+These give 71 and 475 respectively.
+"NewPDFs/Australian Bat Lyssavirus/Mackenzie-2001.xml"                  
+"NewPDFs/El Moro Canyon Virus/Milazzo-2012.xml"                         
+
+MacKenzie has an image in the 2nd column.  Also, not regular format.Centered abstract and title.  Only one line.
+Need getColPositions() to take the image into account. But our image data is wrong.
+
+[done] When getColPositions() finds a column in the middle, it should check if it can figure out
+       if there is a column before this.
+
+These give an empty column position vector. There is nothing special about them.
+"NewPDFs/New York Virus/Knust-2013.xml"                                 
+"NewPDFs/Seoul Virus/Zhang-2009-Hantaviruses in rodents and humans.xml" 
 
 
 
