@@ -9,6 +9,8 @@ margins =
     # XXX Deal with rotation when the text is actually rotated.
     # Specifying @rotation = 0 for case when there is a rotate line of text identifying how
     # the document was retrieved, e.g. downloaded by UC Davis.....
+    #XXX should we extend this to get top and bottom.
+    #XXX  and deal with a set of nodes, and also an entire document.
 function(page, bbox = getBBox2(getNodeSet(page, ".//text[@rotation = 0]")))
 {
    c(min(bbox[, 1]), max(bbox[,1] + bbox[,3]))
