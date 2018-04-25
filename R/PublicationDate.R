@@ -142,7 +142,7 @@ function(node)
 hasCoverPage =
 function(doc)
 {
-  isBioOne(doc) || isMBio(doc)
+  isBioOne(doc) || isMBio(doc) || isResearchGate(doc)
 }
 
 isMBio =
