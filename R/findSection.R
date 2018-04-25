@@ -20,8 +20,12 @@ function(doc, asNodes = FALSE, secHeaders = findSectionHeaders(doc, ...), maxNum
           removeNodes(nn[!sapply(nn, is.null)])
     }
     
-    if(length(secHeaders) == 0)
-        return(list())
+    if(length(secHeaders) == 0) {
+        ti = unlist(getDocTitle(doc, asNode = TRUE))
+        end = getLastRealTextNode(doc)
+        ans = getNodesBetween(ti[[length(ti)]], end)
+        return(ans)
+    }
 
     secHeaders = orderNodes(unlist(secHeaders))
 
@@ -127,7 +131,7 @@ function(doc, sectionName = c('introduction', 'background',
     if(onlyFirst)
         return(intro)
     
-#browser()
+
     if(!length(intro)) {
        filter = paste(sprintf("lower-case(normalize-space(.)) = '%s'", otherSectionNames), collapse = " or ")
        xp = sprintf("//text[%s]", filter)
@@ -346,7 +350,7 @@ getTextAfter =
 function(x = NULL, to = NULL, before = FALSE, useLines = TRUE, ...)
 {
     page = xmlParent(if(!is.null(x)) x else to)
-    cols = getTextByCols(page, asNodes = TRUE, ...)
+    cols = getTextByCols(page, asNodes = TRUE, order = TRUE, ...)
 
     if(!is.null(x) && !is.null(to) && pageOf(to) < pageOf(x)) {
         warning("to node in getTextAfter() is on earlier page (", pageOf(to) , " versus ",  pageOf(x), "  Ignoring to node")
@@ -367,13 +371,14 @@ function(x = NULL, to = NULL, before = FALSE, useLines = TRUE, ...)
     }
     
     if(!is.null(x)) {
-        # find the column and the index of the node matching x
+        # find the column and the index of the node matching x. Not the same as columnOf() as we want the index within the column.
         if(xmlName(x) == "text") {        
            i =  lapply(cols, function(n) if(length(n)) which(sapply(n, identical,  x)) else integer())
            colNum = which(sapply(i, length) > 0)        
                                         #        colNum = which(sapply(cols, identicalInColumn, x))
         } else {
-            ## Force for now!!!
+            ## Force for now!!!  Not a <text> element, so presumable a <line> or <rect>
+            warning("hard coded column for now")
             i = 1L
             colNum = 1L          
         }
@@ -540,4 +545,34 @@ removeNumPrefixes =
 function(x)
 {
   gsub("^[[:space:]]*[0-9.]+ ?", "", x)
+}
+
+
+
+getLastRealTextNode =
+function(doc, docFont = getDocFont(doc), nodes = getNodeSet(doc, xpathQ("//text", doc)), textFonts = getTextFonts(doc, txtNodes = nodes))
+{
+    # Make this smarter by finding the text that comes after the main text of the
+    # document. Acknowledgements, etc.
+    # We are currently calling this because we have no section headers.
+    # So we may look at text that is different from the regular document font.
+    # and/or look for
+#browser()
+    byPage = split(nodes, sapply(nodes, pageOf))
+    tmp = byPage[[ length(byPage) ]]
+    cols = getTextByCols(doc[[ length(byPage) ]], txtNodes = tmp, asNodes = TRUE)
+    tmp = cols[[length(cols)]]
+    tmp = orderByLine(tmp)
+
+    ans = tmp[[length(tmp)]]
+    ans
+
+    
+#    ans[[length(ans)]]
+#    bb = getBBox2(tmp)
+#    o = order(bb[, "top"], bb[, "left"])
+#    tmp = tmp[o]
+#    tmp[[ length(tmp) ]]
+    #  textFonts[[length(textFonts)]]
+    
 }
