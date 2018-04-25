@@ -111,7 +111,6 @@ function(nodes, asDataFrame = FALSE, color = FALSE, diffs = FALSE, dropCropMarks
     if(color) 
         ans = addBBoxColors(nodes, ans)
 
-
     if(diffs) {
         ans[3:4] = ans[3:4] - ans[1:2]
         names(ans)[3:4] = c("width", "height")        
@@ -128,7 +127,7 @@ function(nodes, ans)
             ans$fill = cols[[1]]
             ans$stroke = cols[[2]]            
         } else 
-            ans = cbind(ans, cols[[1]], cols[[2]])
+            ans = cbind(ans, fill = cols[[1]], stroke = cols[[2]])
 
         ans
 }
