@@ -3,3 +3,13 @@ setOldClass(c("PDFToXMLPage", "ConvertedPDFPage", "XMLInternalElement", "XMLInte
 
 
 setAs("character", "PDFToXMLDoc", function(from) readPDFXML(from))
+
+
+setAs("XMLInternalNode", "PDFToXMLPage",
+      function(from) {
+          if(xmlName(from) != 'page') 
+              stop("XML node is not a <page>")
+
+          class(from) = c("PDFToXMLPage", "ConvertedPDFPage", class(from))
+          from
+      })

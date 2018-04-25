@@ -66,6 +66,7 @@ function(p, threshold = .1,
          bbox = getBBox2(txtNodes), docFont = TRUE, align = "left", local = FALSE, ...)    
 {
     bbox = as.data.frame(bbox)
+    p = as(p, "PDFToXMLPage")
 
     vals = switch(align,
                   left = bbox$left,
