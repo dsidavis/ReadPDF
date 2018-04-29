@@ -1,45 +1,42 @@
+# This reads a simple R scatterplot.
+
 if(FALSE) {
   p = readPDFXML("scatterplot.xml")[[1]]
   x = getPoints(p, asBBox = TRUE)
+  
   pp = x$left + x$width/2
-  mp = getXMap(p)
+  mp = getMap(p)
   round(linearMap(pp, mp), 1)
 
-  
+  ppy = x$top + x$width/2
+  mpy = getMap(p, FALSE)
+  round(linearMap(ppy, mpy), 4)  
 }    
 
-# This reads a simple R scatterplot.
-
-p = readPDFXML("scatterplot.xml")[[1]]
-
-
 getPlotRegion =
+    #
+    #  get the rectangle corresponding to the plot region 
+    #
 function(p)
 {
   getBBox(getNodeSet(p, ".//rect"))
 }
 
-getAxes =
-function(p, region = getPlotRegion(p), pageHeight = dim(p)[2])
-{
-   
-}
 
 getHTicks =
 function(p, region = getPlotRegion(p), pageHeight = dim(p)[2])        
 {
-    bt = region[, "y0"] # bottom of the plot region
-
     lines = getNodeSet(p, ".//line")
     bbl = getBBox(lines)
+
+    bt = region[, "y0"] # bottom of the plot region    
     
     w = (bbl[, "y0"] == region[1, "y0"] & bbl[, "x0"] == bbl[, "x1"])  # which vertical tick marks meet the plot region
     pos = bbl[w,]
     txt = getNodeSet(p, ".//text")
     bb2 = getBBox2(txt, asDataFrame = TRUE)
-    d = (region[1, "y0"] - bb2$top)
+    w = (region[1, "y0"] < bb2$top)
 
-    w =  d < 0
     # Below the bottom of the plot region.
     # Includes the x axis label. So let's get rid of that.
     # Different assumptions
@@ -50,15 +47,37 @@ function(p, region = getPlotRegion(p), pageHeight = dim(p)[2])
 }
 
 
-getXMap =
-function(p, region = getPlotRegion(p))
+getVTicks =
+function(p, region = getPlotRegion(p), pageHeight = dim(p)[2])        
 {
-    h = getHTicks(p)
+    lines = getNodeSet(p, ".//line")
+    bbl = getBBox(lines)
+
+    bt = region[, "x0"] # left of the plot region    
+    
+    w = (bbl[, "x0"] == bt & bbl[, "x0"] != bbl[, "x1"] & bbl[, "y0"] == bbl[, "y1"])  # which horizontal tick marks meet the plot region
+
+    pos = bbl[w,]
+    
+    txt = getNodeSet(p, ".//text")
+    bb2 = getBBox2(txt, asDataFrame = TRUE)
+    w = bb2$left < region[1, "x0"] 
+
+#    ll = nodesByLine(txt[w])[[1]]
+#    x = getBBox2(ll, asDataFrame = TRUE)
+    x = split(bb2[w,], cut(bb[w, "left"], 2))[[2]]
+    data.frame(raw = pos[, "y0"], plot = as.numeric(x$text)) 
+}
+
+getMap =
+function(p, horizontal = TRUE, region = getPlotRegion(p))
+{
+    h = (if(horizontal) getHTicks else getVTicks)(p)
+    
     # get the two end points and compute the number of units per PDF unit
     e = h[c(1, nrow(h)),]
-#    scale = diff(e[[2]])/diff(e[[1]])
-
-    r = region[1, c("x0", "x1")]    
+    cols = if(horizontal) c(1, 3) else c(2, 4)
+    r = region[1, cols]    
     m = linearMap(r, e)
     data.frame(raw = r, x = m)
 }
@@ -84,3 +103,25 @@ function(p, region = getPlotRegion(p), pageHeight = dim(p)[2], asBBox = FALSE)
     else
        text[ h & v]
 }
+
+#####################################
+
+getAxes =
+function(p, region = getPlotRegion(p), pageHeight = dim(p)[2])
+{
+   
+}
+
+getTitle =
+function(p)
+{
+
+}
+
+getAxisLabels =
+function(p)
+{
+
+}
+
+getDataLines = function(p) {}
