@@ -109,3 +109,6 @@ export(getTextByCols)
 #)
 
 export(getPageLines)
+
+
+export(getLines)
