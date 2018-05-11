@@ -106,14 +106,16 @@ renderPage =
         txt = getNodeSet(page, ".//text")
         if(length(txt)) {
             bb = t(sapply(txt, xmlAttrs))
+            if(!("rotation"  %in% colnames(bb)))
+               bb = cbind(bb, rotation = rep(0, nrow(bb)))
             storage.mode(bb) = "double"
 
             
             colors = getNodeColors(txt)
             text = sapply(txt, xmlValue)
             by(1:nrow(bb), bb[, "rotation"],
-               function(i)
-                 text(bb[i,2], h - bb[i,1], text[i], cex = cex.text, adj = adj, col = colors[i], srt = - bb[i[1], "rotation"])) 
+                   function(i)
+                       text(bb[i,2], h - bb[i,1], text[i], cex = cex.text, adj = adj, col = colors[i], srt = - bb[i[1], "rotation"]))
         }
     }
 
