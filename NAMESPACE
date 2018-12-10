@@ -4,7 +4,7 @@ import(methods)
 
 export(readPDFXML)
 export(findAbstract)
-export(getSectionText, getDocText)
+export(getSectionText, getDocText, findSectionHeaders)
 
 export(pdfText, pdf_text)
 
