@@ -1,5 +1,5 @@
 getXPathDocFontQuery =
-function(node, docFont = TRUE, fontId = getDocFont(node)$id)
+function(node, docFont = TRUE, fontId = getDocFont(node, local = local)$id, local = FALSE)
 {
     xp = if(is.logical(docFont) && docFont)
             sprintf("//text[@font = '%s']", fontId)
@@ -62,10 +62,11 @@ function(p, threshold = .1,
 getColPositions.PDFToXMLPage = getColPositions.XMLInternalNode =  getColPositions.XMLInternalElementNode =
     # For a single page
 function(p, threshold = .1,
-         txtNodes = getNodeSet(p, getXPathDocFontQuery(p, docFont)),
-         bbox = getBBox2(txtNodes), docFont = TRUE, align = "left", ...)    
+         txtNodes = getNodeSet(p, getXPathDocFontQuery(p, docFont, local = local)),
+         bbox = getBBox2(txtNodes), docFont = TRUE, align = "left", local = FALSE, ...)    
 {
     bbox = as.data.frame(bbox)
+    p = as(p, "PDFToXMLPage")
 
     vals = switch(align,
                   left = bbox$left,
@@ -73,7 +74,12 @@ function(p, threshold = .1,
                   center = (bbox$left + bbox$right)/2
                  )
     tt = table(vals)
-    
+#browser()    
+    if(missing(txtNodes) && nrow(bbox) == 0 && !local) {
+        # Use the page-specific font count
+        return(getColPositions(p, threshold, docFont = docFont, align = align, local = TRUE, ...))
+    }
+
     # Subtract 2 so that we start slightly to the left of the second column to include those starting points
     # or change cut to be include.lowest = TRUE
     ans = as.numeric(names(tt [ tt > nrow(bbox)*threshold])) - 2
@@ -92,7 +98,15 @@ function(p, threshold = .1,
     
     w = which(diff(ans) < minDiff)
     if(length(w))
-       ans = ans[ - (w+1)]
+        ans = ans[ - (w+1)]
+
+
+    if(length(ans) == 1 && ans[1] > .4*dim(p)["width"]) {
+        ## So only one column and it starts close to the middle of the page. Probably means
+        ## there is one to the left that we didn't find. This may be because the text is in a different font.
+        ##
+        ans = c(margins(p)[1], ans)
+     }
     
     ans
 }
@@ -115,7 +129,10 @@ function(p, threshold = .1, txtNodes = getNodeSet(p, ".//text"), bbox = getBBox2
 
 getNumCols.character =
 function(p, threshold = .1, txtNodes = getNodeSet(p, ".//text"), bbox = getBBox2(txtNodes))
-  getNumCols(  readPDFXML(p), threshold, txtNodes, bbox)
+{
+    p = readPDFXML(p)
+    getNumCols(p , threshold, txtNodes, bbox)
+}
 
 
 getNumCols.PDFToXMLPage = getNumCols.XMLInternalNode =

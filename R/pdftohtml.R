@@ -1,9 +1,4 @@
-pdfDoc =
-function()
-{
-
-}
-
+#pdfDoc =function(){}
 
 QQuote =
 function(x)

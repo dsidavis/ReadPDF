@@ -1,5 +1,23 @@
+# EID Abstracts
+1. Handle the foot note markers in the author list in EID abstracts.
+1. [done] generalize findEIDAbstract() not to use specific font number but get the text in column 1 above the horizontal
+ line that is not bold.
+ [6] "LatestDocs/PDF/3302321137/Aradaib-2010-Nosocomial outbreak of Crimean-C1.xml"
+
+# getColPositions
+1. getColPositions("LatestDocs/PDF/2682627390/Adrian Diaz-2008-West Nile virus in birds, Arg.xml")
+
+1. getNumCols() gives 0 for Adrian ... above. Should be at least 2, but 3 is correct.
+   Now get 2 columns but the 2nd page is quite different. The table throws it.
+   
+1. "NewPDFs/Seoul Virus/Zhang-2009-Hantaviruses in rodents and humans.xml" 
+   + 3rd page has an image.  Take image and the text in caption being in a different font.
+   + [fixed] Yields -2 for last page.  Now gives 4 values corresponding to the numbers and the text
+      of the references in each column.
+
 # pdftohtml
 
+1. Figure out what the coordinates are in an image.
 
 1. In Easterbrook-2007, p4  The figure has lines and is PDF but we don't see the lines in the plot
    when we plot that page in R.
@@ -14,13 +32,25 @@
 1. spaces in Table 2 of Aguilar-2007  The 5 and 80 run together.
 1. Spaces within a string are getting lost in pdftohotml - e.g., Fulhorst-2002  - page 1 - 'TexasParksand'
 1. Check the links in pdftohtml. In Lahm, we only get 14 links to the bibliography items.
-  There are 519 /Link elements in the uncompressed PDF.
+    There are 519 /Link elements in the uncompressed PDF.
 1. Are the dimensions for the shaded rectangles correct from pdftohtml. Is linewidth transformed also?
    See Lahm[[ page 5]]  
 
 
 # Todo list for ReadPDF
 
++ FIX fixTitleNodes().
+
++ Generally, fix the getDocTitle() function to be more accurate. See Status/TitleStatus.md
+
+1. XXX pdfText messes up text in different columns.  Check.
+
+1. [check - think done]showNode() for lines|rect.
+     location and color
+	 
+1. getNodesBetween():  work with a line/rect node.	 
+     + XXX done but fix the hard coding of the col and index as 1 in findSection.R:getTextAfter().
+	 
 ## Spreadsheets of results
 
 ## Misc

@@ -20,8 +20,12 @@ function(doc, asNodes = FALSE, secHeaders = findSectionHeaders(doc, ...), maxNum
           removeNodes(nn[!sapply(nn, is.null)])
     }
     
-    if(length(secHeaders) == 0)
-        return(list())
+    if(length(secHeaders) == 0) {
+        ti = unlist(getDocTitle(doc, asNode = TRUE))
+        end = getLastRealTextNode(doc)
+        ans = getNodesBetween(ti[[length(ti)]], end)
+        return(ans)
+    }
 
     secHeaders = orderNodes(unlist(secHeaders))
 
@@ -112,7 +116,8 @@ function(doc, sectionName = c('introduction', 'background',
          otherSectionNames = c('references', 'acknowledgements', 'acknowledgments', 'results', 'methods'),
          checkCentered = TRUE,
          discardAfterReferences = TRUE,
-         allowRotated = FALSE, onlyFirst = FALSE
+         allowRotated = FALSE, onlyFirst = FALSE,
+         order = TRUE, groupByLine = FALSE
          )
 {
     if(is.character(doc))
@@ -134,7 +139,7 @@ function(doc, sectionName = c('introduction', 'background',
     if(onlyFirst)
         return(intro)
     
-#browser()
+
     if(!length(intro)) {
        filter = paste(sprintf("lower-case(normalize-space(.)) = '%s'", otherSectionNames), collapse = " or ")
        xp = sprintf("//text[%s]", filter)
@@ -197,7 +202,19 @@ function(doc, sectionName = c('introduction', 'background',
             i = sapply(secs, isOnLineBySelf)
             secs = secs[ i ]
         }
-        return(nodesByLine(secs))
+
+        if(order) { # Do we need to do this?? 
+            o = order(sapply(secs, pageOf), sapply(secs, inColumn))
+            secs = secs[o]
+        }
+        if(groupByLine) {
+            # XXX This changes the order of the nodes.
+            # We really should group these by page and within column, except those that span multiple columns.
+            # We now turn this off. What does this do to getSectionText().
+           secs = nodesByLine(secs)
+        }
+        
+        secs
     }
 }
 
@@ -286,7 +303,7 @@ function(page, nodes = getNodeSet(page, ".//text"), bb = getBBox2(nodes, TRUE),
 
 
 getNodesBetween =
-function(x = NULL, y = NULL, useLines = TRUE)
+function(x = NULL, y = NULL, useLines = TRUE, exclude = FALSE, ...)
 {
     if(is.null(x) && is.null(y))
         stop("need to specify either x or y or both")
@@ -304,7 +321,7 @@ function(x = NULL, y = NULL, useLines = TRUE)
     s = pageOf(x)
     e = pageOf(y)
 
-    if(e > s) {
+    ans = if(e > s) {
         # get all the nodes on each page up to e
         p1 = getTextAfter(x, useLines = useLines)
         if(e - s > 1) {
@@ -315,8 +332,15 @@ function(x = NULL, y = NULL, useLines = TRUE)
         pe = getTextAfter(, y, useLines = useLines)
         c(p1, unlist(pgs, recursive = FALSE), pe)
     } else {
-        getTextAfter(x, y, useLines = useLines)
+        getTextAfter(x, y, useLines = useLines, ...)
     }
+
+    if(exclude) 
+           # drop x and y.  XXX need to handle if y is null in call and keep then.
+        ans = ans[-c(1, length(ans))]
+
+    ans
+    
 }
 
 getTextAfter =
@@ -329,13 +353,12 @@ getTextAfter =
     # specify either x OR to so it can get the nodes before the to node.
     # One can specify x and not to, x and to, or just to.
     #
-    #
 
 #XXX FIX THIS TO KEEP THE TEXT BY COLUMN.
-function(x = NULL, to = NULL, before = FALSE, useLines = TRUE)
+function(x = NULL, to = NULL, before = FALSE, useLines = TRUE, ...)
 {
     page = xmlParent(if(!is.null(x)) x else to)
-    cols = getTextByCols(page, asNodes = TRUE)
+    cols = getTextByCols(page, asNodes = TRUE, order = TRUE, ...)
 
     if(!is.null(x) && !is.null(to) && pageOf(to) < pageOf(x)) {
         warning("to node in getTextAfter() is on earlier page (", pageOf(to) , " versus ",  pageOf(x), "  Ignoring to node")
@@ -348,7 +371,6 @@ function(x = NULL, to = NULL, before = FALSE, useLines = TRUE)
           # If to is a rect/line, find its location, otherwise find any lines on this page.
        if(!is.null(to) && xmlName(to) %in% c('rect', 'line')) {
            bb = getBBox(list(to))
-
            bb[1,2] = bb[1,4]
            to = NULL
 #           useLines = FALSE
@@ -357,10 +379,17 @@ function(x = NULL, to = NULL, before = FALSE, useLines = TRUE)
     }
     
     if(!is.null(x)) {
-        # find the column and the index of the node matching x
-        i = lapply(cols, function(n) if(length(n)) which(sapply(n, identical,  x)) else integer())
-        colNum = which(sapply(i, length) > 0)        
-#        colNum = which(sapply(cols, identicalInColumn, x))
+        # find the column and the index of the node matching x. Not the same as columnOf() as we want the index within the column.
+        if(xmlName(x) == "text") {        
+           i =  lapply(cols, function(n) if(length(n)) which(sapply(n, identical,  x)) else integer())
+           colNum = which(sapply(i, length) > 0)        
+                                        #        colNum = which(sapply(cols, identicalInColumn, x))
+        } else {
+            ## Force for now!!!  Not a <text> element, so presumable a <line> or <rect>
+            warning("hard coded column for now")
+            i = 1L
+            colNum = 1L          
+        }
     }
 
     if(!is.null(to)) {
@@ -406,6 +435,16 @@ function(x = NULL, to = NULL, before = FALSE, useLines = TRUE)
         if(!is.null(to))
             tmp[[2]] = to
         bb2 = getBBox2(tmp)
+###!!!!!        
+        isShape = sapply(tmp, xmlName) != "text"
+        if(any(isShape)) {
+             # Convert getBBox to x0, y0, width and height, not x0, y0, x1, y1
+             # Do this in getBBox() as an option.
+            
+            vv = getBBox(tmp[isShape], diffs = TRUE)
+            bb2[isShape,] = vv
+
+        }
         # bb is for rect/line.  So we are looking for lines that span at least half the page
         # and are further "down" the page than our x node (which is located at bb2[1,])
         # Was > .6 not .53
@@ -514,4 +553,34 @@ removeNumPrefixes =
 function(x)
 {
   gsub("^[[:space:]]*[0-9.]+ ?", "", x)
+}
+
+
+
+getLastRealTextNode =
+function(doc, docFont = getDocFont(doc), nodes = getNodeSet(doc, xpathQ("//text", doc)), textFonts = getTextFonts(doc, txtNodes = nodes))
+{
+    # Make this smarter by finding the text that comes after the main text of the
+    # document. Acknowledgements, etc.
+    # We are currently calling this because we have no section headers.
+    # So we may look at text that is different from the regular document font.
+    # and/or look for
+#browser()
+    byPage = split(nodes, sapply(nodes, pageOf))
+    tmp = byPage[[ length(byPage) ]]
+    cols = getTextByCols(doc[[ length(byPage) ]], txtNodes = tmp, asNodes = TRUE)
+    tmp = cols[[length(cols)]]
+    tmp = orderByLine(tmp)
+
+    ans = tmp[[length(tmp)]]
+    ans
+
+    
+#    ans[[length(ans)]]
+#    bb = getBBox2(tmp)
+#    o = order(bb[, "top"], bb[, "left"])
+#    tmp = tmp[o]
+#    tmp[[ length(tmp) ]]
+    #  textFonts[[length(textFonts)]]
+    
 }

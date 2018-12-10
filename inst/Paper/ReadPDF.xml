@@ -1,0 +1,218 @@
+<article xmlns:r="http://www.r-project.org"
+         xmlns:xi="http://www.w3.org/2003/XInclude"
+	 xmlns:c="http://www.C.org"
+	 xmlns:omg="http://www.omegahat.org">
+
+<articleinfo>
+
+<title></title>
+
+<author><firstname>Duncan</firstname><surname>Temple Lang</surname>
+  <affiliation><orgname>University of California at Davis</orgname>
+               <orgdiv>Data Science Initiative</orgdiv>
+               <orgdiv>Department of Statistics</orgdiv>
+  </affiliation>
+</author>
+
+<abstract>
+  We describe a rich, flexible R package to extract structured content
+  from PDF documents.
+  There are high-level functions that extract text by line, column, etc.;
+  title, section titles, tables, images, ...
+  The package also provides medium- and low-level primitive functions
+  on which users can quickly build new functionality to extract
+  content from documents.
+  The package is is highly extensible by allowing users to 
+  query information about one or more individual elements
+  with which we can customize the extraction of higher-level aspects.
+</abstract>
+</articleinfo>
+
+
+
+<section>
+  <title></title>
+
+<para>
+The starting points is a PDF document (that is not a scanned document).    
+</para>    
+  
+
+<para>
+  The high-level functions can take the name of a PDF
+  file. They implicitly convert this to an XML file (each time)
+  and then process that.
+  We can also explicitly create the XML file once and pass that file name to these functions.
+  Alternatively, we can parse the XML document and pass that to any of the functions.
+</para>
+<para>
+ We do read the XML document into R with any of the following:
+<r:code>
+  doc = readPDFXML("foo.pdf") # will convert to XML on the fly
+  doc = convertPDF2XML("foo.pdf") # convert and parse on the fly
+  doc = convertPDF2XML("foo.pdf", "foo.xml") # convert and save
+  doc = readPDFXML("foo.xml")    # parse persistent XML file separately
+</r:code>
+Then we can pass this document object to a high-level function such as 
+<r:code>
+getDocTitle(doc)
+</r:code>
+However, we can also pass the PDF or XML file directly, e.g.,
+<r:code>
+getDocTitle("foo.pdf")
+getDocTitle("foo.xml")
+</r:code>
+Clearly, if we are going to be performing several operations
+on the document, we should avoid converting it multiple times
+and do it just once. And if we will operate on the XML document
+in several different R sessions, we should write it a separate
+XML file and read from that.
+</para>
+
+  
+<para>
+How is the PDF converted to XML?  
+The package includes an enhanced version of the pdftohtml
+executable built on the xpdf library (related to the poppler library).
+(This enhanced version of pdftohtml is available on github at
+<ulink url="https://github.com/dsidavis/pdftohtml"/>)
+We use pdftohtml  to convert a PDF document to an XML document which we then read into R.
+<!--
+  Most of the functions perform this conversion from PDF to XML  on-the-fly as needed,
+  i.e., if they are given a PDF document, they convert it to XML.
+  Alternatively, if one repeatedly reads the same PDF document, we can explicitly convert it to XML
+  just once and read that directly, avoiding the repeated conversion.
+-->  
+  We perform the explicit conversion in R using  the function <r:func>convertPDF2XML</r:func>, e.g.,
+<r:code>
+doc = convertPDF2XML("foo.pdf")
+doc = convertPDF2XML("foo.pdf", "foo.xml")   # write to a file
+</r:code>
+This is a simple call to the pdftohtml executable from within R.
+One can also invoke pdftohtml directly outside of R.
+This is useful when processing a large collection of documents.
+</para>
+</section>
+
+
+
+<section>
+<title>Miscellaneous High-Level Functions</title>
+
+<para>
+Our work focus mostly (but not exclusively) on academic papers, i.e., journal papers.
+We want to get
+<ul>
+  <li>the title of the paper,</li>
+  <li>the abstract, </li>
+  <li>the section titles, </li>
+  <li>the text in each section,</li>
+  <li>the tables in the document</li>
+  <li>
+
+</para>
+</section>
+
+
+
+
+<section>
+<title>Intermediate &amp; Low-Level Functionality</title>
+
+<para>
+We use <r:func>getBBox2</r:func> and <r:func>getBBox</r:func> very commonly.
+This is because we work with the location of the text or lines/rectangles
+on a page.
+</para>
+
+
+
+<para>
+  We often identify the nodes of interest
+  and then want to group them by line.
+  The function <r:func>nodesByLine</r:func> does this.
+</para>
+
+
+
+<para>
+  While we often work on each page separately,
+  we also query an entire document, find elements of interest
+  and then need to know on which page each is located.
+  The <r:func>pageOf</r:func> function tells us the page number of
+  an element.
+  It can return either the page number or alternatively the
+  <xml:tag>page</xml:tag> node. We use the latter when .... <fix>give example</fix>
+</para>
+
+
+<para>
+  Most documents are single column.
+  We work a lot with journal articles which often have a two- or three-column
+  format.
+  The function <r:func>getColPositins</r:func> attempts to identify
+  the boundaries of each of the columns. This is not always straightforward.
+  Some pages have very little text and are dominated by a table or image, for example.
+  Many short paragraphs all of whose first lines are indented also confuse where the column starts.
+  <r:func>getColPositions</r:func> can guess from the specific page or try to use all of the pages
+</para>
+
+
+</section>
+
+
+
+
+
+<section>
+<title>Comparison with Other Approaches</title>
+
+<para>
+pdftotext, Rpoppler, ...
+</para>
+
+
+<para>
+The table reading app written by journalists for journalists.
+</para>
+
+</section>
+
+
+<section>
+<title></title>
+<para>
+  The <r:func>getBBox</r:func> function finds the locations of the line and rect nodes.
+  It can also include the colors of these elements.
+</para>
+</section>
+
+
+
+
+
+
+
+
+<section>
+<title>Future Work</title>
+
+
+<para>
+Enhance heuristics for identifying and extracting high-level elements.
+Tables, etc.
+</para>
+
+
+<para>
+  Enhance pdftohtml
+</para>
+<para>
+  Improve handling fonts.
+</para>
+<para>
+  Explore and Extend Rrawpoppler for building PDF processing functionality with R code.
+</para>
+</section>
+
+</article>

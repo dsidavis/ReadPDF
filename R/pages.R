@@ -78,5 +78,9 @@ columnOf =
 function(node, cols = getColPositions(xmlParent(node)))
 {
     bb = getBBox2(list(node))
-    which(bb[1, "left"] < cols)[1] - 1
+    before = bb[1, "left"] < cols
+    if(!any(before))
+        length(cols)
+    else
+       which(before)[1] - 1
 }

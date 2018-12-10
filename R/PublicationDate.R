@@ -142,7 +142,7 @@ function(node)
 hasCoverPage =
 function(doc)
 {
-  isBioOne(doc) || isMBio(doc)
+  isBioOne(doc) || isMBio(doc) || isResearchGate(doc)
 }
 
 isMBio =
@@ -202,7 +202,7 @@ function(doc, checkAbstract = TRUE)
   if(isBioOne(doc) && !is.na(tmp <- textAboveTitle(doc, 2)))
       return(tmp)
 
-  if(isScanned2(doc)) {
+  if(isScanned(doc)) { # was isScanned2()
       y = getYearFromFileName(basename(docName(doc)))
       if(length(y))
           return(c(filename = y))

@@ -17,10 +17,16 @@ getDocTitle =
     #
     #  See 1599857215/Learned-2005-Extended interhuman transmission.xml for a title in the meta that is just the name of the file.
     #
-function(file, page = 1, doc = readPDFXML(file), meta = FALSE, minWords = 1, ...)
+function(file, page = 1, doc = readPDFXML(file), meta = FALSE, minWords = 1, asNode = FALSE, scanned = isScanned(doc), ...)
 {
   if(missing(doc) && is(file, "XMLInternalDocument"))
       doc = file
+
+
+  if(isOIEDoc(doc)) 
+     return(getOIETitle(doc, asNode = asNode))
+
+
 
   if(meta) {
       meta = getNodeSet(doc, "//docinfo/META[@name = 'title']")
@@ -41,7 +47,7 @@ function(file, page = 1, doc = readPDFXML(file), meta = FALSE, minWords = 1, ...
     # For what documents is this necessary - e.g. Puzelli et al
     # But need to be more specific for this cover page as other docs, e.g., A case of Crimean-Congo Ham.... .xml doesn't
     # have the cover page but does have the www.euro...org link.
-  if(length(getNodeSet(doc, "//page[1][./text[contains(., 'www.eurosurveillance.org')] and ./text[contains(., 'Weekly')] ]")))
+  if(missing(page) && length(getNodeSet(doc, "//page[1][./text[contains(., 'www.eurosurveillance.org')] and ./text[contains(., 'Weekly')] ]")))
       page = 2
   
      # handle case where the first page is a cover sheet
@@ -50,8 +56,10 @@ function(file, page = 1, doc = readPDFXML(file), meta = FALSE, minWords = 1, ...
   if(length(getNodeSet(p1, ".//text")) == 0)
       return(list())
 
-  if(isScanned2(doc))
-      return(NA_character_)
+  if(scanned) # Should we use isScanned() ?
+      return(if(asNode) list() else NA_character_)
+  
+
   
   fonts = getFontInfo(p1)
   if(is.null(fonts))
@@ -74,7 +82,7 @@ function(file, page = 1, doc = readPDFXML(file), meta = FALSE, minWords = 1, ...
 
   isElsevier = isElsevierDoc(doc)
   if(isElsevier && !isTitleBad(txt)) {
-      return(splitElsevierTitle(txt, p1))
+      return(splitElsevierTitle(txt, p1, asNode = asNode))
 #     tt = names(txt)
 #     if(grepl("Journal", tt[1]))
 #         tt = tt[-1]
@@ -91,22 +99,25 @@ function(file, page = 1, doc = readPDFXML(file), meta = FALSE, minWords = 1, ...
         # See why we are doing this in 4214927259/A case of Crimean-Congo haemorrhagic fever in.xml
         # 
       tmp = mkLines(txt, p1)
+      if(asNode) return(tmp)
+      
       title = paste(sapply(tmp, function(x) paste(if(is.list(x)) sapply(x, xmlValue) else xmlValue(x), collapse = " ")), collapse = "\n")
       return(title)
 #      return(paste(names(txt), collapse = " "))
   }
       
-  while( (length(txt) == 1 && nchar(names(txt)) == 1) || all(w <- isTitleBad(txt, minWords = minWords))) {  
+  while( (length(txt) == 1 && nchar(names(txt)) == 1) || all(w <- isTitleBad(txt, minWords = minWords))) {
+
       # then a single character that is very large
       # get second largest font and
-#browser()  
+
       mx = max(fonts$size[fonts$size < mx ])
       w = (fonts$size == mx)
       id = fonts$id[w]
 # if multiple ones, see if any are bold and restrict to that.
 # Doesn't work for Van Der Poel-2005
-      if(length(id) > 1 & any(fonts$isBold[w]))
-          id = id[fonts$isBold[w]]
+      if(length(id) > 1 & any(isb <- isBold(fonts[w,]))) #fonts$isBold[w]))
+          id = id[isb]
 
       if(length(id) == 0)
           break  #XXXX
@@ -117,6 +128,29 @@ function(file, page = 1, doc = readPDFXML(file), meta = FALSE, minWords = 1, ...
 
   orderByLine(txt)
 }
+
+
+fixTitleNodes =
+    ## We can compute the locations of the resulting nodes (with getBBox2),
+    ## sort them and compute the differences. Or order them by line
+    ## and see how far apart they are, OR see if there are other nodes in between lines.
+    ## 
+    ## We should compute the line spacing for the entire page or document and compare to that.
+    ## For now, we'll use a threshold of 3 which is 3 height of text in a line, so that allows double spacing.
+function(nodes, threshold = 3)
+{
+    ll = nodesByLine(nodes)
+    txt = sapply(ll, function(x) trim(paste(sapply(unlist(x), xmlValue), collapse = " ")))
+    ll = ll [ txt != ""]
+
+    bb = lapply(ll, getBBox2)
+    h = median(getBBox2(nodes)[,"height"])
+    top = sapply(bb, function(x) median(x[, "top"]))
+     ##XXX This is broken!
+    d = diff(c(top[1] - h, top))
+
+    unlist(ll[ d < h*threshold ])
+}   
 
 
 isTitleBad =
@@ -148,7 +182,7 @@ function(txtNodes, minWords = 3, filename = "")
 
 
   bb = getBBox2(txtNodes, TRUE)
-#browser()
+
   if(diff(range(bb$top)) > 2 * median(bb$height)) {
       ll = nodesByLine(txtNodes, bbox = bb)
       bad = sapply(names(ll), isTitleBad, minWords, filename)
@@ -179,6 +213,8 @@ function(txtNodes, minWords = 3, filename = "", lowerCase = TRUE)
 
   
   #Test:
+   grepl("^Review$", txtNodes)  ||
+  grepl("^viruses$", txtNodes)  ||        
   grepl("Acta Veterinaria", txtNodes) ||
   grepl("BMC Infectious Diseases", txtNodes) ||
   nchar(txtNodes) < 6 ||   
@@ -202,15 +238,17 @@ splitElsevierTitle =
     # e.g. Kelly-2008-NIH
     #  Lau-2007 has no grey box and no line.  So we have to do further checks on the shaded box  to see it is large enough.
     #
-function(nodes, page)
+function(nodes, page, asNode = FALSE)
 {
     y = as.numeric(sapply(nodes, xmlGetAttr, "top"))
-    lines = getNodeSet(page, ".//line")
+    lines = getNodeSet(page, ".//line") #XX??  and .//rect
     lw = as.numeric(sapply(lines, xmlGetAttr, "lineWidth", 0))
     yl = 0
+
     if(any(lw > 10)) {
         i = which.max(lw)
-        yl = as.numeric(strsplit(xmlGetAttr(lines[[i]], "bbox"), ",")[[1]])[2]
+           # Is the 
+        yl = as.numeric(strsplit(xmlGetAttr(lines[[i]], "bbox"), ",")[[1]])[2] + lw[i]/2
     } else {
 
         r = getNodeSet(page, ".//rect[@fill.color != '0,0,0']")
@@ -232,6 +270,9 @@ function(nodes, page)
        # if none of the nodes are above the line, don't filter. See 0809541268/Kitajima-2009-First%20detection%20of%20genotype%203%20he.xml"
     if(any(y > yl))
         nodes = nodes[y > yl]
+
+    if(asNode)
+       return(nodes)
     
     paste(names(nodes), collapse = " ")
 
@@ -298,7 +339,7 @@ function(txt, page)
 {
     pos = unique(as.numeric(sapply(txt, xmlGetAttr, "top")))
     h = max(as.numeric(sapply(txt, xmlGetAttr, "height")))    
-    sapply(pos, mkLine, page, h)
+    lapply(pos, mkLine, page, h)
 }
 
 mkLine =
@@ -316,3 +357,41 @@ function(pos, page, height)
     w = abs(pos - bb[, "top"]) < .33*height & bb[, "height"]/height > .7
     textNodes[w]
 }
+
+
+
+
+isOIEDoc =
+function(doc)      
+{
+    doc = as(doc, "PDFToXMLDoc")
+    
+    length(getNodeSet(doc, "//text[contains(., 'http://www.oie.int/wahis_2/')]")) > 0
+}
+
+
+getOIETitle =
+function(doc, asNode = FALSE)
+{
+    doc = as(doc, "PDFToXMLDoc")
+     # Find the image on page 1 and then the text that is not black that is to the right of the image"    
+    p1 = doc[[1]]
+    img = getNodeSet(p1, ".//img")[[1]]                                       #    bbi = getBBox2()
+    atNames = c("x", "y", "width", "height")
+    bbi = structure(as(xmlAttrs(img)[atNames], "numeric"), names = atNames)
+    # not(@color = '#000000') and 
+    xp = sprintf(".//text[@left > %f and @top > %f and @top < %f ]", bbi["x"] + bbi["width"], bbi["y"], bbi["y"] + bbi["height"])
+    ans = getNodeSet(p1, xp)
+    colors = getTextNodeColors(ans, doc = doc)
+
+    ans = ans[colors != "#ababab"]
+
+    if(asNode)
+       ans
+    else
+       paste( sapply(ans, xmlValue), collapse = " ")
+
+}
+
+
+# Date of start of the event

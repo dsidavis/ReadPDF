@@ -9,8 +9,32 @@ margins =
     # XXX Deal with rotation when the text is actually rotated.
     # Specifying @rotation = 0 for case when there is a rotate line of text identifying how
     # the document was retrieved, e.g. downloaded by UC Davis.....
+    #XXX should we extend this to get top and bottom.
+    #XXX  and deal with a set of nodes, a page, and also an entire document.
 function(page, bbox = getBBox2(getNodeSet(page, ".//text[@rotation = 0]")))
+    UseMethod("margins")
+
+margins.character =
+function(page, bbox = getBBox2(getNodeSet(page, ".//text[@rotation = 0]")))        
 {
+    margins(readPDFXML(page))
+}
+
+margins.PDFToXMLDoc =
+function(page, bbox = getBBox2(getNodeSet(page, ".//text[@rotation = 0]")))        
+{
+    lapply(getPages(page), margins)
+}
+
+margins.XMLInternalNode = margins.PDFToXMLPage =
+function(page, bbox = getBBox2())
+{
+    margins(getNodeSet(page, ".//text[@rotation = 0]"))
+}
+
+margins.list = margins.XMLNodeSet =
+function(page, bbox = getBBox2(unlist(page)))
+{    
    c(min(bbox[, 1]), max(bbox[,1] + bbox[,3]))
 }
 
@@ -19,6 +43,9 @@ function(doc, asNodes = TRUE, page = doc[[1 + hasCoverPage(doc) ]], byLine = TRU
 {
     if(is.character(doc))
         doc = readPDFXML(doc)
+
+    if(isEID(doc))
+        return(findEIDAbstract(doc, asNodes, byLine))
     
     if(isBioOne(doc) && missing(page))
           # skip the first page and start at the second page
@@ -35,7 +62,6 @@ function(doc, asNodes = TRUE, page = doc[[1 + hasCoverPage(doc) ]], byLine = TRU
     rect = getNodeSet(page, ".//rect | .//line")
     rect.bb = getBBox(rect, color = TRUE, asDataFrame = TRUE)    
 
-#browser()    
     if(length(a) && any(w <- isNodeIn(a[[1]], rect.bb))) {
         # Calzolari
         # Is the Abstract within a colored box. If so, get the text in that box.
@@ -404,3 +430,6 @@ function(node, boxes, pos = getBBox2(list(node)))
 {
     pos[,1] >= boxes[,1] & pos[,2] > boxes[,2] & (pos[,1] + pos[,3]) < boxes[,3] & (pos[,2] + pos[,4]) < boxes[,4] 
 }
+
+
+

@@ -33,6 +33,18 @@ function(f, pageNum = 1, doc = xmlParse(f), page = getNodeSet(doc, "//page")[[pa
 
 plot.PDFToXMLPage = showPage
 
+plot.PDFToXMLDoc =
+function(x, y, ...)
+{
+    np = getNumPages(x)
+    r = ceiling(sqrt(np))
+    c = np/r
+    opar = par(no.readonly = TRUE)
+    on.exit(par(opar))
+    par(mfrow = c(r, c))
+    invisible(sapply(getPages(doc), renderPage))
+}
+
 pageTitle =
 function(page, docname = docName(page), fullName = TRUE)
 {
@@ -59,7 +71,7 @@ renderPage =
 
     plot(0, type = "n", xlab = "", ylab = "", xlim = c(0, psize[2]), ylim = c(0, psize[1]))
     title(title)
-    
+
     rr = getNodeSet(page, ".//rect ")
     if(length(rr)) {
         bb = getBBox(rr)
@@ -94,14 +106,16 @@ renderPage =
         txt = getNodeSet(page, ".//text")
         if(length(txt)) {
             bb = t(sapply(txt, xmlAttrs))
+            if(!("rotation"  %in% colnames(bb)))
+               bb = cbind(bb, rotation = rep(0, nrow(bb)))
             storage.mode(bb) = "double"
 
             
             colors = getNodeColors(txt)
             text = sapply(txt, xmlValue)
             by(1:nrow(bb), bb[, "rotation"],
-               function(i)
-                 text(bb[i,2], h - bb[i,1], text[i], cex = cex.text, adj = adj, col = colors[i], srt = - bb[i[1], "rotation"])) 
+                   function(i)
+                       text(bb[i,2], h - bb[i,1], text[i], cex = cex.text, adj = adj, col = colors[i], srt = - bb[i[1], "rotation"]))
         }
     }
 

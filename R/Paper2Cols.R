@@ -25,7 +25,11 @@ nchar(cols)
 # Headers and footers on the pages.
 
 
-pdfText = pdf_text =
+pdfText = 
+function(doc, numPages = getNumPages(doc), docFont = getDocFont(doc))
+    UseMethod("pdfText")
+
+pdfText.PDFToXMLDoc = pdfText.PDFToXMLDoc.character = pdf_text =
 function(doc, numPages = getNumPages(doc), docFont = getDocFont(doc))
 {
    if(is.character(doc))
@@ -34,7 +38,11 @@ function(doc, numPages = getNumPages(doc), docFont = getDocFont(doc))
    lapply(getPages(doc)[seq(1, min(numPages, getNumPages(doc)))], getTextByCols, docFont = docFont)
 }
 
-
+pdfText.PDFToXMLPage = 
+function(doc, numPages = getNumPages(doc), docFont = getDocFont(doc))
+{
+   getTextByCols(doc, docFont = docFont)
+}
 
 isCenteredMargins =
 function(node, margins = margins(xmlParent(node)), bbox = getBBox2(list(node)))
@@ -121,7 +129,8 @@ function(nodes, asNodes = TRUE, bbox = getBBox2(nodes, TRUE),
 
     intv = seq(0, max(bbox$top)+ fontSize - 1, by = fontSize)
     topBins = cut(bbox$top, intv)
-    byLine = tapply(nodes, topBins, arrangeLineNodes, asNodes, simplify = FALSE)
+##    byLine = tapply(nodes, topBins, arrangeLineNodes, asNodes, simplify = FALSE)
+    byLine = lapply(split(nodes, topBins), arrangeLineNodes, asNodes)
 
     names(byLine) = sapply(byLine, arrangeLineNodes, FALSE)
     byLine[ sapply(byLine, length) > 0]
@@ -179,17 +188,17 @@ getTextByCols =
     #
     # Have to remove headers and footers first!
     #
-    #  The nodes that are a little further to the right of the majority are indenations of the
-    # first line in a paragraph, like this sentence!
+    #  The nodes that are a little further to the right of the majority are indentations of the
+    #  first line in a paragraph, like this sentence!
     #
     #  Need to identify blocks of text that span the entire page and those that are columnar.
-    #
     #
 function(p, threshold = .1, asNodes = FALSE,
          txtNodes = getNodeSet(p, getXPathDocFontQuery(p, docFont)),
          bbox = getBBox2(txtNodes, TRUE),
          breaks = getColPositions(if(perPage) p else as(p, "XMLInternalDocument"), threshold = threshold, bbox = bbox, perPage = perPage, docFont = docFont, ...),
-         perPage = FALSE, docFont = FALSE, ...)         
+         perPage = FALSE, docFont = FALSE,
+         order = FALSE, ...)         
 {
     if(length(txtNodes) == 0)
         return(character())
@@ -198,8 +207,13 @@ function(p, threshold = .1, asNodes = FALSE,
     bb$text = sapply(txtNodes, xmlValue)
     
     if(asNodes) {
-        split(txtNodes, cut(bb$left, c(0, breaks[-1], Inf)))
+        ans = split(txtNodes, cut(bb$left, c(0, breaks[-1], Inf)))
+        if(order)
+            ans = lapply(ans, function(x) unlist(orderByLine(x)))
+        ans
     } else {
+        if(order)
+            warning('ignoring order in getTextByCols for asNodes = FALSE for now')
         cols = split(bb, cut(bb$left, c(0, breaks[-1], Inf)))
         cols = sapply(cols, function(x) paste(x$text[ order(x$top) ], collapse = "\n"))
     }
