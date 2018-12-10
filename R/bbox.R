@@ -1,21 +1,22 @@
 getBBox2 =
     # For text, not rect or line nodes.
-function(nodes, asDataFrame = FALSE, attrs = c("left", "top", if(rotation) "rotation"), pages = FALSE, rotation = FALSE)
+function(nodes, asDataFrame = FALSE, attrs = c("left", "top", if(rotation) "rotation"), pages = FALSE, rotation = FALSE, color = FALSE)
     UseMethod("getBBox2")
 
 getBBox2.PDFToXMLPage =
     # For text, not rect or line nodes.
-function(nodes, asDataFrame = FALSE, attrs = c("left", "top", if(rotation) "rotation"), pages = FALSE, rotation = FALSE)
+function(nodes, asDataFrame = FALSE, attrs = c("left", "top", if(rotation) "rotation"), pages = FALSE, rotation = FALSE, color = FALSE)
     getBBox2(getNodeSet(nodes, ".//text"), asDataFrame, color)
 
 
 getBBox2.XMLInternalNode =
-function(nodes, asDataFrame = FALSE, attrs = c("left", "top", if(rotation) "rotation"), pages = FALSE, rotation = FALSE)
-    getBBox2(list(nodes), asDataFrame, attrs, pages, rotation)
+function(nodes, asDataFrame = FALSE, attrs = c("left", "top", if(rotation) "rotation"), pages = FALSE, rotation = FALSE, color = FALSE)
+    getBBox2(list(nodes), asDataFrame, attrs, pages, rotation, color)
 
 getBBox2.XMLNodeSet = getBBox2.list = 
     # For text, not rect or line nodes.
-function(nodes, asDataFrame = FALSE, attrs = c("left", "top", if(rotation) "rotation"), pages = FALSE, rotation = FALSE)
+    #XXX Add support for color.
+function(nodes, asDataFrame = FALSE, attrs = c("left", "top", if(rotation) "rotation"), pages = FALSE, rotation = FALSE, color = FALSE)
 {
     if(is(nodes, "XMLInternalElementNode"))
         if(xmlName(nodes) == "text")
@@ -78,7 +79,7 @@ function(nodes, asDataFrame = FALSE, color = FALSE)
     bb = matrix(as.numeric(unlist(els)), , 4, byrow = TRUE)
     colnames(bb) = c("x0", "y0", "x1", "y1")
     ty = sapply(nodes, xmlName)
-    if(asDataFrame) {
+    ans = if(asDataFrame) {
         ans = as.data.frame(bb)
         ans$nodeType = ty
         ans
@@ -86,6 +87,18 @@ function(nodes, asDataFrame = FALSE, color = FALSE)
         rownames(bb) = sapply(nodes, xmlName)
         bb
     }
+
+    if(color) {
+        cols = lapply(c("fill.color", "stroke.color"), function(at) sapply(nodes, xmlGetAttr, at))
+        if(asDataFrame) {
+            ans$fill = cols[[1]]
+            ans$stroke = cols[[2]]            
+        } else {
+            ans = cbind(ans, cols[[1]], cols[[2]])
+        }
+    }    
+
+    ans
 }
 
 

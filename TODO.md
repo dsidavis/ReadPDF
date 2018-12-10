@@ -18,6 +18,7 @@
 1. Are the dimensions for the shaded rectangles correct from pdftohtml. Is linewidth transformed also?
    See Lahm[[ page 5]]  
 
+
 # Todo list for ReadPDF
 
 ## Spreadsheets of results
@@ -71,12 +72,37 @@ Title is a lock, abstract seems to be less reliable,
 - [INVESTIGATE] read.csv: "# blah blah, blah" read in after the comma as a cell
 
 ## getSectionText()
+
+1. [high] Section headers on the same line but in different columns.
+    13 Geology-2013-Ballmer-G33804.1.pdf	
+
+1. Too many sections found:
+   +  22 Beghein Science-2014-Beghein-science.1246724.xml - bibliography entries
+
+1. Extra section title in results 
+     + "3 Agius ggge20274.xml"  "3. (d) The temperature anomaly beneath south-"
+     +	6 Appelo 09077223x.xml - "1. There is a maximum value of the dissipation coefficient,"                      
+	       and several others from a list.  Fonts are different from section titles - bold versus regular.
+
+1. Spaces in words, e.g. D ISCUSSION  means we don't find the section:
+    1-50/50 Colombi_et_al-2012-Geophysical_Journal_International.xml
+
+1. Get the order of the sections correct - CIG_Citation/1-50/1 aagaard jgrb50217.xml
+  The findSectionHeader() function should order the sections according to column, not document
+   order.  See Becker-2012
+
 1. When there are no section headers, except REFERENCES, collect the text from the body into its own
    unnamed section. See Degiorgis-2000.
-   
-1. The findSectionHeader() function should order the sections according to column, not document
-   order.  See Becker-2012
-   
+  
+1. Combine text across lines.
+    CGI_Citation/1-50/10 Bae_et_al-2010-Geophysical_Prospecting.xml"
+	Inversion Algorithm in the Laplace Domain
+	Also, 1-50/11 Bakir art%3A10.1007%2Fs00024-012-0482-8.xml
+	
+1. For CIG_Citation, add the appendices, etc.
+    12 Bakir art%3A10.1007....
+	
+
 1. Calzolari, Becker-2012
      Picking up an author name with the same font as the sections header we were looking for.
 	 And the last one is on a line by itself because it is in the second column, but all the other

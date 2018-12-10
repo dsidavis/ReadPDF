@@ -93,6 +93,14 @@ findSectionHeaders =
     #  See weaver-2001 for example of main section titles being
     #  centered but sub-sections are in the same font and not centered.
     #
+#
+#  Need to include the continuation text on the next lines if the section title
+# spans multiple lines. See, e.g.,
+#     2019 CItation/Papers/1-50/11 Bakir art%3A10.1007%2Fs00024-012-0482-8.xml
+# in the CIG papers.
+#
+#  Subsections, see CIG_citation/2019 CItation/Papers/1-50/1 aagaard jgrb50217.xml
+#
     
 function(doc, sectionName = c('introduction', 'background',
                   'conclusions', 'discussion', 'materials and methods',

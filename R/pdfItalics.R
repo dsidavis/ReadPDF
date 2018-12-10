@@ -16,7 +16,7 @@ function(doc = xmlParsePDFTOHTML("../../pdftohtml/examples/Italics.xml"), useHeu
         # So using heuristics, i.e. the name of the font rather than the flags in the PDF for the font.
        fonts = getNodeSet(doc, "//fontspec")
        names = sapply(fonts, xmlGetAttr, "name")
-       w = grepl("IT?$|Italic|Itl|-i$", names)
+       w = grepl("IT?$|Italic|Itl|-i$|\\.I", names)
        italics = c(italics, fonts[w])
     }
 
