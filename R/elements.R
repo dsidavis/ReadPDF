@@ -16,6 +16,7 @@ function(doc, addPageNum = FALSE)
 }
 
 extRegexp = "\\.[a-z]{3,4}"
+
 getLinks =
 function(doc, locations = FALSE, internal = TRUE)
 {
@@ -23,7 +24,7 @@ function(doc, locations = FALSE, internal = TRUE)
        doc = readPDFXML(doc)
     
     if(!locations) {
-       u = unname(unlist(getNodeSet(doc, "//ulink/@url")))
+       u = unname(unlist(getNodeSet(doc, xpathQ("//ulink/@url", doc))))
        if(!internal) {
            b = removeExtension(basename(URLdecode(docName(doc))))
            i = grepl(sprintf("^%s%s#", b, extRegexp), u)
@@ -33,7 +34,7 @@ function(doc, locations = FALSE, internal = TRUE)
        return(u)
     }
     
-    tmp = t(xpathSApply(doc, "//ulink", xmlAttrs))
+    tmp = t(xpathSApply(doc, xpathQ("//ulink", doc), xmlAttrs))
     df = as.data.frame(tmp[, c("x1", "y1", "x2", "y2")])
     df[] = lapply(df, as.numeric)
     df$url = tmp[,"url"]
