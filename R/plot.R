@@ -21,11 +21,11 @@ function(file)
 
 showPage =
     # toplevel function.  Provide a file and a page number, and we render that page.
-function(x, pageNum = 1, doc = xmlParse(f), page = getNodeSet(doc, "//page")[[pageNum]], ...)
+function(x, pageNum = 1, doc = xmlParse(x), page = getNodeSet(doc, "//page")[[pageNum]], ...)
 {
   if(is(x, "XMLInternalDocument") && missing(doc))
       doc = x
-  else if(missing(pageNum) && is(f, "XMLInternalElementNode") && xmlName(f) == "page")
+  else if(missing(pageNum) && is(x, "XMLInternalElementNode") && xmlName(x) == "page")
       page = x
   
   renderPage(page, ...)
@@ -62,8 +62,8 @@ renderPage =
     #
     # No color information on the text nodes at this point.
     #
-    function(page, cex.text = .5, adj = c(0, 1), showText = TRUE, showBoxes = FALSE,
-             title = pageTitle(page, fullName = fullName), fullName = TRUE) # , showColors = TRUE)
+function(page, cex.text = .5, adj = c(0, 1), showText = TRUE, showBoxes = FALSE,
+         title = pageTitle(page, fullName = fullName), fullName = TRUE) # , showColors = TRUE)
 {    
     p = page
     psize = as.integer(xmlAttrs(p)[c("height", "width")])
