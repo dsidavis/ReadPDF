@@ -1,0 +1,126 @@
+# Getting Started
+
+
+The `ReadPDF` package is one approach to extracting content and information from PDF documents.
+This approach converts the PDF document to an XML document using an adapted version of
+the `pdftohtml` tool.  We then read the resulting XML  document into `R` (using the XML package).
+The structure of the XML document is quite simple.
+Under a root node, we have a `<docinfo>` node and a sequence of 0 or more `<page>` nodes, for example,
+```
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!DOCTYPE pdf2xml SYSTEM "pdf2xml.dtd">
+
+<pdf2xml>
+  <docinfo>
+    <filename>color.pdf    </filename>     <date>Sun Aug  6 17:29:54 2017</date>
+     <filesize>13565</filesize>
+<META name="generator" content="pdftohtml 0.40"/>
+<META name="date" content="2017-08-06T17:29:16+00:00"/>
+<META name="title" content="color"/>
+  </docinfo>
+<page number="1" position="absolute" top="0" left="0" width="918" height="1188" rotation="0.000000">  
+	<fontspec id="0" size="12" family="Times" color="#ff0000" isItalic="0"  isBold="0"  isOblique="0"  name="HSFEKN+CMR10"/>
+	<fontspec id="1" size="12" family="Times" color="#000000" isItalic="0"  isBold="0"  isOblique="0"  name="HSFEKN+CMR10"/>
+<text top="192" left="223" width="57" height="13" font="0" rotation="0.000000">Red text</text>
+```
+
+Each `<page>` node has attributes giving the dimensions of the page, the rotation of the page's contents,
+and the page number.
+Within the `<page>`, we have specifications of fonts introduced on this page for the entire document.
+These are `<fontspec>` nodes.
+
+Next we typically have `<text>` nodes containing the text of the page.
+Each `<text>` node as attributes that identify the bounding box containing the text, i.e.,
+the location of the page for the rectangle in which the text resides.
+This is given by the top-left corner, with the origin in the top-left of the page and increasing
+from left to right horizontally and top to bottom vertically. In other words, PDF goes down the page
+and has the origin at the top of the page!
+
+A `<text>` node also has a rotation attribute and a font id which maps back to the
+corresponding `<fontspec>` node in the page or previous pages of the document.
+
+Finally, the content of the `<text>` node is the actual text.
+
+There is no guarantee that the text content is a single word. It may be multiple words,
+or a single character or part of a word. The tool that generates the PDF can arrange the
+content in whatever way it choses.  All that is necessary is that it appears correctly
+when rendered.  Some of the functionality in the package helps to reassemble words "appropriately".
+
+
+It is useful to understand the structure of the XML document resulting from processing the PDF document
+with `pdftohtml`. However, the `ReadPDF` package attempts to provide a higher-level interface above
+the XML structure. It provides functions that allow one to work on elements of the page at a more conceptual
+level. However, one can still work directly with XML.
+
+The page- and document-level concepts include
++ text
++ lines of text
++ columns
++ font tables
++ shapes such as lines and rectangles
++ images
++ section headers
++ footers and headers
++ is the document scanned.
+
+
+
+## Reading the Document
+
+We can read a PDF document with
+```
+doc = readPDFXML(filename)
+```
+If `filename` identifies a PDF document, the function
+first converts the PDF to XML and  then reads that into R.
+If `filename` is the name of an XML document already converted from the PDF document,
+we, of course, skip the conversion.  So if we want to revisit the same PDF document
+multiple times, it is useful to convert the PDF to XML once and read the
+resulting XML file each time.
+
+The conversion of the PDF to XML can be done from within R
+(via `convertPDF2XML()`) or in the terminal by calling the
+`pdftohtml` executable.  The most important thing is to install
+pdftohtml from the github repository `https://github.com/dsidavis/pdftohtml.git`, i.e.,
+```
+git clone https://github.com/dsidavis/pdftohtml.git
+```
+Then invoke make.
+
+The `convertPDF2XML()` function needs to know where the pdftohtml executable
+is. It can find this in several ways - via
+1. your shell's path
+1. the (shell) environment variable PDFTOHTML, or
+1. the R option "PDFTOHTML".
+You set any of these to where you installed the pdftohtml executable
+or directly to where you compiled it in the cloned repository,
+e.g., under `pdftohtml/src/pdftohtml`.
+
+
+
+## Once we have read the document ...
+
+Now that we have read the document, we can query it for various points of interest.
+
+We can treat the XML document  as a list where the elements correspond to the pages.
+This allows us to access a page by page number, e.g.,
+```
+doc[[1]]
+```
+We can find the number of pages with either
+```
+length(doc)
+getNumPages(doc)
+```
+
+It can be useful to view a page or all of the pages in a document.
+We can use the generic function `plot()` with either:
+```
+plot(doc)
+plot(doc[[1]])
+```
+
+
+
+
+

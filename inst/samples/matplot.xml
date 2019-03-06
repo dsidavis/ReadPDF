@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!DOCTYPE pdf2xml SYSTEM "pdf2xml.dtd">
+
+<pdf2xml>
+  <docinfo>
+    <filename>matplot.pdf</filename>
+   <date>Wed Sep 14 19:04:49 2016</date>
+     <filesize>4855</filesize>
+  </docinfo>
+<page number="1" position="absolute" top="0" left="0" height="756" width="756" rotation="0.000000">
+	<fontspec id="0" size="16" family="Helvetica" color="#ff0000" isItalic="0"  isBold="0"  isOblique="0"  name="Helvetica"/>
+	<fontspec id="1" size="16" family="Helvetica" color="#000000" isItalic="0"  isBold="0"  isOblique="0"  name="Helvetica"/>
+	<fontspec id="2" size="16" family="Helvetica" color="#0000ff" isItalic="0"  isBold="0"  isOblique="0"  name="Helvetica"/>
+<text top="188" left="107" width="10" height="17" font="0">1</text>
+<text top="363" left="171" width="10" height="17" font="0">1</text>
+<text top="328" left="235" width="10" height="17" font="0">1</text>
+<text top="165" left="299" width="10" height="17" font="0">1</text>
+<text top="287" left="363" width="10" height="17" font="0">1</text>
+<text top="103" left="427" width="10" height="17" font="0">1</text>
+<text top="112" left="491" width="10" height="17" font="0">1</text>
+<text top="308" left="555" width="10" height="17" font="0">1</text>
+<text top="393" left="619" width="10" height="17" font="0">1</text>
+<text top="431" left="683" width="10" height="17" font="0">1</text>
+<text top="672" left="171" width="10" height="17" font="1">2</text>
+<text top="672" left="299" width="10" height="17" font="1">4</text>
+<text top="672" left="427" width="10" height="17" font="1">6</text>
+<text top="672" left="555" width="10" height="17" font="1">8</text>
+<text top="672" left="678" width="20" height="17" font="1">10</text>
+<text top="583" left="63" width="0" height="17" font="1">12</text>
+<text top="505" left="63" width="0" height="17" font="1">14</text>
+<text top="426" left="63" width="0" height="17" font="1">16</text>
+<text top="348" left="63" width="0" height="17" font="1">18</text>
+<text top="269" left="63" width="0" height="17" font="1">20</text>
+<text top="190" left="63" width="0" height="17" font="1">22</text>
+<text top="112" left="63" width="0" height="17" font="1">24</text>
+<text top="359" left="19" width="0" height="17" font="1">d</text>
+<text top="600" left="107" width="10" height="17" font="2">2</text>
+<text top="501" left="171" width="10" height="17" font="2">2</text>
+<text top="378" left="235" width="10" height="17" font="2">2</text>
+<text top="374" left="299" width="10" height="17" font="2">2</text>
+<text top="386" left="363" width="10" height="17" font="2">2</text>
+<text top="619" left="427" width="10" height="17" font="2">2</text>
+<text top="424" left="491" width="10" height="17" font="2">2</text>
+<text top="426" left="555" width="10" height="17" font="2">2</text>
+<text top="422" left="619" width="10" height="17" font="2">2</text>
+<text top="466" left="683" width="10" height="17" font="2">2</text>
+<line bbox="115.305,204.615,171.900,359.445" lineWidth="0.750" fill.color="0,0,0"  stroke.color="65536,0,0"  />
+<line bbox="185.055,364.365,230.145,339.450" lineWidth="0.750" fill.color="0,0,0"  stroke.color="65536,0,0"  />
+<line bbox="243.555,324.165,299.640,181.575" lineWidth="0.750" fill.color="0,0,0"  stroke.color="65536,0,0"  />
+<line bbox="308.610,181.095,362.595,284.190" lineWidth="0.750" fill.color="0,0,0"  stroke.color="65536,0,0"  />
+<line bbox="371.145,283.545,428.055,119.400" lineWidth="0.750" fill.color="0,0,0"  stroke.color="65536,0,0"  />
+<line bbox="442.290,110.760,484.920,117.000" lineWidth="0.750" fill.color="0,0,0"  stroke.color="65536,0,0"  />
+<line bbox="498.945,128.835,556.245,304.575" lineWidth="0.750" fill.color="0,0,0"  stroke.color="65536,0,0"  />
+<line bbox="566.100,323.475,617.100,391.245" lineWidth="0.750" fill.color="0,0,0"  stroke.color="65536,0,0"  />
+<line bbox="632.910,405.360,678.300,432.120" lineWidth="0.750" fill.color="0,0,0"  stroke.color="65536,0,0"  />
+<line bbox="175.605,645.840,687.600,645.840" lineWidth="0.750" fill.color="0,0,0"  stroke.color="0,0,0"  />
+<line bbox="175.605,645.840,175.605,656.640" lineWidth="0.750" fill.color="0,0,0"  stroke.color="0,0,0"  />
+<line bbox="303.600,645.840,303.600,656.640" lineWidth="0.750" fill.color="0,0,0"  stroke.color="0,0,0"  />
+<line bbox="431.595,645.840,431.595,656.640" lineWidth="0.750" fill.color="0,0,0"  stroke.color="0,0,0"  />
+<line bbox="559.605,645.840,559.605,656.640" lineWidth="0.750" fill.color="0,0,0"  stroke.color="0,0,0"  />
+<line bbox="687.600,645.840,687.600,656.640" lineWidth="0.750" fill.color="0,0,0"  stroke.color="0,0,0"  />
+<line bbox="88.560,586.350,88.560,114.570" lineWidth="0.750" fill.color="0,0,0"  stroke.color="0,0,0"  />
+<line bbox="88.560,586.350,77.760,586.350" lineWidth="0.750" fill.color="0,0,0"  stroke.color="0,0,0"  />
+<line bbox="88.560,507.720,77.760,507.720" lineWidth="0.750" fill.color="0,0,0"  stroke.color="0,0,0"  />
+<line bbox="88.560,429.090,77.760,429.090" lineWidth="0.750" fill.color="0,0,0"  stroke.color="0,0,0"  />
+<line bbox="88.560,350.460,77.760,350.460" lineWidth="0.750" fill.color="0,0,0"  stroke.color="0,0,0"  />
+<line bbox="88.560,271.830,77.760,271.830" lineWidth="0.750" fill.color="0,0,0"  stroke.color="0,0,0"  />
+<line bbox="88.560,193.200,77.760,193.200" lineWidth="0.750" fill.color="0,0,0"  stroke.color="0,0,0"  />
+<line bbox="88.560,114.570,77.760,114.570" lineWidth="0.750" fill.color="0,0,0"  stroke.color="0,0,0"  />
+<rect bbox="88.560,645.840,710.640,88.560" lineWidth="0.750" fill.color="0,0,0"  stroke.color="0,0,0" />
+<line bbox="117.465,597.405,169.725,516.630" lineWidth="0.750" fill.color="0,0,0"  stroke.color="0,0,65536" dashes="2.250,3.750" startDash="0.000"  />
+<line bbox="180.600,498.000,234.600,394.455" lineWidth="0.750" fill.color="0,0,0"  stroke.color="0,0,65536" dashes="2.250,3.750" startDash="0.000"  />
+<line bbox="250.380,384.150,292.830,381.300" lineWidth="0.750" fill.color="0,0,0"  stroke.color="0,0,65536" dashes="2.250,3.750" startDash="0.000"  />
+<line bbox="314.235,382.500,356.970,390.210" lineWidth="0.750" fill.color="0,0,0"  stroke.color="0,0,65536" dashes="2.250,3.750" startDash="0.000"  />
+<line bbox="370.455,402.540,428.745,614.790" lineWidth="0.750" fill.color="0,0,0"  stroke.color="0,0,65536" dashes="2.250,3.750" startDash="0.000"  />
+<line bbox="434.970,614.940,492.225,440.820" lineWidth="0.750" fill.color="0,0,0"  stroke.color="0,0,65536" dashes="2.250,3.750" startDash="0.000"  />
+<line bbox="506.400,430.935,548.805,432.390" lineWidth="0.750" fill.color="0,0,0"  stroke.color="0,0,65536" dashes="2.250,3.750" startDash="0.000"  />
+<line bbox="570.375,432.090,612.825,429.435" lineWidth="0.750" fill.color="0,0,0"  stroke.color="0,0,65536" dashes="2.250,3.750" startDash="0.000"  />
+<line bbox="632.505,434.850,678.690,466.470" lineWidth="0.750" fill.color="0,0,0"  stroke.color="0,0,65536" dashes="2.250,3.750" startDash="0.000"  />
+</page>
+</pdf2xml>
