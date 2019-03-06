@@ -274,7 +274,7 @@ function(els)
 
 
 xfoo = 
-function(page, nodes = getNodeSet(doc, ".//text"))
+function(page, nodes = getNodeSet(page, ".//text"))
 {    
     ll = nodesByLine(nodes)
     pos = getLineEnds(ll)
