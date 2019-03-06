@@ -21,12 +21,12 @@ function(file)
 
 showPage =
     # toplevel function.  Provide a file and a page number, and we render that page.
-function(f, pageNum = 1, doc = xmlParse(f), page = getNodeSet(doc, "//page")[[pageNum]], ...)
+function(x, pageNum = 1, doc = xmlParse(f), page = getNodeSet(doc, "//page")[[pageNum]], ...)
 {
-  if(is(f, "XMLInternalDocument") && missing(doc))
-      doc = f
+  if(is(x, "XMLInternalDocument") && missing(doc))
+      doc = x
   else if(missing(pageNum) && is(f, "XMLInternalElementNode") && xmlName(f) == "page")
-      page = f
+      page = x
   
   renderPage(page, ...)
 }
@@ -42,7 +42,7 @@ function(x, y, ...)
     opar = par(no.readonly = TRUE)
     on.exit(par(opar))
     par(mfrow = c(r, c))
-    invisible(sapply(getPages(doc), renderPage))
+    invisible(sapply(getPages(x), renderPage))
 }
 
 pageTitle =
