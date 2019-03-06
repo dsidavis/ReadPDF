@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!DOCTYPE pdf2xml SYSTEM "pdf2xml.dtd">
+
+<pdf2xml>
+  <docinfo>
+    <filename>color.pdf    </filename>     <date>Sun Aug  6 17:29:54 2017</date>
+     <filesize>13565</filesize>
+<META name="generator" content="pdftohtml 0.40"/>
+<META name="date" content="2017-08-06T17:29:16+00:00"/>
+<META name="title" content="color"/>
+  </docinfo>
+<page number="1" position="absolute" top="0" left="0" width="918" height="1188" rotation="0.000000">
+	<fontspec id="0" size="12" family="Times" color="#ff0000" isItalic="0"  isBold="0"  isOblique="0"  name="HSFEKN+CMR10"/>
+	<fontspec id="1" size="12" family="Times" color="#000000" isItalic="0"  isBold="0"  isOblique="0"  name="HSFEKN+CMR10"/>
+<text top="192" left="223" width="57" height="13" font="0" rotation="0.000000">Red text</text>
+<text top="192" left="285" width="149" height="13" font="1" rotation="0.000000">and regular black text.</text>
+<text top="1044" left="455" width="7" height="13" font="1" rotation="0.000000">1</text>
+</page>
+</pdf2xml>
