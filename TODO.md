@@ -1,3 +1,7 @@
+# 
+
++ length() generic not triggering on an "ConvertedPDFDoc"
+
 # EID Abstracts
 1. Handle the foot note markers in the author list in EID abstracts.
 1. [done] generalize findEIDAbstract() not to use specific font number but get the text in column 1 above the horizontal
