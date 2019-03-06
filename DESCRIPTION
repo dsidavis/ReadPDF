@@ -1,8 +1,8 @@
 Package: ReadPDF
 Title: Extract Information from PDF Documents
 Version: 0.1-0
-Description: This is a package to read PDF documents
-Author: Duncan Temple Lang et al....
+Description: This is a package to read PDF documents.
+Author: Duncan Temple Lang, Matt Espe.
 Maintainer: Duncan Temple Lang <duncan@r-project.org>
 License: BSD_3_clause + file LICENSE
 Imports: XML, methods
