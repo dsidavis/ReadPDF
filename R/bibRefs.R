@@ -13,11 +13,12 @@ function(doc, supThreshold = .66, fonts = getFontInfo(doc),
     else
         fontq = "true"
     xp = sprintf("//text[(%s) and isBibSup(normalize-space(.))]", fontq)
-  tt = getNodeSet(doc, xp,  xpathFuns = list(isBibSup = isBibSup))
+    tt = getNodeSet(doc, xp,  xpathFuns = list(isBibSup = isBibSup))
 }
 
 isBibSup =
 function(str)
 {
-  grepl("^[0-9]+((,[0-9]+)*|­[0-9]+)$", str)
+    grepl("^[0-9]+((,[0-9]+)*|­[0-9]+)$", str)
+                            # ^  non ascii character.
 }
