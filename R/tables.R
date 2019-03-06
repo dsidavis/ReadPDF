@@ -459,7 +459,7 @@ function(node, page = pageOf(node, TRUE), showCircle = TRUE, text = sapply(node,
        text(x, y, text, col = "red", cex = 2)
     
     if(showCircle) {
-       symbols(x, y, circle = rep(mean(bb[,4])*2, length(x)), fg = "red", lwd = 2, add = TRUE)
+       symbols(x, y, circles = rep(mean(bb[,4])*2, length(x)), fg = "red", lwd = 2, add = TRUE)
     }
 }
 
