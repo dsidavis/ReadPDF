@@ -63,18 +63,18 @@ getBBox =
     #
     # This bbox function expects an attribute named bbox
     # This is for rect and line nodes, not <text> nodes. Use getBBox2() for that.
-function(nodes, asDataFrame = FALSE, color = FALSE, diffs = FALSE, dropCropMarks = TRUE)
+function(nodes, asDataFrame = FALSE, color = FALSE, diffs = FALSE, dropCropMarks = TRUE, ...)
     UseMethod("getBBox")
 
 getBBox.XMLInternalNode =
-function(nodes, asDataFrame = FALSE, color = FALSE, diffs = FALSE, dropCropMarks = TRUE)    
+function(nodes, asDataFrame = FALSE, color = FALSE, diffs = FALSE, dropCropMarks = TRUE, ...)    
     getBBox(list(nodes), asDataFrame, color, diffs, dropCropMarks)
 
 getBBox.XMLNodeSet = getBBox.list =
     #
     # This bbox function expects an attribute named bbox
     #
-function(nodes, asDataFrame = FALSE, color = FALSE, diffs = FALSE, dropCropMarks = TRUE)    
+function(nodes, asDataFrame = FALSE, color = FALSE, diffs = FALSE, dropCropMarks = TRUE, ...)    
 {
     if(length(nodes) == 0) {
         ans = if(asDataFrame)
@@ -142,7 +142,7 @@ getBBox.PDFToXMLPage =
     #
     # This bbox function expects an attribute named bbox
     #
-function(nodes, asDataFrame = FALSE, color = FALSE)
+function(nodes, asDataFrame = FALSE, color = FALSE, diffs = FALSE, dropCropMarks = TRUE, ...)
 {
   getBBox(getNodeSet(nodes, ".//line| .//rect"), asDataFrame, color)
 }
