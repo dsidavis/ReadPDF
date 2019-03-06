@@ -61,14 +61,15 @@ function(nodes, bbox = getBBox2(nodes, asDataFrame = TRUE))
 
 
 
-hasGap = 
-function(nodes, col = getColPositions(xmlParent(node[[1]])), bbox = getBBox2(nodes, asDataFrame = TRUE))
+hasGap =
+    #XXX Finish off.
+function(nodes, col = getColPositions(xmlParent(nodes[[1]])), bbox = getBBox2(nodes, asDataFrame = TRUE))
 {
    start = bbox$left
    end = bbox$left +  bbox$width
    n = length(nodes)
    d = start[-1] - end[-n]
-   browser()
+#   browser()
 }
 
 
