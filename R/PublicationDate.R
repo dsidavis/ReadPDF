@@ -260,6 +260,7 @@ function(doc, checkAbstract = TRUE)
   if(!grepl("Downloaded", footer) && any(w <- hasYear(footer)))
       return(structure(footer[w], names = rep("header", sum(w))))  
 
+                                      #XXX  non-ASCII symbol
   cr = getNodeSet(doc, "//text[contains(., '©')]")
   if(length(cr)) {
       tt = sapply(cr, xmlValue)
