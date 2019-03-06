@@ -2,7 +2,14 @@
 <!DOCTYPE pdf2xml SYSTEM "pdf2xml.dtd">
 
 <pdf2xml>
-<page number="1" position="absolute" top="0" left="0" height="1080" width="1080" rotation="0.000000">
+  <docinfo>
+    <filename>plot.pdf    </filename>     <date>Sun Aug  6 11:38:45 2017</date>
+     <filesize>4061</filesize>
+<META name="generator" content="pdftohtml 0.40"/>
+<META name="date" content="2016-08-22T16:37:04+00:00"/>
+<META name="title" content="R Graphics Output"/>
+  </docinfo>
+<page number="1" position="absolute" top="0" left="0" width="1080" height="1080" rotation="0.000000">
 <line bbox="220.935,969.840,220.935,88.560" lineWidth="0.750" fill.color="0,0,0"  stroke.color="65536,0,0"  />
 <line bbox="318.270,969.840,318.270,88.560" lineWidth="1.500" fill.color="0,0,0"  stroke.color="0,0,65536" dashes="4.500,7.500" startDash="0.000"  />
 <line bbox="415.605,969.840,415.605,88.560" lineWidth="2.250" fill.color="0,0,0"  stroke.color="0,65536,0" dashes="0.000,9.000" startDash="0.000"  />
