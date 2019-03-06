@@ -74,9 +74,20 @@ function(node, asNode = FALSE)
 }
 
 
-columnOf =
-function(node, cols = getColPositions(xmlParent(node)))
-{
+setGeneric("columnOf",
+function(node, cols = getColPositions(xmlParent(node)), ...)
+           standardGeneric("columnOf"))
+
+setMethod("columnOf", "list",
+function(node, cols = getColPositions(xmlParent(node)), ...)
+          {
+              sapply(node, columnOf, cols, ...)
+          })
+
+setMethod("columnOf",
+          "XMLInternalElementNode",
+function(node, cols = getColPositions(xmlParent(node)), ...)
+{          
     bb = getBBox2(list(node))
     before = bb[1, "left"] < cols
     if(!any(before))
@@ -84,3 +95,4 @@ function(node, cols = getColPositions(xmlParent(node)))
     else
        which(before)[1] - 1
 }
+)
