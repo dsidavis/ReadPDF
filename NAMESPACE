@@ -31,6 +31,9 @@ exportMethods(sapply)
 
 export(length)
 exportMethods(length)
+export(getNumPages)
+exportClass("PDFToXMLDoc")
+exportClass("ConvertedPDFDoc")
 
 export(dim)
 exportMethods(dim)
@@ -122,3 +125,6 @@ export(getPageLines)
 
 
 export(getLines)
+
+export(getLinks)
+
