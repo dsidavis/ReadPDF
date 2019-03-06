@@ -222,7 +222,8 @@ function(txtNodes, minWords = 3, filename = "", lowerCase = TRUE)
   grepl("^[-0-9, ]+$", txtNodes) ||          
   grepl("^Letters$", txtNodes) || grepl("table of contents", txtNodes) || grepl("^[A-Za-z]+ +\\bJournal$", txtNodes) ||
   txtNodes %in% c("DISPATCHES", "Research Paper", "KEYWORDS", "ScienceDirect", "Occasional Papers", "HHS Public Access", "Newsdesk", "Case Report", "LETTERS", "No Job Name", "NIH Public Access", "Special Report  Rapport spÃ©cial", "W J C C") ||
-  grepl("Rapid Communications|Research Articles|Weekly issue|Vol\\.[0-9]+|Volume [0-9]+|ournal of|Science Journals", txtNodes) ||
+#^^^^ non-ASCII
+      grepl("Rapid Communications|Research Articles|Weekly issue|Vol\\.[0-9]+|Volume [0-9]+|ournal of|Science Journals", txtNodes) ||
   length(strsplit(txtNodes, " ")[[1]]) < minWords
 }
 
