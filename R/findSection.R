@@ -293,8 +293,9 @@ function(node, cols = getTextByCols(xmlParent(node), asNodes = TRUE))
 
 #XXX give proper name.
 f = 
-function(page, nodes = getNodeSet(page, ".//text"), bb = getBBox2(nodes, TRUE),
-          cols = getColPositions(page))
+function(page, nodes = getNodeSet(page, ".//text"),
+         bb = getBBox2(nodes, TRUE),
+         cols = getColPositions(page))
 {    
     b = split(bb, cut(bb$left, c(0, cols[-1], Inf) -2))
     k = lapply(b, function(x) x[order(x$top),])
