@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!DOCTYPE pdf2xml SYSTEM "pdf2xml.dtd">
+
+<pdf2xml>
+  <docinfo>
+    <filename>matplot2.pdf</filename>
+   <date>Wed Sep 14 19:04:55 2016</date>
+     <filesize>4517</filesize>
+  </docinfo>
+<page number="1" position="absolute" top="0" left="0" height="756" width="756" rotation="0.000000">
+	<fontspec id="0" size="16" family="Helvetica" color="#000000" isItalic="0"  isBold="0"  isOblique="0"  name="Helvetica"/>
+<text top="672" left="171" width="10" height="17" font="0">2</text>
+<text top="672" left="299" width="10" height="17" font="0">4</text>
+<text top="672" left="427" width="10" height="17" font="0">6</text>
+<text top="672" left="555" width="10" height="17" font="0">8</text>
+<text top="672" left="678" width="20" height="17" font="0">10</text>
+<text top="611" left="63" width="0" height="17" font="0">12</text>
+<text top="533" left="63" width="0" height="17" font="0">14</text>
+<text top="456" left="63" width="0" height="17" font="0">16</text>
+<text top="378" left="63" width="0" height="17" font="0">18</text>
+<text top="301" left="63" width="0" height="17" font="0">20</text>
+<text top="224" left="63" width="0" height="17" font="0">22</text>
+<text top="146" left="63" width="0" height="17" font="0">24</text>
+<text top="359" left="19" width="0" height="17" font="0">d</text>
+
+   <coords numPoints="10">
+      <coord>111.600 109.200</coord>
+      <coord>175.605 153.045</coord>
+      <coord>239.595 625.200</coord>
+      <coord>303.600 176.145</coord>
+      <coord>367.605 211.095</coord>
+      <coord>431.595 384.315</coord>
+      <coord>495.600 512.490</coord>
+      <coord>559.605 239.685</coord>
+      <coord>623.595 163.230</coord>
+      <coord>687.600 113.655</coord>
+   </coords><line bbox="175.605,645.840,687.600,645.840" lineWidth="0.750" fill.color="0,0,0"  stroke.color="0,0,0"  />
+<line bbox="175.605,645.840,175.605,656.640" lineWidth="0.750" fill.color="0,0,0"  stroke.color="0,0,0"  />
+<line bbox="303.600,645.840,303.600,656.640" lineWidth="0.750" fill.color="0,0,0"  stroke.color="0,0,0"  />
+<line bbox="431.595,645.840,431.595,656.640" lineWidth="0.750" fill.color="0,0,0"  stroke.color="0,0,0"  />
+<line bbox="559.605,645.840,559.605,656.640" lineWidth="0.750" fill.color="0,0,0"  stroke.color="0,0,0"  />
+<line bbox="687.600,645.840,687.600,656.640" lineWidth="0.750" fill.color="0,0,0"  stroke.color="0,0,0"  />
+<line bbox="88.560,613.620,88.560,149.040" lineWidth="0.750" fill.color="0,0,0"  stroke.color="0,0,0"  />
+<line bbox="88.560,613.620,77.760,613.620" lineWidth="0.750" fill.color="0,0,0"  stroke.color="0,0,0"  />
+<line bbox="88.560,536.190,77.760,536.190" lineWidth="0.750" fill.color="0,0,0"  stroke.color="0,0,0"  />
+<line bbox="88.560,458.760,77.760,458.760" lineWidth="0.750" fill.color="0,0,0"  stroke.color="0,0,0"  />
+<line bbox="88.560,381.330,77.760,381.330" lineWidth="0.750" fill.color="0,0,0"  stroke.color="0,0,0"  />
+<line bbox="88.560,303.900,77.760,303.900" lineWidth="0.750" fill.color="0,0,0"  stroke.color="0,0,0"  />
+<line bbox="88.560,226.470,77.760,226.470" lineWidth="0.750" fill.color="0,0,0"  stroke.color="0,0,0"  />
+<line bbox="88.560,149.040,77.760,149.040" lineWidth="0.750" fill.color="0,0,0"  stroke.color="0,0,0"  />
+<rect bbox="88.560,645.840,710.640,88.560" lineWidth="0.750" fill.color="0,0,0"  stroke.color="0,0,0" />
+
+   <coords numPoints="10">
+      <coord>111.600 524.460</coord>
+      <coord>175.605 492.930</coord>
+      <coord>239.595 541.470</coord>
+      <coord>303.600 475.830</coord>
+      <coord>367.605 488.445</coord>
+      <coord>431.595 459.840</coord>
+      <coord>495.600 550.770</coord>
+      <coord>559.605 556.695</coord>
+      <coord>623.595 445.245</coord>
+      <coord>687.600 526.275</coord>
+   </coords></page>
+</pdf2xml>
