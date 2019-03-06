@@ -31,9 +31,10 @@ function(doc = xmlParsePDFTOHTML("../../pdftohtml/examples/Italics.xml"), useHeu
 }
 
 
-f = 
+f =
+    #XXX ????
 function(p, bbox = getBBox2(p), cols = getColPositions(p))
 {
-    kols = split(bbox, cut(bb[, "left"], c(0, cols, Inf) - 2))
+    kols = split(bbox, cut(bbox[, "left"], c(0, cols, Inf) - 2))
 #    lapply(kols, function(x))
 }
