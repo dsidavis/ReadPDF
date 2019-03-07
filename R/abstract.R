@@ -11,31 +11,36 @@ margins =
     # the document was retrieved, e.g. downloaded by UC Davis.....
     #XXX should we extend this to get top and bottom.
     #XXX  and deal with a set of nodes, a page, and also an entire document.
-function(page, bbox = getBBox2(getNodeSet(page, ".//text[@rotation = 0]")))
+    #XXX remove header and footer
+function(page, bbox = getBBox2(getNodeSet(page, ".//text[@rotation = 0]")), ...)
     UseMethod("margins")
 
 margins.character =
-function(page, bbox = getBBox2(getNodeSet(page, ".//text[@rotation = 0]")))        
+function(page, bbox = getBBox2(getNodeSet(page, ".//text[@rotation = 0]")), ...)        
 {
-    margins(readPDFXML(page))
+    margins(readPDFXML(page), ...)
 }
 
 margins.PDFToXMLDoc =
-function(page, bbox = getBBox2(getNodeSet(page, ".//text[@rotation = 0]")))        
+function(page, bbox = getBBox2(getNodeSet(page, ".//text[@rotation = 0]")), asDataFrame = TRUE, ...)        
 {
-    lapply(getPages(page), margins)
+    ans = lapply(getPages(page), margins)
+    if(asDataFrame)
+        as.data.frame(do.call(rbind, ans))
+    else
+        ans
 }
 
 margins.XMLInternalNode = margins.PDFToXMLPage =
-function(page, bbox = getBBox2())
+function(page, bbox = getBBox2(), ...)
 {
     margins(getNodeSet(page, ".//text[@rotation = 0]"))
 }
 
 margins.list = margins.XMLNodeSet =
-function(page, bbox = getBBox2(unlist(page)))
+function(page, bbox = getBBox2(unlist(page)), ...)
 {    
-   c(min(bbox[, 1]), max(bbox[,1] + bbox[,3]))
+   c(left = min(bbox[, 1]), right = max(bbox[,1] + bbox[,3]), top = min(bbox[,2]), bottom = max(bbox[,4]))
 }
 
 findAbstract =
