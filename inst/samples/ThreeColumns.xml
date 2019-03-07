@@ -1,0 +1,199 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!DOCTYPE pdf2xml SYSTEM "pdf2xml.dtd">
+
+<pdf2xml>
+  <docinfo>
+    <filename>ThreeColumns.pdf    </filename>     <date>Thu Mar  7 07:58:29 2019</date>
+     <filesize>35138</filesize>
+<META name="generator" content="pdftohtml 0.40"/>
+<META name="author" content="Duncan Temple Lang"/>
+<META name="keywords" content=""/>
+<META name="date" content="2019-03-07T15:56:24+00:00"/>
+<META name="subject" content=""/>
+<META name="title" content="Document2"/>
+  </docinfo>
+<page number="1" position="absolute" top="0" left="0" width="918" height="1188" rotation="0.000000">
+	<fontspec id="0" size="14" family="Times" color="#000000" isItalic="0"  isBold="0"  isOblique="0"  name="MAUIPH+Helvetica"/>
+	<fontspec id="1" size="7" family="Times" color="#000000" isItalic="0"  isBold="0"  isOblique="0"  name="MAUIPH+Helvetica"/>
+	<fontspec id="2" size="14" family="Times" color="#00006c" isItalic="0"  isBold="0"  isOblique="0"  name="MAUIPH+Helvetica"/>
+	<fontspec id="3" size="14" family="Times" color="#6b0001" isItalic="0"  isBold="0"  isOblique="0"  name="MAUIPH+Helvetica"/>
+<text top="112" left="109" width="194" height="17" font="0" rotation="0.000000">useful to explicitly register </text>
+<text top="132" left="109" width="180" height="17" font="0" rotation="0.000000">the routines that we can </text>
+<text top="151" left="109" width="132" height="17" font="0" rotation="0.000000">call via any of the </text>
+<text top="171" left="109" width="162" height="17" font="0" rotation="0.000000">.C()/.Call()/.External() </text>
+<text top="191" left="109" width="156" height="17" font="0" rotation="0.000000">interfaces. When the </text>
+<text top="211" left="109" width="191" height="17" font="0" rotation="0.000000">routines are registered, R </text>
+<text top="231" left="109" width="142" height="17" font="0" rotation="0.000000">can help to identify </text>
+<text top="250" left="109" width="184" height="17" font="0" rotation="0.000000">potential errors in calling </text>
+<text top="270" left="109" width="166" height="17" font="0" rotation="0.000000">them. R can detect an </text>
+<text top="290" left="109" width="147" height="17" font="0" rotation="0.000000">incorrect number of </text>
+<text top="310" left="109" width="199" height="17" font="0" rotation="0.000000">arguments for a routine, or </text>
+<text top="330" left="109" width="132" height="17" font="0" rotation="0.000000">that the types are </text>
+<text top="349" left="109" width="187" height="17" font="0" rotation="0.000000">incorrect, e.g., an integer </text>
+<text top="369" left="109" width="171" height="17" font="0" rotation="0.000000">vector when a numeric </text>
+<text top="389" left="109" width="142" height="17" font="0" rotation="0.000000">vector is expected. </text>
+<text top="409" left="109" width="200" height="17" font="0" rotation="0.000000">Registration also allows us </text>
+<text top="429" left="109" width="199" height="17" font="0" rotation="0.000000">to resolve the symbols just </text>
+<text top="449" left="109" width="201" height="17" font="0" rotation="0.000000">once rather than each time </text>
+<text top="469" left="109" width="173" height="17" font="0" rotation="0.000000">we call a routine, and it </text>
+<text top="488" left="109" width="157" height="17" font="0" rotation="0.000000">also allows us to use </text>
+<text top="508" left="109" width="202" height="17" font="0" rotation="0.000000">different symbols/names to </text>
+<text top="528" left="109" width="183" height="17" font="0" rotation="0.000000">refer to the routines. It is </text>
+<text top="548" left="109" width="180" height="17" font="0" rotation="0.000000">convenient to be able to </text>
+<text top="568" left="109" width="188" height="17" font="0" rotation="0.000000">run R code to identify the </text>
+<text top="587" left="109" width="192" height="17" font="0" rotation="0.000000">R-callable routines and to </text>
+<text top="607" left="109" width="184" height="17" font="0" rotation="0.000000">generate the registration </text>
+<text top="627" left="109" width="86" height="17" font="0" rotation="0.000000">information </text>
+<text top="647" left="109" width="185" height="17" font="0" rotation="0.000000">programmatically. As we </text>
+<text top="667" left="109" width="197" height="17" font="0" rotation="0.000000">change these routines, we </text>
+<text top="686" left="109" width="148" height="17" font="0" rotation="0.000000">can programatically </text>
+<text top="706" left="109" width="169" height="17" font="0" rotation="0.000000">update the registration </text>
+<text top="726" left="109" width="196" height="17" font="0" rotation="0.000000">information with little effort </text>
+<text top="746" left="109" width="201" height="17" font="0" rotation="0.000000">and ensure the information </text>
+<text top="766" left="109" width="123" height="17" font="0" rotation="0.000000">is synchronized. </text>
+<text top="785" left="109" width="171" height="17" font="0" rotation="0.000000">Generating bindings to </text>
+<text top="805" left="109" width="196" height="17" font="0" rotation="0.000000">native libraries: Numerous </text>
+<text top="825" left="109" width="150" height="17" font="0" rotation="0.000000">R packages provide </text>
+<text top="845" left="109" width="184" height="17" font="0" rotation="0.000000">interfaces to existing C/C</text>
+<text top="848" left="292" width="13" height="9" font="1" rotation="0.000000">++ </text>
+<text top="865" left="109" width="166" height="17" font="0" rotation="0.000000">libraries. This typically </text>
+<text top="884" left="109" width="198" height="17" font="0" rotation="0.000000">involves manually creating </text>
+<text top="904" left="109" width="179" height="17" font="0" rotation="0.000000">two pieces of code. The </text>
+<text top="924" left="109" width="149" height="17" font="0" rotation="0.000000">first is an R-callable </text>
+<text top="944" left="109" width="119" height="17" font="0" rotation="0.000000">wrapper routine </text>
+<text top="964" left="109" width="168" height="17" font="0" rotation="0.000000">corresponding to each </text>
+<text top="983" left="109" width="177" height="17" font="0" rotation="0.000000">routine of interest in the </text>
+<text top="1003" left="109" width="171" height="17" font="0" rotation="0.000000">third- party library. The </text>
+<text top="1023" left="109" width="198" height="17" font="0" rotation="0.000000">second is a corresponding </text>
+<text top="1043" left="109" width="199" height="17" font="0" rotation="0.000000">R function that invokes the </text>
+<text top="1063" left="109" width="177" height="17" font="0" rotation="0.000000">wrapper routine, having </text>
+<text top="112" left="361" width="190" height="17" font="0" rotation="0.000000">coerced the R arguments </text>
+<text top="132" left="361" width="176" height="17" font="0" rotation="0.000000">to the appropriate form. </text>
+<text top="151" left="361" width="134" height="17" font="0" rotation="0.000000">This is often quite </text>
+<text top="171" left="361" width="183" height="17" font="0" rotation="0.000000">straightforward, but both </text>
+<text top="191" left="361" width="193" height="17" font="0" rotation="0.000000">time-consuming and error-</text>
+<text top="211" left="361" width="164" height="17" font="0" rotation="0.000000">prone. This makes for </text>
+<text top="231" left="361" width="163" height="17" font="0" rotation="0.000000">unnecessarily lengthy </text>
+<text top="250" left="361" width="183" height="17" font="0" rotation="0.000000">write-debug- test cycles. </text>
+<text top="270" left="361" width="173" height="17" font="0" rotation="0.000000">Instead, we'd like to be </text>
+<text top="290" left="361" width="185" height="17" font="0" rotation="0.000000">able to programmatically </text>
+<text top="310" left="361" width="198" height="17" font="0" rotation="0.000000">read the information about </text>
+<text top="330" left="361" width="202" height="17" font="0" rotation="0.000000">the third-party routines and </text>
+<text top="349" left="361" width="150" height="17" font="0" rotation="0.000000">data types and then </text>
+<text top="369" left="361" width="182" height="17" font="0" rotation="0.000000">generate all of the code. </text>
+<text top="389" left="361" width="157" height="17" font="0" rotation="0.000000">We want to minimize </text>
+<text top="409" left="361" width="189" height="17" font="0" rotation="0.000000">human intervention. If we </text>
+<text top="429" left="361" width="159" height="17" font="0" rotation="0.000000">could generate these </text>
+<text top="449" left="361" width="77" height="17" font="0" rotation="0.000000">"bindings" </text>
+<text top="469" left="361" width="179" height="17" font="0" rotation="0.000000">programmatically, the R </text>
+<text top="488" left="361" width="176" height="17" font="0" rotation="0.000000">programmer can spend </text>
+<text top="508" left="361" width="189" height="17" font="0" rotation="0.000000">time creating higher-level </text>
+<text top="528" left="361" width="181" height="17" font="0" rotation="0.000000">functionality using these </text>
+<text top="548" left="361" width="79" height="17" font="0" rotation="0.000000">primitives. </text>
+<text top="568" left="361" width="173" height="17" font="0" rotation="0.000000">Dynamic calls to native </text>
+<text top="587" left="361" width="163" height="17" font="0" rotation="0.000000">routines: The rdyncall </text>
+<text top="607" left="361" width="6" height="17" font="0" rotation="0.000000">(</text>
+<text top="607" left="366" width="80" height="17" font="2" rotation="0.000000">Adler 2012</text>
+<text top="607" left="446" width="72" height="17" font="0" rotation="0.000000">) and Rffi </text>
+<text top="627" left="361" width="6" height="17" font="0" rotation="0.000000">(</text>
+<text top="627" left="366" width="137" height="17" font="2" rotation="0.000000">Temple Lang 2011</text>
+<text top="627" left="503" width="27" height="17" font="0" rotation="0.000000">) R </text>
+<text top="647" left="361" width="191" height="17" font="0" rotation="0.000000">packages avoid having to </text>
+<text top="667" left="361" width="145" height="17" font="0" rotation="0.000000">explicitly create the </text>
+<text top="686" left="361" width="176" height="17" font="0" rotation="0.000000">wrapper routines and R </text>
+<text top="706" left="361" width="175" height="17" font="0" rotation="0.000000">functions to interface to </text>
+<text top="726" left="361" width="145" height="17" font="0" rotation="0.000000">existing C routines. </text>
+<text top="746" left="361" width="195" height="17" font="0" rotation="0.000000">Instead, they both provide </text>
+<text top="766" left="361" width="187" height="17" font="0" rotation="0.000000">a dynamic mechanism to </text>
+<text top="785" left="361" width="143" height="17" font="0" rotation="0.000000">call arbitrary native </text>
+<text top="805" left="361" width="179" height="17" font="0" rotation="0.000000">routines. However, both </text>
+<text top="825" left="361" width="161" height="17" font="0" rotation="0.000000">approaches require a </text>
+<text top="845" left="361" width="177" height="17" font="0" rotation="0.000000">description of the target </text>
+<text top="865" left="361" width="185" height="17" font="0" rotation="0.000000">routines. Again, we want </text>
+<text top="884" left="361" width="185" height="17" font="0" rotation="0.000000">to obtain this information </text>
+<text top="904" left="361" width="199" height="17" font="0" rotation="0.000000">programmatically and then </text>
+<text top="924" left="361" width="173" height="17" font="0" rotation="0.000000">we can easily generate </text>
+<text top="944" left="361" width="170" height="17" font="0" rotation="0.000000">these descriptions and </text>
+<text top="964" left="361" width="188" height="17" font="0" rotation="0.000000">remove humans from the </text>
+<text top="983" left="361" width="67" height="17" font="0" rotation="0.000000">process. </text>
+<text top="1003" left="361" width="191" height="17" font="0" rotation="0.000000">Understanding third-party </text>
+<text top="1023" left="361" width="159" height="17" font="0" rotation="0.000000">libraries interactively: </text>
+<text top="1043" left="361" width="197" height="17" font="0" rotation="0.000000">When we interface to third-</text>
+<text top="1063" left="361" width="198" height="17" font="0" rotation="0.000000">party libraries, we typically </text>
+<text top="112" left="613" width="169" height="17" font="0" rotation="0.000000">read documentation to </text>
+<text top="132" left="613" width="176" height="17" font="0" rotation="0.000000">identify and understand </text>
+<text top="151" left="613" width="196" height="17" font="0" rotation="0.000000">the important routines and </text>
+<text top="171" left="613" width="181" height="17" font="0" rotation="0.000000">data structures. In some </text>
+<text top="191" left="613" width="146" height="17" font="0" rotation="0.000000">situations, it can be </text>
+<text top="211" left="613" width="164" height="17" font="0" rotation="0.000000">convenient to find this </text>
+<text top="231" left="613" width="188" height="17" font="0" rotation="0.000000">information interac- tively </text>
+<text top="250" left="613" width="165" height="17" font="0" rotation="0.000000">within an environment </text>
+<text top="270" left="613" width="173" height="17" font="0" rotation="0.000000">such as R. Rather than </text>
+<text top="290" left="613" width="185" height="17" font="0" rotation="0.000000">reading static document, </text>
+<text top="310" left="613" width="195" height="17" font="0" rotation="0.000000">we can query the code for </text>
+<text top="330" left="613" width="183" height="17" font="0" rotation="0.000000">information such as how </text>
+<text top="349" left="613" width="200" height="17" font="0" rotation="0.000000">often a particular data type </text>
+<text top="369" left="613" width="193" height="17" font="0" rotation="0.000000">is returned by a routine or </text>
+<text top="389" left="613" width="186" height="17" font="0" rotation="0.000000">passed as an argument? </text>
+<text top="409" left="613" width="179" height="17" font="0" rotation="0.000000">or what idioms does the </text>
+<text top="429" left="613" width="182" height="17" font="0" rotation="0.000000">library use? We can use </text>
+<text top="449" left="613" width="200" height="17" font="0" rotation="0.000000">R's graphics capabilities to </text>
+<text top="469" left="613" width="168" height="17" font="0" rotation="0.000000">visualize the code and </text>
+<text top="488" left="613" width="186" height="17" font="0" rotation="0.000000">which routines call which </text>
+<text top="508" left="613" width="110" height="17" font="0" rotation="0.000000">other routines. </text>
+<text top="528" left="613" width="185" height="17" font="0" rotation="0.000000">In-line documentation as </text>
+<text top="548" left="613" width="168" height="17" font="0" rotation="0.000000">comments: Often third-</text>
+<text top="568" left="613" width="152" height="17" font="0" rotation="0.000000">party native libraries </text>
+<text top="587" left="613" width="198" height="17" font="0" rotation="0.000000">contain documen- tation in </text>
+<text top="607" left="613" width="194" height="17" font="0" rotation="0.000000">comments adjacent to the </text>
+<text top="627" left="613" width="173" height="17" font="0" rotation="0.000000">corresponding routines </text>
+<text top="647" left="613" width="151" height="17" font="0" rotation="0.000000">and data structures. </text>
+<text top="667" left="613" width="124" height="17" font="0" rotation="0.000000">Accordingly, it is </text>
+<text top="686" left="613" width="180" height="17" font="0" rotation="0.000000">convenient to be able to </text>
+<text top="706" left="613" width="133" height="17" font="0" rotation="0.000000">easily access this </text>
+<text top="726" left="613" width="145" height="17" font="0" rotation="0.000000">documentation and </text>
+<text top="746" left="613" width="176" height="17" font="0" rotation="0.000000">potentially reuse it as R </text>
+<text top="766" left="613" width="137" height="17" font="0" rotation="0.000000">documentation for </text>
+<text top="785" left="613" width="189" height="17" font="0" rotation="0.000000">functions that interface to </text>
+<text top="805" left="613" width="194" height="17" font="0" rotation="0.000000">the routines, as we did for </text>
+<text top="825" left="613" width="158" height="17" font="0" rotation="0.000000">the RCUDA package </text>
+<text top="845" left="613" width="6" height="17" font="0" rotation="0.000000">(</text>
+<text top="845" left="618" width="189" height="17" font="3" rotation="0.000000">http://github.com/duncantl</text>
+<text top="865" left="613" width="63" height="17" font="3" rotation="0.000000">/RCUDA</text>
+<text top="865" left="676" width="15" height="17" font="0" rotation="0.000000">). </text>
+<text top="884" left="613" width="140" height="17" font="0" rotation="0.000000">Compiling R code: </text>
+<text top="904" left="613" width="181" height="17" font="0" rotation="0.000000">Recently, we have been </text>
+<text top="924" left="613" width="188" height="17" font="0" rotation="0.000000">developing R facilities for </text>
+<text top="944" left="613" width="198" height="17" font="0" rotation="0.000000">compiling R code to native </text>
+<text top="964" left="613" width="196" height="17" font="0" rotation="0.000000">instructions to by-pass the </text>
+<text top="983" left="613" width="187" height="17" font="0" rotation="0.000000">R interpreter. This allows </text>
+<text top="1003" left="613" width="195" height="17" font="0" rotation="0.000000">us to rewrite and translate </text>
+<text top="1023" left="613" width="141" height="17" font="0" rotation="0.000000">R code so that it is </text>
+<text top="1043" left="613" width="171" height="17" font="0" rotation="0.000000">essentially native code </text>
+<text top="1063" left="613" width="196" height="17" font="0" rotation="0.000000">and can call other existing </text>
+</page>
+<page number="2" position="absolute" top="0" left="0" width="918" height="1188" rotation="0.000000">
+	<fontspec id="4" size="16" family="Times" color="#000000" isItalic="0"  isBold="0"  isOblique="0"  name="MWBXAX+Calibri"/>
+<text top="112" left="109" width="140" height="17" font="0" rotation="0.000000">native routines, for </text>
+<text top="132" left="109" width="187" height="17" font="0" rotation="0.000000">example, in the R engine </text>
+<text top="151" left="109" width="172" height="17" font="0" rotation="0.000000">or standard C libraries. </text>
+<text top="171" left="109" width="185" height="17" font="0" rotation="0.000000">This results in significant </text>
+<text top="191" left="109" width="165" height="17" font="0" rotation="0.000000">speedup. However, to </text>
+<text top="211" left="109" width="186" height="17" font="0" rotation="0.000000">make this work, we need </text>
+<text top="231" left="109" width="176" height="17" font="0" rotation="0.000000">to know the signature ­ </text>
+<text top="250" left="109" width="156" height="17" font="0" rotation="0.000000">parameter types and </text>
+<text top="270" left="109" width="160" height="17" font="0" rotation="0.000000">return type ­ of these </text>
+<text top="290" left="109" width="185" height="17" font="0" rotation="0.000000">native, external routines. </text>
+<text top="310" left="109" width="183" height="17" font="0" rotation="0.000000">Again, if we can find this </text>
+<text top="330" left="109" width="86" height="17" font="0" rotation="0.000000">information </text>
+<text top="349" left="109" width="160" height="17" font="0" rotation="0.000000">programmatically, we </text>
+<text top="369" left="109" width="146" height="17" font="0" rotation="0.000000">greatly simplify and </text>
+<text top="389" left="109" width="199" height="17" font="0" rotation="0.000000">improve the entire process </text>
+<text top="409" left="109" width="173" height="17" font="0" rotation="0.000000">of generating the code. </text>
+<text top="429" left="109" width="157" height="17" font="0" rotation="0.000000">Determining memory </text>
+<text top="449" left="109" width="133" height="17" font="0" rotation="0.000000">management and </text>
+<text top="469" left="109" width="173" height="17" font="0" rotation="0.000000">mutability of inputs and </text>
+<text top="488" left="109" width="132" height="17" font="0" rotation="0.000000">outputs: When we</text>
+<text top="484" left="241" width="4" height="22" font="4" rotation="0.000000"> </text>
+</page>
+</pdf2xml>
