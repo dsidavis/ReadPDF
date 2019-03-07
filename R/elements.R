@@ -1,18 +1,29 @@
 
 getImages =
-function(doc, addPageNum = FALSE)
+function(doc, addPageNum = TRUE,
+         attrs = c("x", "y", "width", "height", "originalWidth", "originalHeight", "filename", "Title", "Creator", "Producer", "CreationDate"),
+         query = xpathQ("//img", doc))
 {
     if(is.character(doc))
        doc = readPDFXML(doc)
+
+    if(length(attrs)) {
+        ans = xpathSApply(doc, query, function(x) xmlAttrs(x)[attrs])
+        tmp = as.data.frame(t(ans), stringsAsFactors = FALSE)
+        names(tmp) = attrs
+        ans = type.convert(tmp)
+    } else
+        ans = xpathSApply(doc, query, xmlAttrs)
     
-    tmp = t(xpathSApply(doc, "//img", xmlAttrs))
-    imgInfo = as.data.frame(matrix(as.numeric(tmp), nrow(tmp), ncol(tmp),
-                                    dimnames = dimnames(tmp)))
+    if(addPageNum) {
+        pages = as.integer(xpathSApply(doc, query, function(x) xmlGetAttr(xmlParent(x), "number")))
+        if(is.data.frame(ans))
+            ans$pageNum = pages
+        else
+            mapply(function(x, p) { x["pageNum"] = p; x}, ans, pages)
+    }
     
-    if(addPageNum)
-        imgInfo$pageNum = as.integer(xpathSApply(doc, "//img", function(x) xmlGetAttr(xmlParent(x), "number")))
-    
-    imgInfo
+    ans
 }
 
 extRegexp = "\\.[a-z]{3,4}"
