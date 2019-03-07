@@ -13,8 +13,7 @@ function(file, out = character(), args = c("-q", "-xml"), pdftohtml = getOption(
     # No -c with -stdout!!!
     if(length(out) == 0)
         args = c(args, "-stdout")
-
-    if(grepl("\\.xml$", out))
+    else if(grepl("\\.xml$", out))
         out = gsub("\\.xml$", "", out)
     
     cmd = sprintf("%s %s '%s' %s", pdftohtml, paste(args, collapse = " "), path.expand(file), if(length(out)) QQuote(out) else "")
