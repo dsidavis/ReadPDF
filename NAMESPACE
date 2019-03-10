@@ -69,6 +69,7 @@ S3method(isTitleBad, character)
 
 
 
+export(getTextBBox)
 export(getBBox, getBBox2)
 S3method(getBBox2, XMLNodeSet)
 S3method(getBBox2, list)
@@ -124,7 +125,9 @@ export(getTextByCols)
 export(getPageLines)
 
 
+# Bad name as it seems like drawn lines not lines of text.
+# Rename to be getTextLines. or getTextByLine.
 export(getLines)
-
 export(getLinks)
+
 
