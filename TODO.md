@@ -1,4 +1,16 @@
 # 
+
++ Identify watermark
+   + Rotated
+   + In center of page
+   + large font
+   + light color
+
++ pdfText() should have docFont = FALSE by default.
+
++ getTextByCols() moves the ++ following C/C for C++ because it is at a different vertical position
+  eventhough it is in the correct document order. So fix this.
+
 + get docInfo as meta data
 
 + [done] margins only gets left and right, not top and bottom.
@@ -9,9 +21,10 @@
   (e.g. watermark, download information on the side of the page) and then compute the margins.
   Or identify the contiguous body of the page and focus only on that.
 
-+ margins() for multiple pages - return a data.frame or loose list of pairs.
++ [done] margins() for multiple pages - return a data.frame or loose list of pairs.
+   + margins(, asDataFrame = FALSE)
 
-+ Add isBold, isItalic function that uses the font info and its name to guess when isBold etc are FALSE..
++ Enhance isBold, isItalic function that uses the font info and its name to guess when isBold etc are FALSE..
 
 + Change default for asDataFrame in getBBox() and getBBox2() to TRUE and fix code in the package and
   in Zoonotics and other places we are using it. (Lots of places.)

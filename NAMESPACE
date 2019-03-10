@@ -131,3 +131,6 @@ export(getLines)
 export(getLinks)
 
 
+export(margins)
+
+export(isBold, isItalic)
