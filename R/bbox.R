@@ -10,7 +10,7 @@ function(nodes, asDataFrame = FALSE, attrs = c("left", "top", if(rotation) "rota
 getBBox2.PDFToXMLPage =
     # For text, not rect or line nodes.
 function(nodes, asDataFrame = FALSE, attrs = c("left", "top", if(rotation) "rotation"), pages = FALSE, rotation = FALSE, color = FALSE)
-    getBBox2(getNodeSet(nodes, ".//text"), asDataFrame, color = color)
+    getBBox2(getNodeSet(nodes, ".//text"), asDataFrame, attrs = attrs, color = color)
 
 
 getBBox2.XMLInternalNode =
@@ -51,8 +51,8 @@ function(nodes, asDataFrame = FALSE, attrs = c("left", "top", if(rotation) "rota
        rownames(m) = txt
    }
 
-   if(color) {
-       cols = getTextNodeColors(nodes, m)
+    if(color) {
+       cols = getTextNodeColors(nodes) # , m$font)
        if(asDataFrame)
            m$color = cols
        else
