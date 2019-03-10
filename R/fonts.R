@@ -33,7 +33,7 @@ function(doc)
    } else
        df = data.frame(size = integer(), isItalic = logical(), isBold = logical(), isOblique = logical())
    
-   df
+   structure(df, class = c("FontSpecInfo", class(df)))
 }
 
 
@@ -155,7 +155,7 @@ function(x, fontInfo = getFontInfo(as(x, "XMLInternalDocument")), ...)
 isBold.character =
 function(x, ...)    
 {
-    grepl("Bold", x)
+    grepl("([Bb]old|CMB)", x)
 }
 
 
@@ -163,4 +163,28 @@ isBold.data.frame =
 function(x, ...)    
 {
    x$isBold | isBold(x$name)
+}
+
+
+isItalic =
+function(x, ...)
+    UseMethod("isItalic")
+
+isBold.XMLInternalNode =
+function(x, fontInfo = getFontInfo(as(x, "XMLInternalDocument")), ...)    
+{
+
+}
+
+isItalic.character =
+function(x, ...)    
+{
+    grepl("([Ii]talic|CMT?I|Oblique|-?It[0-9]?$|Obl$|Ital$|MTMI)", x, ...)
+}
+
+
+isItalic.data.frame =
+function(x, ...)    
+{
+   x$isItalic | isItalic(x$name)
 }
