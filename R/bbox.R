@@ -1,6 +1,6 @@
 getTextBBox =
 function(nodes, asDataFrame = TRUE, attrs = c("left", "top", if(rotation) "rotation"), pages = FALSE, rotation = FALSE, color = FALSE)
-    getBBox2(nodes, asDataFrame, attrrs, pages, rotation, color)
+    getBBox2(nodes, asDataFrame, attrs, pages, rotation, color)
 
 getBBox2 =
     # For text, not rect or line nodes.
