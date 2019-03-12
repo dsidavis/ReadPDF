@@ -27,6 +27,7 @@ function(doc, asNodes = FALSE, secHeaders = findSectionHeaders(doc, ...), maxNum
         return(ans)
     }
 
+
     secHeaders = orderNodes(unlist(secHeaders))
 
     secs = lapply(seq(along = secHeaders),
@@ -151,8 +152,11 @@ function(doc, sectionName = c('introduction', 'background',
 
 
     if(length(intro)) {
+
         if(hasNum)
-           return(getNodeSet(doc, "//text[isNum(normalize-space(.))]", xpathFuns = list(isNum = isSectionNum)))
+            return(getNodeSet(doc, sprintf("//text[isNum(normalize-space(.)) and (%s)]",
+                                             paste( sprintf("@font = '%s'", sapply(intro, xmlGetAttr, "font")), collapse = " or " )),
+                               xpathFuns = list(isNum = isSectionNum)))
 
 
         i = sapply(intro, function(x) length(getNodeSet(x, "./preceding::text[ . = 'Supporting Online Material']"))) > 0
