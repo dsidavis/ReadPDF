@@ -9,8 +9,11 @@ function(doc, asNodes = FALSE, secHeaders = findSectionHeaders(doc, ...), maxNum
     if(is.character(doc))
         doc = readPDFXML(doc)
 
-    if(getNumPages(doc) > maxNumPages)
-        return(list())
+    if(getNumPages(doc) > maxNumPages) {
+      warning("doc pages exceeds maxNumPages")
+      return(list())      
+    }
+
 
     if(separateTables) {
         tblNodes = getTables(doc)
