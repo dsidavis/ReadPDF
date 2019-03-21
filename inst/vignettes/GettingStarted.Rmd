@@ -504,38 +504,44 @@ findSectionHeaders() attempts to find the first one using a variety of heuristic
 + text with a slightly larger font than the main text.
 
 ```
-secHeaders = findSectionHeaders(doc)
+sh = findSectionHeaders(doc)
 ```
 
 In this case `findSectionHeaders` finds all but the Section 3 header, which we say earlier was made up of two different fonts. 
 
 ## Section Text
 
-We can extract text by section using `getSectionText`. By default, this returns a list where each item corresponds to one of the section headers found by `findSectionHeaders`. That means that if `findSectionHeaders` missed any section headers then `getSectionText` will group multiple sections under one header.
+We can extract text by section using `getSectionText`. By default, this returns a list where each item corresponds to one of the section headers found by `findSectionHeaders`. That means that if `findSectionHeaders` missed any section headers then `getSectionText` will group text from multiple sections under one header.
 
 ```
 secText = getSectionText(doc, maxNumPages = 50, cleanSectionNums = F)
 ```
 
-Each item of `getSectionText` is a list of text by node in the section. To view sections as text blocks rather than building blocks we can paste sections together by
+Each item of `secText` is a list of text by node in a section. To view sections as text blocks we can paste their entries together:
 
 ```
 lapply(secText, paste, collapse = " ")
 ```
 
-To extract the text from a specific section we can combine the functionality of `getNodeSet`with `getSectionText`, specifying in `getNodeSet` the nodes we are interested in and using them as the argument to `secHeaders` in `getSectionText`. For example, if we only want the text from the section containing "Motivation", we can supply  only this header to the secHeaders argument of `getSectionText`. We can use XPath syntax in specifying the header node set, specifically `starts-with` and `or` to specify section headers in the form "1. , 2.". **FIX? The first option below returns a mix of the beginning of the Motivation section with the abstract tacked on. The second is correct for the first section queired, 1. Motivation, but still truncated for the second. The third way works but isn't ideal for the user**
-```
-movText = getSectionText(doc, maxNumPages = 50, cleanSectionNums = F, secHeaders = getNodeSet(doc, "//text[contains(., 'Motivation')]"))
-movText = getSectionText(doc, maxNumPages = 50, cleanSectionNums = F, secHeaders = getNodeSet(doc, "//text[starts-with(.,'1. ') or starts-with(.,'2. ')]"))
-movText = getSectionText(doc, maxNumPages = 50, cleanSectionNums = F, secHeaders = getNodeSet(doc, "//text[starts-with(.,'1. ') or starts-with(.,'2. ')]"))[[1]]
-```
-
-As an example, if we want to extract the references section we can extract nodes starting at "References", "Bibliography", or "Works Cites". **FIX. Would be better to pick the References secHeader found earlier and have an end-of-doc option, or failing that use last text.**
+To extract the text from a specific section we can combine the functionality of `getSectionText` and `getNodeSet`. We specify in `getNodeSet` the nodes we are interested in and use them as the argument to `secHeaders` in `getSectionText`. For example, if we only want text from the section "1. Motivation", we can supply this and the following header to `secHeaders`. We use XPath syntax, specifically `starts-with` and `or`, to extract section headers that begin "1. Motivation", and "2. Concepts".
 
 ```
-lastText = tail(xmlValue(getNodeSet(doc[[getNumPages(doc)]], path = "//text")),1)
-refText = getSectionText(doc, maxNumPages = 50, cleanSectionNums = F, secHeaders = getNodeSet(doc, "//text[starts-with(.,'References') or starts-with(.,'Bibliography') or starts-with(.,'Works Cited')
-or (.='yyyy-mm-dd')]"),  addOmitted = FALSE)[[1]]
+movText = getSectionText(doc, maxNumPages = 50, cleanSectionNums = F, 
+  secHeaders = getNodeSet(doc, 
+  "//text[starts-with(.,'1. Motivation') or starts-with(.,'2. Concepts')]"))[[1]]
+```
+ **^ FIX? Long-term would be better to have an "end" header so we don't have to extract an unwanted section and user doesn't need to append [[1]].**
+ 
+A common use case is to extract only the references section. We can use the previously found section headers stored as `sh`, and identify the one containing "References", "Work Cited", or "Bibliography". 
+
+```
+refSecNum = grep(pattern = "References|Works Cited|Bibliography", sapply(sh, xmlValue))
+```
+We then extract the text from that header until, by default, the end of the document. **FIXED? Now if only one node is supplied, goes til end of doc, and returns just that section, no need for [[1]].**
+
+```
+refText = getSectionText(doc, maxNumPages = 50, cleanSectionNums = F, 
+  secHeaders = sh[[refSecNum]],  addOmitted = FALSE)
 ```
 
 ## Images
