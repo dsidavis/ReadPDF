@@ -176,7 +176,7 @@ We can get all text nodes with
 
 getNodeSet(doc, "//text")
 
-@Duncan make a note somewhere about Xpath syntax? Suggest a reference? Make a subsection for getting specific nodes?
+@Duncan make a note somewhere about Xpath syntax? Suggest a reference (e.g.? https://www.w3schools.com/xml/xpath_syntax.asp)? Make a subsection for getting specific nodes?
 
 ## Font Information
 
@@ -511,23 +511,31 @@ In this case `findSectionHeaders` finds all but the Section 3 header, which we s
 
 ## Section Text
 
-We can extract the text belonging to a given section. By default the section headers are the same as those found by `findSectionHeaders`, so if that function missed any section headers then multiple sections may be grouped by getSectionText.
+We can extract text by section using `getSectionText`. By default, this returns a list where each item corresponds to one of the section headers found by `findSectionHeaders`. That means that if `findSectionHeaders` missed any section headers then `getSectionText` will group multiple sections under one header.
 
 ```
 secText = getSectionText(doc, maxNumPages = 50, cleanSectionNums = F)
 ```
 
-To view sections as text blocks rather than individual lines we can paste sections together by
+Each item of `getSectionText` is a list of text by node in the section. To view sections as text blocks rather than building blocks we can paste sections together by
 
 ```
 lapply(secText, paste, collapse = " ")
 ```
 
-To extract the text from a specific section we can combine the functionality of `getNodeSet`with `getSectionText`, specifying in `getNodeSet` the nodes we are interested in and using them as the argument to `secHeaders` in `getSectionText`. For example, if we only want the text from the section containing "Motivation".
-
-**FIX? The text below is a mix of the beginning of the Motivation section with the abstract tacked on.**
+To extract the text from a specific section we can combine the functionality of `getNodeSet`with `getSectionText`, specifying in `getNodeSet` the nodes we are interested in and using them as the argument to `secHeaders` in `getSectionText`. For example, if we only want the text from the section containing "Motivation", we can supply  only this header to the secHeaders argument of `getSectionText`. We can use XPath syntax in specifying the header node set, specifically `starts-with` and `or` to specify section headers in the form "1. , 2.". **FIX? The first option below returns a mix of the beginning of the Motivation section with the abstract tacked on. The second is correct for the first section queired, 1. Motivation, but still truncated for the second. The third way works but isn't ideal for the user**
 ```
 movText = getSectionText(doc, maxNumPages = 50, cleanSectionNums = F, secHeaders = getNodeSet(doc, "//text[contains(., 'Motivation')]"))
+movText = getSectionText(doc, maxNumPages = 50, cleanSectionNums = F, secHeaders = getNodeSet(doc, "//text[starts-with(.,'1. ') or starts-with(.,'2. ')]"))
+movText = getSectionText(doc, maxNumPages = 50, cleanSectionNums = F, secHeaders = getNodeSet(doc, "//text[starts-with(.,'1. ') or starts-with(.,'2. ')]"))[[1]]
+```
+
+As an example, if we want to extract the references section we can extract nodes starting at "References", "Bibliography", or "Works Cites". **FIX. Would be better to pick the References secHeader found earlier and have an end-of-doc option, or failing that use last text.**
+
+```
+lastText = tail(xmlValue(getNodeSet(doc[[getNumPages(doc)]], path = "//text")),1)
+refText = getSectionText(doc, maxNumPages = 50, cleanSectionNums = F, secHeaders = getNodeSet(doc, "//text[starts-with(.,'References') or starts-with(.,'Bibliography') or starts-with(.,'Works Cited')
+or (.='yyyy-mm-dd')]"),  addOmitted = FALSE)[[1]]
 ```
 
 ## Images
