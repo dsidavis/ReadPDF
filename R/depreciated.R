@@ -1,3 +1,6 @@
+################################################################################
+# abstract.R
+
 #
 #
 #
@@ -438,3 +441,152 @@ function(node, boxes, pos = getBBox2(list(node)))
 
 
 
+################################################################################
+# AClasses.R
+setOldClass(c("PDFToXMLDoc", "ConvertedPDFDoc", "XMLInternalDocument", "XMLAbstractDocument"))
+setOldClass(c("PDFToXMLPage", "ConvertedPDFPage", "XMLInternalElement", "XMLInternalNode", "XMLAbstractNode"))
+
+
+setAs("character", "PDFToXMLDoc", function(from) readPDFXML(from))
+
+
+setAs("XMLInternalNode", "PDFToXMLPage",
+      function(from) {
+          if(xmlName(from) != 'page') 
+              stop("XML node is not a <page>")
+
+          class(from) = c("PDFToXMLPage", "ConvertedPDFPage", class(from))
+          from
+      })
+################################################################################
+# assembleLines.R
+
+
+getLines = getHLines = 
+function(page, nodes = getNodeSet(page, ".//rect"), mar = margins(page),# page is global here!
+         bb = getBBox(nodes, asDataFrame = TRUE), 
+         threshold = 5, lhThreshold = 6, minLineLength = 20, marThreshold = 10, horiz = TRUE)
+{         
+     # horizontal lines
+    w = if(horiz)
+           abs(bb$y1 - bb$y0) < lhThreshold 
+        else
+           abs(bb$x1 - bb$x0) < lhThreshold
+    
+    hbb = bb[w,]
+
+    var = if(horiz) "y1" else "x1"
+    
+    uvals = unique(hbb[[var]])
+    g = split(hbb, cut(hbb[[var]], c(0, uvals)))
+
+    if(horiz) {
+        wd = sapply(g, function(x) range(x$x0, x$x1))
+        w2 = wd[1,] < (mar[1] + marThreshold) &  wd[2,] > ( mar[2] -  marThreshold)
+    } else {
+        ht = sapply(g, function(x) diff(range(x$y0, x$y1)))
+        w2 = ht > dim(page)[2]*.1
+    }
+
+    g = g[w2]
+    do.call(rbind, lapply(g, joinLines, horiz = horiz))
+}
+
+
+joinLines = 
+function(xx, horiz = TRUE, maxGap = 5, vars = if(horiz) c("x0", "x1") else c("y0", "y1"))
+{
+    xx = xx[ order(xx[[ vars[2] ]]), ]
+    d = xx[[vars[1]]][-1] - xx[[vars[2]]] [-nrow(xx)]
+  
+    w = c(0, cumsum(d >= maxGap))
+    yy = split(xx, w)
+    
+    do.call(rbind, lapply(yy, function(x) {
+                         cbind(x[which.min(x[[vars[1]]]), c("x0", "y0")], x[which.max(x[[vars[2]]]), c("x1", "y1")])
+                   }))
+}
+
+################################################################################
+# authorAffiliations.R
+
+getAuthorAffil =
+    ##
+    ## Also removing Received/Accepted dates .....
+    ##
+function(doc)
+{
+    if(is.character(doc))
+        doc = readPDFXML(doc)
+
+    if(isEID(doc)) 
+        return(list(author = getEIDAuthors(doc), affiliations = getBelowLine(doc)))
+
+
+    ti = getDocTitle(doc, asNode = TRUE)
+    if(length(ti) == 0 || is.character(ti)) {
+        stop("No title")
+        return(NULL)
+    }
+    ab = findAbstract(doc)
+    
+    if(length(ab) == 0 || is.character(ab))
+        stop("no abstract")
+#        return(NULL)
+
+    getNodesBetween(ti[[length(ti)]], ab[[1]], exclude = TRUE)
+                                        #sapply(xs, xmlValue)
+}
+
+
+
+getBelowLine =
+    ## check that the font for the content below is different from the document font
+    ## XXX If line in 2nd column and lower than one in column 1, we won't get anything. So deal with both columns.
+    ###
+function(doc, col = 1, colPos = getColPositions(p1))
+{
+    if(is.character(doc))
+        doc = readPDFXML(doc)
+
+    p1 = doc[[1]]
+    
+    lines = getBBox(p1)
+     # Get horizontal lines only
+    lines = lines[ lines[, "y0"] == lines[, "y1"], ]
+
+    tlines = if(col == length(colPos))
+               lines[lines[, "x0"] >= colPos[2] ,]
+            else
+                lines[lines[, "x0"] < colPos[2] ,]
+    tlines = tlines[tlines[,"y0"] == max(tlines[, "y0"]) ,]
+    if(is.matrix(tlines))
+        tlines = tlines[1,]
+
+    xpath.query = sprintf(".//text[ @top > %f and (@left + @width ) < %f]", tlines["y0"], colPos[2] )
+    txt = getNodeSet(p1, xpath.query)
+    ## Check these are all in a different font than the document's regular text.
+
+    txt
+}
+
+
+
+
+authorsAfterTitle =
+    ## This is  currently a very simple minded function
+    ## to group the nodes by line and then group those lines
+    ## by interline skip to get blocks.
+    ## Then we can take the block after the title. 
+function(doc, lineskip = 20, title = getDocTitle(doc))
+{
+    g = getPageGroups(doc, lineskip)
+    combine = function(x) paste(names(x), collapse = "\n")
+    g.txt = sapply(g, combine)
+    i = match(title, g.txt)
+    
+    if(is.na(i))
+        g
+    else
+        g[[i + 1L]]
+}
