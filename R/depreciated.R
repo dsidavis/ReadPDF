@@ -590,3 +590,492 @@ function(doc, lineskip = 20, title = getDocTitle(doc))
     else
         g[[i + 1L]]
 }
+################################################################################
+# bibRefs.R
+findBibCites =
+    #
+    # Find text that identifies citations in the bibliography
+    # in the form of numbers, ranges of numbers, etc.
+    # that are superscripts.
+    #
+function(doc, supThreshold = .66, fonts = getFontInfo(doc),
+         textFont = getDocFont(doc))
+{
+    w = fonts$size < supThreshold*textFont$size
+    if(any(w))
+        fontq = paste(sprintf("@font = '%s'", fonts$id[w]), collapse = " or ")
+    else
+        fontq = "true"
+    xp = sprintf("//text[(%s) and isBibSup(normalize-space(.))]", fontq)
+    tt = getNodeSet(doc, xp,  xpathFuns = list(isBibSup = isBibSup))
+}
+
+isBibSup =
+function(str)
+{
+    grepl("^[0-9]+((,[0-9]+)*|­[0-9]+)$", str)
+                            # ^  non ascii character.
+}
+################################################################################
+# emergingInfDisease.R
+
+isEID = isEmergingInfectDisease =
+function(doc)
+{
+    doc = as(doc, "PDFToXMLDoc")
+
+    foot = getPageFooter(doc[[1]])
+    length(foot) && nchar(foot) && grepl("Emerging Infectious Diseases", foot)
+}
+
+
+
+getEIDAuthors =
+function(doc, title = getDocTitle(doc, asNode = TRUE), colPos = getColPositions(doc[[1]]))
+{
+    getEIDHeadMaterialByFont(doc, '1', asNodes = TRUE, colPos = colPos)
+}
+
+
+findEIDAbstract =
+function(doc, asNodes = TRUE, byLine = TRUE, colPos = getColPositions(doc[[1]]))
+{
+    getEIDHeadMaterialByFont (doc, '3', asNodes, colPos = colPos)
+}
+
+getEIDHeadMaterialByFont =
+function(doc, font, asNodes = TRUE, byLine = TRUE, colPos = getColPositions(doc[[1]]))
+{
+
+    doc = as(doc, "PDFToXMLDoc")
+    p1 = doc[[1]]
+    lines = getBBox(p1)
+    lines = lines[ lines[, "y0"] == lines[, "y1"] & lines[, "x1"] < colPos[2], ]
+    tlines = lines[lines[,"y0"] == min(lines[, "y0"]),]
+    ## We are going to assume this is @font = 1 for now.
+    ## If this turns out to be a false assumption in all EID papers, we can
+    ## get the font information  and find the text above the line in the first column
+    ## and below the title that have a bold font.
+    xpath.query = sprintf(".//text[ @top < %f and (@left + @width ) < %f and @font = '%s']", tlines["y0"], colPos[2], font )
+    txt = getNodeSet(p1, xpath.query)
+#    fontInfo = getFontInfo(p1)
+#    fonts = sapply(txt, xmlGetAttr, "font")
+#    browser()
+
+    
+#   doc = as(doc, "PDFToXMLDoc")
+#   p1 = doc[[1]]
+#   lines = getBBox(p1)
+#   lines = lines[ lines[, "y0"] == lines[, "y1"] & lines[, "x1"] < colPos[2], ]
+#   tlines = lines[lines[,"y0"] == min(lines[, "y0"]),]
+#   xpath.query = sprintf(".//text[ @top < %f and (@left + @width ) < %f and @font = '3']", tlines["y0"], colPos[2] )
+#   txt = getNodeSet(p1, xpath.query)
+    if(asNodes)
+       txt
+    else
+       paste(sapply(txt, xmlValue), collapse = " ")
+}
+
+
+findEIDAbstract =
+function(doc, asNodes = TRUE, byLine = TRUE, colPos = getColPositions(doc[[1]]))
+{
+    doc = as(doc, "PDFToXMLDoc")
+    p1 = doc[[1]]
+    lines = getBBox(p1, asDataFrame = TRUE)
+
+    if(nrow(lines) == 0 || max(lines$x1 - lines$x0) < dim(p1)["width"]*.5) {
+        ## XXX So we use a different strategy when we implement it.
+        warning("this is not a regular EID paper. No horizontal line at top")
+        return(list())
+    }
+    
+
+    if(length(colPos) == 0)
+        stop("getColPosition() failed for this page")
+
+    if(length(colPos) == 3)
+        stop("This is a very different EID paper")
+    
+    if(length(colPos) == 1) 
+       colPos = c(margins(p1)[1], colPos)
+
+   
+    lines = lines[ lines[, "y0"] == lines[, "y1"] & lines[, "x1"] < colPos[2], ]
+    tlines = lines[lines[,"y0"] == min(lines[, "y0"]),]
+    xpath.query = sprintf(".//text[ @top < %f and (@left + @width ) < %f]", tlines["y0"], colPos[2])
+    txt = getNodeSet(p1, xpath.query)
+
+
+    ll = orderByLine(txt)
+    ll.bb = lapply(ll, getBBox2)
+    tops = sapply(ll.bb, function(x) median(x[, "top"]))
+
+    delta = diff(tops)
+    threshold = getDocFont(doc)[1, "size"]*2
+    blocks = split(ll, cumsum(c(0, delta) > threshold))
+    return(blocks[[length(blocks)]])
+browser()        
+    
+    ## Now we figure out which of the text is the title, the author names and the text of the abstract.
+    ## The title may not be considered bold, as it may be Arial-Black which looks bold, but bold is not in the name.
+    ## We also know that the abstract will be the smallest text in this group.
+    fontInfo = getFontInfo(doc)
+     ## Font id of 
+    fi = sapply(txt, xmlGetAttr, "font")
+    f2 = fontInfo[unique(fi),]
+    ## This won't quite work as we will pick up the footnote markers which will be smaller.
+    ## We may need to find the first the line that has non bold text
+    ## It is possible the abstract text will have a bold item in it so we can't take the first bold.
+    ##
+    ## If the size of the fonts for the authors and the abstract are the same, we may select the wrong one!
+    ##
+    ## So we probably need to arrange by line and then find where there is more than interline space as we go back up.
+#browser()
+    fids = f2$id[ order(f2$size, decreasing = TRUE)] [-(1:2)]
+    txt = txt[ fi %in% fids]
+
+    if(asNodes)
+       txt
+    else
+       paste(sapply(txt, xmlValue), collapse = " ")   
+    
+##    b = isBold(fontInfo)
+##    f2 = fontInfo[!b,]
+    
+}
+
+################################################################################
+# datesPublished.R
+
+#  See  ~/DSIProjects/Zoonotics-shared/PublicationDate.R for a better version.
+getDatePublished =
+function(doc)
+{    
+   nodes = getNodeSet(doc, "//text[contains(., 'Received:')] | //text[contains(., 'Published:')] | //text[contains(., 'Accepted:')]")
+   if(length(nodes) == 0)
+       return(NULL)
+
+   txt = sapply(nodes, xmlValue)
+   e = strsplit(unlist(strsplit(txt, " / ")), ":")
+   structure(XML:::trim(sapply(e, `[[`, 2)), names = XML:::trim(sapply(e, `[[`, 1)))
+}
+
+
+getSubmissionDateInfo =
+function(doc, phrases = c("Received", "Accepted", "Available online", "Published at", "Published online", "received for review"))
+{
+  cond = sprintf("starts-with(normalize-space(.), '%s')", t(cbind(phrases, paste0("(", phrases))))
+  getNodeSet(doc, sprintf("//text[%s]", paste(cond, collapse = " or ")))
+}
+
+################################################################################
+# PublicationDate.R
+
+getPublicationDate1 =
+    # OLD VERSION - SEE BELOW
+function(doc, page = 1, words = c("accepted", "received", "volume", "copyright", "published", "submitted", "recebido", "aceito"))
+{
+  if(is.character(doc))
+     doc = xmlParse(doc)
+
+    # look for the words that often identify a year.
+  cond = paste(sprintf("contains(lower-case(.), '%s')", words), collapse = " or ")
+    
+  ans = xpathSApply(doc, sprintf("//page[@number='%d']//text()[%s]", page, cond),  xmlValue)
+
+  if(length(ans) == 0) {
+      tmp = getNodeSet(doc, sprintf("//page[@number = '%d']//text()[contains(., 'Emerging Infectious Disease')]", page))
+      if(length(tmp))
+         ans = gsub(".* Vol\\. .*, (.*)", "\\1", xmlValue(tmp[[1]]))
+  }
+
+
+ if(length(ans) == 0) {
+      tmp = getNodeSet(doc, sprintf("//page[@number = '%d']//text()[contains(., 'Journal of ')]", page))
+      if(length(tmp))
+         ans = xmlValue(tmp[[1]])
+  }  
+
+  # We don't do anything with the txt here.
+ if(FALSE || length(ans) == 0) {
+      tmp = getNodeSet(doc, sprintf("//page[@number = '%d']//text()", page))
+      if(length(tmp)) {
+         txt = sapply(tmp, xmlValue)
+      }
+  }  
+
+  if(length(ans) == 0 && page == 1) {
+           # Go to the last page
+     npages = length(getNodeSet(doc, "//page"))
+     if(npages > 1) {
+       ans = getPublicationDate1(doc, npages, words)
+       if(length(ans) == 0 && npages > 2)
+           # try second page
+          return(getPublicationDate1(doc, 2, words))
+    }
+  }
+
+  ans
+}
+
+
+findVol =
+function(doc)
+{
+   unlist(xpathSApply(doc, "//text()[contains(lower-case(.), 'vol')]", getVolume))
+}
+
+getVolume =
+function(node)
+{
+   txt = xmlValue(node)
+   grep("Volume|Vol\\.?[[:space:]]?[0-9]+", txt, value = TRUE)
+}
+
+#tmp = lapply(docs2, )
+
+
+
+hasCoverPage =
+function(doc)
+{
+  isBioOne(doc) || isMBio(doc) || isResearchGate(doc)
+}
+
+isMBio =
+function(doc)    
+{
+   length(getNodeSet(doc, "//page[1]//text[contains(., 'mBio')]")) > 0 &&    length(getNodeSet(doc, "//page[1]//ulink[starts-with(@url, 'http://mbio.asm.org')]")) > 0
+}
+
+isBioOne =
+    #
+    # There are some documents from BioOne which are scanned documents with a front page that is not scanned.
+    # isScanned() only looks at the first page. So we detect these explicitly.
+    #
+function(doc)
+   length(getNodeSet(doc, "//text[starts-with(., 'BioOne sees sustainable scholarly ')]")) > 0
+
+
+
+
+getPublicationDate =
+    #
+    # New version
+    #
+    #
+    #@'return a named character  vector. The values contain a date, possibly with other text content.
+    #     the names indicate which step/method was used to identify the date.  These will all be the same
+    #     as we stop when we have any date.
+    #
+    # The steps are Scanned (no date)
+    #               NIH Public Access  (particular format in which we can find the date)
+    #               Title     (Date in the title)    
+    #               Received  (information about when received, accepted, published)
+    #               footer    (taken from the footer on the first page)
+    #               header    (taken from the header of the first page)
+    #               copyright (find the copyright symbol and the date after it)
+    #               AboveTitle (text above the title of the paper)
+    #               TextRegEx  (find a date of the form [number] NameOfMonth[,] Year anywhere in the text)
+    #
+function(doc, checkAbstract = TRUE)
+{
+  if(is.character(doc))
+     doc = readPDFXML(doc)
+
+  if(checkAbstract) {
+      abstract = try(findAbstract(doc, FALSE))
+
+      if(!is(abstract, 'try-error') && length(abstract)) {
+          txt = paste(abstract, collapse = "\n")
+          m = gregexpr("\\b(19|20)[0-9]{2}\\b", txt)
+          if(any(m[[1]] > -1)) {
+              y = unique(regmatches(txt, m)[[1]])
+              return(structure(y, names = rep("abstract", length(y))))
+          } 
+      }
+  }
+  
+  if(isBioOne(doc) && !is.na(tmp <- textAboveTitle(doc, 2)))
+      return(tmp)
+
+  if(isScanned(doc)) { # was isScanned2()
+      y = getYearFromFileName(basename(docName(doc)))
+      if(length(y))
+          return(c(filename = y))
+      else
+          return(structure(NA, names = "Scanned"))
+  }
+
+  nih = getNodeSet(doc, "//text[. = 'NIH Public Access']")
+  if(length(nih) > 0) {
+      txt = unique(xpathSApply(nih[[1]], "./following-sibling::text[contains(., 'doi:')]", xmlValue))
+      if(length(txt))
+        return(structure(txt, names = "NIH Public Access")) # , journal = xmlValue(getSibling(nih[[1]]))))
+  }
+
+  if(length(getNodeSet(doc, "//text[starts-with(., 'www.oie.int/')]")) > 0) {
+     date = xmlValue(getNodeSet(doc, "//text[. = 'Date of start of the event']/following-sibling::text[1]")[[1]])
+     return(c(OIE = date))
+  }
+  
+  title = getDocTitleString(doc)
+  if(hasYear(title))
+      return(structure(title, names = "Title"))
+
+  rec = getSubmissionDateInfo(doc)
+  if(length(rec) > 0) {
+      txt = xmlValue(rec[[1]])
+      if(!hasYear(txt)) {
+          top = xmlGetAttr(rec[[1]], "top")
+          txt = paste(xpathSApply(rec[[1]], sprintf("./following-sibling::text[@top = '%s']", top), xmlValue), collapse = " ")
+      }
+      if(hasYear(txt))
+          return(structure(txt, names = rep('Received', length(txt))))
+  }
+
+  rec = getNodeSet(doc, "//text[contains(., 'received for review')]")
+  if(length(rec) > 0) {
+      txt = xmlValue(rec[[1]])
+      if(!hasYear(txt)) {
+          top = xmlGetAttr(rec[[1]], "top")
+          txt = paste(xpathSApply(rec[[1]], sprintf("./following-sibling::text[@top = '%s']", top), xmlValue), collapse = " ")
+      }
+      if(hasYear(txt))
+          return(structure(txt, names = rep('Received', length(txt))))
+  }
+  
+  
+
+  p1 = getNodeSet(doc, "//page")[[1]]
+  footer = getPageFooter(p1)
+ 
+  if(!grepl("Downloaded", footer) && any(w <- hasYear(footer)))
+      return(structure(footer[w], names = rep("footer", sum(w))))
+
+  footer = getPageHeader(p1)
+  if(!grepl("Downloaded", footer) && any(w <- hasYear(footer)))
+      return(structure(footer[w], names = rep("header", sum(w))))  
+
+                                      #XXX  non-ASCII symbol
+  cr = getNodeSet(doc, "//text[contains(., '©')]")
+  if(length(cr)) {
+      tt = sapply(cr, xmlValue)
+      if(any(w <- hasYear(tt)))
+          return(structure(tt[w], names = rep("copyright", sum(w))))
+  }
+
+  tt = textAboveTitle(doc, 1)
+  if(any(w <- hasYear(tt)))
+      return(structure(tt[w], names = rep("AboveTitle", sum(w))))
+
+
+  txt = getDocText(doc)
+  rx = sprintf("([0-9]{1,2} )?(%s),? (19|20)[0-9]{2}", paste(getMonthNames(), collapse = "|"))
+  g = gregexpr(rx, txt, ignore.case = TRUE)
+  if(g[[1]][1] > 0) {
+      tt = unique(regmatches(txt, g)[[1]])
+      return(structure(tt, names = rep("MonthNameYear.TextRegEx", length(tt))))
+  }
+
+  # Could go to the second page and start over with the headers, etc.
+
+  tt = getNodeSet(doc, "//text[isDate(string(.))]",
+                  xpathFuns = list(isDate = containsDate))
+  if(length(tt)) #XXX Put the match type here.
+      return(c(TextDate = unique(extractDate(sapply(tt, xmlValue)))))
+
+
+  fname = basename(docName(doc))
+  y = getYearFromFileName(fname)
+  if(length(y)) 
+     return(c(filename = y))
+  
+  NA
+}
+
+getYearFromFileName = getYearFromString =
+    # getYearFromFileName("Kohl 1996.xml")
+    # getYearFromFileName("Smithburn-1949-The susceptibility of African w.xml")
+function(fname)
+{
+  #   "(^|[^0-9])[0-9]{4}([^[0-9]|$)"
+  # But need to not include characters within the () ()
+  m = gregexpr("(\\b|_)(19[0-9]{2}|20[01][0-9]{1})(\\b|_)", fname, perl = TRUE)
+  if(any(m[[1]] > -1))
+     gsub("(^_|_$)", "", regmatches(fname, m)[[1]])
+  else
+     character()
+}
+
+getMonthNames =
+function(format = c("%b.", "%b", "%B"))
+{    
+  unlist(lapply(format, function(f) format(ISOdate(2017, 1:12, 1), f)))
+}
+
+containsDate =
+function(str)
+{
+   grepl(mkDateRegexp(), str) 
+}
+
+mkDateRegexp =
+function()
+{
+  sprintf("[0-9]{4} (%s)( [0-9]{,2})", paste(getMonthNames(), collapse = "|"))
+}
+
+extractDate =
+function(str)
+{
+  unlist(regmatches(str, gregexpr(mkDateRegexp(), str)))
+}
+
+
+getDocText =
+    # Too simple. See the one in ReadPDF
+function(doc)
+{
+    if(is.character(doc))
+       doc = readPDFXML(doc)
+    
+    paste(xpathSApply(doc, "//text", xmlValue), collapse = " ")
+}
+
+textAboveTitle =
+    # Finds the title and then gets the text above that. This is useful when there is header material
+    # in a sequence of lines.
+    # Could find it in other ways also.
+function(doc, page = 1)
+{
+    titleNodes = getDocTitle(doc, page)
+    if(length(titleNodes) == 0 || is.character(titleNodes))
+        return(NA)
+   pos = min(as.integer(sapply(titleNodes, xmlGetAttr, "top")))
+   page = getNodeSet(titleNodes[[1]], ".//ancestor::page")[[1]]
+   bbox = getBBox2(getNodeSet(page, ".//text"))
+   rownames(bbox)[ bbox[, "top"] < pos]
+}
+
+hasYear =
+function(txt)
+{
+#      grepl("(^| )(19|20)[0-9]{2}( |$)", txt)
+     grepl("\\b(19|20)[0-9]{2}\\b", txt)
+}
+
+
+
+firstIsolated =
+function(doc, text = pdfText(doc))
+{
+    if(missing(text) && is.character(doc))
+       doc = readPDFXML(doc)
+
+    pageNum = rep(seq(along = text), sapply(text, length))
+    text = unlist(text)
+    i = grep("first[[:space:]]+isolated", text, ignore.case = TRUE)
+    structure(text[i], names = pageNum[i])
+}
