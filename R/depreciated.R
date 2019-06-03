@@ -1688,3 +1688,1060 @@ function(doc, docFont = getDocFont(doc), nodes = getNodeSet(doc, xpathQ("//text"
     #  textFonts[[length(textFonts)]]
     
 }
+################################################################################
+# gapFuns.R
+groupLines =
+    ##
+    ##
+    ## "LatestDocs/PDF/3475635737/Nakgoi-2014-Dengue,%20Japanese%20Encephalitis%20and.xml" - lineskip 13
+function(ll, lineskip = 16) # 18 didn't separate the abstract from columns in Mackenzie-2001.pdf
+{
+    bbs = lapply(ll, getBBox2, asDataFrame = TRUE)
+    tops = sapply(bbs, function(x) median(x$top))
+    d = diff(tops)
+
+    if(is.na(lineskip)) {
+        tt = table(d)
+        lineskip = as.integer(names(tt)[which.max(tt)])
+    }
+    
+    grps = cumsum(c(0, d) > 2*lineskip)
+    blocks = split(ll, grps)
+    names(blocks) = seq(along = blocks)
+    blocks
+}
+
+
+pageNodesByLine =
+function(page)
+{        
+#doc = readPDFXML("NewPDFs/Dobrava Virus/Scharninghausen-1999.xml")
+#    bb = getBBox(doc[[1]])
+    tt = getNodeSet(page, ".//text")
+    ll = nodesByLine(tt)
+}
+
+
+spansColumn =
+function(nodes, gap, bbox = getBBox2(nodes, asDataFrame = TRUE), threshold = 20)
+{
+   start = bbox$left
+   end = bbox$left +  bbox$width
+
+   w = start < gap & end > gap
+   
+#   w = abs(gap - start) < threshold | abs(end - gap) < threshold
+   any(w) # table(w)
+}
+
+
+getNodePos =
+function(nodes, bbox = getBBox2(nodes, asDataFrame = TRUE))
+{
+   data.frame(start = bbox$left, end = bbox$left + bbox$width)
+}
+
+
+
+
+
+hasGap =
+    #XXX Finish off.
+function(nodes, col = getColPositions(xmlParent(nodes[[1]])), bbox = getBBox2(nodes, asDataFrame = TRUE))
+{
+   start = bbox$left
+   end = bbox$left +  bbox$width
+   n = length(nodes)
+   d = start[-1] - end[-n]
+#   browser()
+}
+
+
+getPageGroups =
+function(page, lineskip = 20)
+{
+    ll = pageNodesByLine(page)
+    g = groupLines(ll, lineskip)
+}
+
+################################################################################
+# getTitle.R
+
+# The pdf in 0698940064/ of the Zoonotics end note
+# There is a 43 point font. That is one character that starts the text and spans 2 lines of text.
+#
+
+getDocTitleString =
+function(f, nodes = getDocTitle(f, ...), ...)
+   paste(sapply(nodes, function(x) if(is.character(x)) x else xmlValue(x)), collapse = " ")
+
+getDocTitle =
+    #
+    # We may want to determine if this is scanned, and if so, does it have a cover page.
+    #
+    #  Identify a journal name and discard this from the results (after the meta)
+    # e.g. "LatestDocs/PDF/2143276081/Kamhieh-2006-Borna disease virus (BDV) infect1.xml" - Veterinary Quaterly.
+    # We can hard code these, but let's try to learn from the headers and footers.
+    # 
+    #
+    #  See 1599857215/Learned-2005-Extended interhuman transmission.xml for a title in the meta that is just the name of the file.
+    #
+function(file, page = 1, doc = readPDFXML(file), meta = FALSE, minWords = 1, asNode = FALSE, scanned = isScanned(doc), ...)
+{
+  if(missing(doc) && is(file, "XMLInternalDocument"))
+      doc = file
+
+
+  if(isOIEDoc(doc)) 
+     return(getOIETitle(doc, asNode = asNode))
+
+
+
+  if(meta) {
+      meta = getNodeSet(doc, "//docinfo/META[@name = 'title']")
+      if(length(meta)) {
+          ti = xmlGetAttr(meta[[1]], "content")
+             # The first grepl() detects the name of the file. Should compare with docName(doc)
+             #  !grepl("PDF/[0-9]+/", ti)          
+          if(!grepl("$$", ti, fixed = TRUE) && !grepl("Microsoft", ti) && !grepl("PDF/PDF", ti) && !isMetaTitleFilename(ti, docName(doc)) &&
+               !grepl("^doi:", ti) && !isTitleBad(ti))
+              return( ti )
+      }
+  }
+  
+  if(missing(page) && (isResearchGate(doc)  ||
+                        length(getNodeSet(doc, "//page[1]//text[. = 'PLEASE SCROLL DOWN FOR ARTICLE']")) > 0 ))
+      page = 2
+
+    # For what documents is this necessary - e.g. Puzelli et al
+    # But need to be more specific for this cover page as other docs, e.g., A case of Crimean-Congo Ham.... .xml doesn't
+    # have the cover page but does have the www.euro...org link.
+  if(missing(page) && length(getNodeSet(doc, "//page[1][./text[contains(., 'www.eurosurveillance.org')] and ./text[contains(., 'Weekly')] ]")))
+      page = 2
+  
+     # handle case where the first page is a cover sheet
+  p1 = getNodeSet(doc, "//page")[[page]]
+
+  if(length(getNodeSet(p1, ".//text")) == 0)
+      return(list())
+
+  if(scanned) # Should we use isScanned() ?
+      return(if(asNode) list() else NA_character_)
+  
+
+  
+  fonts = getFontInfo(p1)
+  if(is.null(fonts))
+     return(NULL)
+  m = which(fonts$size == max(fonts$size))
+  mx = fonts$size[m]
+  id = fonts[m, "id"]
+  
+  txt = getFontText(p1, id)
+
+  if(all(nchar(sapply(txt, xmlValue, trim = TRUE)) == 1)) {
+    # XXX Need to deal with the first letter in each word being different.
+  }
+
+
+#
+# getFontText() should reassemble text across lines, etc. and return
+# the elements that are separate.
+#
+
+  isElsevier = isElsevierDoc(doc)
+  if(isElsevier && !isTitleBad(txt)) {
+      return(splitElsevierTitle(txt, p1, asNode = asNode))
+#     tt = names(txt)
+#     if(grepl("Journal", tt[1]))
+#         tt = tt[-1]
+#     return(paste(tt, collapse = " "))
+  }
+  
+  ctr = 1L
+
+  if(!all(w <- isTitleBad(txt, if(length(txt) > 1) 0 else 3))) {
+      # order them by line. They may be upside down.
+      # See 1834853125/394.full.xml
+      txt = orderByLine(txt[!w])
+        # Make certain to get the rest of the text in the tile that may be in a different font.
+        # See why we are doing this in 4214927259/A case of Crimean-Congo haemorrhagic fever in.xml
+        # 
+      tmp = mkLines(txt, p1)
+      if(asNode) return(tmp)
+      
+      title = paste(sapply(tmp, function(x) paste(if(is.list(x)) sapply(x, xmlValue) else xmlValue(x), collapse = " ")), collapse = "\n")
+      return(title)
+#      return(paste(names(txt), collapse = " "))
+  }
+      
+  while( (length(txt) == 1 && nchar(names(txt)) == 1) || all(w <- isTitleBad(txt, minWords = minWords))) {
+
+      # then a single character that is very large
+      # get second largest font and
+
+      mx = max(fonts$size[fonts$size < mx ])
+      w = (fonts$size == mx)
+      id = fonts$id[w]
+# if multiple ones, see if any are bold and restrict to that.
+# Doesn't work for Van Der Poel-2005
+      if(length(id) > 1 & any(isb <- isBold(fonts[w,]))) #fonts$isBold[w]))
+          id = id[isb]
+
+      if(length(id) == 0)
+          break  #XXXX
+         
+      txt = getFontText(p1, id)
+      ctr = ctr + 1L
+  }
+
+  orderByLine(txt)
+}
+
+
+fixTitleNodes =
+    ## We can compute the locations of the resulting nodes (with getBBox2),
+    ## sort them and compute the differences. Or order them by line
+    ## and see how far apart they are, OR see if there are other nodes in between lines.
+    ## 
+    ## We should compute the line spacing for the entire page or document and compare to that.
+    ## For now, we'll use a threshold of 3 which is 3 height of text in a line, so that allows double spacing.
+function(nodes, threshold = 3)
+{
+    ll = nodesByLine(nodes)
+    txt = sapply(ll, function(x) trim(paste(sapply(unlist(x), xmlValue), collapse = " ")))
+    ll = ll [ txt != ""]
+
+    bb = lapply(ll, getBBox2)
+    h = median(getBBox2(nodes)[,"height"])
+    top = sapply(bb, function(x) median(x[, "top"]))
+     ##XXX This is broken!
+    d = diff(c(top[1] - h, top))
+
+    unlist(ll[ d < h*threshold ])
+}   
+
+
+isTitleBad =
+function(txtNodes, minWords = 3, filename = "")
+ UseMethod("isTitleBad")
+
+isTitleBad.list = isTitleBad.XMLNodeSet =
+function(txtNodes, minWords = 3, filename = "")
+{
+     # One document (  0628126814/Chochlakis-2010-Human%20anaplasmosis%20and%20anaplas.xml)
+     # uses rotation as a form of italics. So we don't check for non-zero rotation, but > 16
+  if(any( as.numeric(sapply(txtNodes, xmlGetAttr, "rotation", 0.)) > 16))
+      return(TRUE)
+
+    # Check to see if this is really a watermark, etc. at the extreme of  a page, e.g.
+    # 3364361467/Majumder-2016-Utilizing Nontraditional Data So.xml
+
+  pos = as.numeric(sapply(txtNodes, xmlGetAttr, "top"))
+  names(pos) = sapply(txtNodes, xmlValue)
+  
+  opos = as.numeric(unlist(getNodeSet(xmlParent(txtNodes[[1]]), ".//text/@top")))
+  names(opos) = xpathSApply(xmlParent(txtNodes[[1]]), ".//text", xmlValue)
+  i = match(names(pos), names(opos))
+#  w = pos <= max(opos[ - i ])
+# how many text nodes are below the txtNodes.
+  w = opos[-i] > min(pos)
+  if(sum(w) < 5)
+     return(TRUE)
+
+
+  bb = getBBox2(txtNodes, TRUE)
+
+  if(diff(range(bb$top)) > 2 * median(bb$height)) {
+      ll = nodesByLine(txtNodes, bbox = bb)
+      bad = sapply(names(ll), isTitleBad, minWords, filename)
+      if(!all(bad)) 
+         return(rep(bad, sapply(ll, length)))
+  }
+    
+if(FALSE) {    
+   w = sapply(txtNodes, isTitleBad, minWords, filename)
+   if(!all(w))
+       return(w)
+}
+       
+# Maybe put these back in if the above doesn't discriminate well.   
+   txt = paste(sapply(txtNodes, xmlValue), collapse = " ")
+   isTitleBad(txt, minWords)
+}
+
+isTitleBad.XMLInternalNode =
+function(txtNodes, minWords = 3, filename = "")
+  isTitleBad(xmlValue(txtNodes), minWords)
+
+isTitleBad.character =
+function(txtNodes, minWords = 3, filename = "", lowerCase = TRUE)
+{
+#  txtNodes = tolower(txtNodes)
+  txtNodes = XML:::trim(txtNodes)
+
+  
+  #Test:
+   grepl("^Review$", txtNodes)  ||
+  grepl("^viruses$", txtNodes)  ||        
+  grepl("Acta Veterinaria", txtNodes) ||
+  grepl("BMC Infectious Diseases", txtNodes) ||
+  nchar(txtNodes) < 6 ||   
+  grepl("Letters? to the Editor", txtNodes, ignore.case = lowerCase) || grepl("^BRIEF COMMUNICATIONS$", txtNodes) ||
+  grepl("^[-0-9, ]+$", txtNodes) ||          
+  grepl("^Letters$", txtNodes) || grepl("table of contents", txtNodes) || grepl("^[A-Za-z]+ +\\bJournal$", txtNodes) ||
+  txtNodes %in% c("DISPATCHES", "Research Paper", "KEYWORDS", "ScienceDirect", "Occasional Papers", "HHS Public Access", "Newsdesk", "Case Report", "LETTERS", "No Job Name", "NIH Public Access", "Special Report  Rapport spÃ©cial", "W J C C") ||
+#^^^^ non-ASCII
+      grepl("Rapid Communications|Research Articles|Weekly issue|Vol\\.[0-9]+|Volume [0-9]+|ournal of|Science Journals", txtNodes) ||
+  length(strsplit(txtNodes, " ")[[1]]) < minWords
+}
+
+
+
+#################
+
+splitElsevierTitle =
+    #
+    # For an elsevier document, we want to find the
+    #     heavy black line above the title
+    # or  the large grey box at the top of the page that contains the name of the journal
+    # e.g. Kelly-2008-NIH
+    #  Lau-2007 has no grey box and no line.  So we have to do further checks on the shaded box  to see it is large enough.
+    #
+function(nodes, page, asNode = FALSE)
+{
+    y = as.numeric(sapply(nodes, xmlGetAttr, "top"))
+    lines = getNodeSet(page, ".//line") #XX??  and .//rect
+    lw = as.numeric(sapply(lines, xmlGetAttr, "lineWidth", 0))
+    yl = 0
+
+    if(any(lw > 10)) {
+        i = which.max(lw)
+           # Is the 
+        yl = as.numeric(strsplit(xmlGetAttr(lines[[i]], "bbox"), ",")[[1]])[2] + lw[i]/2
+    } else {
+
+        r = getNodeSet(page, ".//rect[@fill.color != '0,0,0']")
+        if(length(r) > 0) {
+                # check the height of these rectangles to ensure they aren't just thin lines.
+            bb = t(sapply(r, function(x) as.numeric(strsplit(xmlGetAttr(x, "bbox"), ",")[[1]])))
+            i = which(abs(bb[,2] - bb[,4]) > 10)
+            if(length(i)) {
+               left = min(as.numeric(unlist(getNodeSet(page, "./text/@left"))))
+               if(bb[i[1],1] - left > 20)
+                   yl = bb[i,2][1]
+            }
+        }
+        
+#           # get the two images.
+#        img.dims = xpathSApply(page, ".//img", function(x) as.numeric(xmlAttrs[c("y", "width", "height")]))
+        
+    }
+       # if none of the nodes are above the line, don't filter. See 0809541268/Kitajima-2009-First%20detection%20of%20genotype%203%20he.xml"
+    if(any(y > yl))
+        nodes = nodes[y > yl]
+
+    if(asNode)
+       return(nodes)
+    
+    paste(names(nodes), collapse = " ")
+
+}
+
+
+notWord =
+function(x)
+{
+  grep
+}
+
+
+
+orderByLine =
+function(nodes)
+{
+    o = order(as.numeric(sapply(nodes, xmlGetAttr, "top")))
+    nodes[o]
+}
+
+isElsevierDoc =
+function(doc)
+{
+    length(getNodeSet(doc, "//page[1]//text[ contains(lower-case(.), 'elsevier')]")) > 0
+}
+
+isResearchGate =
+function(doc)
+{
+    length(getNodeSet(doc, "//text[contains(., 'www.researchgate.net')]")) > 0
+}
+
+
+isMetaTitleFilename =
+function(ti, docName = NA)
+{
+  # return(grepl(ti, URLdecode(docName), fixed = TRUE))
+  els = strsplit(ti, "/")[[1]]
+  dels = strsplit(gsub("\\.xml$", "", URLdecode(docName)), "/")[[1]]
+  return ( all (dels[seq(length(dels) - 1, length = 2)] == els[ seq(length(els) - 1, length = 2) ] ) )
+
+          
+ return (  gsub("\\.xml", "", basename(URLdecode(ti))) == els[ length(els) ] )  # ...
+         
+      
+  length(gregexpr("/", ti)[[1]]) >= 3 && 
+      gsub("\\.xml", "", basename(URLdecode(ti))) != basename(ti) 
+}
+
+
+###########################
+#
+#XXX
+#
+#  These functions look for text at approximately the same line and includes them.
+#
+# These are a little too liberal. They don't check the content is close to the original txt nodes.
+#  So we can have text on one side of the page at the same "height" be connected to that on the right.
+#  See 0007787963/Ko-2010-Prevalence of tick-borne encephalitis.xml
+#
+mkLines =
+function(txt, page)
+{
+    pos = unique(as.numeric(sapply(txt, xmlGetAttr, "top")))
+    h = max(as.numeric(sapply(txt, xmlGetAttr, "height")))    
+    lapply(pos, mkLine, page, h)
+}
+
+mkLine =
+  # getDocTitle("4214927259/A case of Crimean-Congo haemorrhagic fever in.xml")
+function(pos, page, height)
+{
+# Could do this in XPath, but don't have abs() there.    
+#   getNodeSet(page, sprintf("./text[@top = %f]", pos))
+# So get the Bounding boxes for all text nodes.
+#
+    
+    textNodes = getNodeSet(page, "./text")
+    bb = getBBox2(textNodes)
+              # added test that the height of any matching element is at least 70% of the original title node.
+    w = abs(pos - bb[, "top"]) < .33*height & bb[, "height"]/height > .7
+    textNodes[w]
+}
+
+
+
+
+isOIEDoc =
+function(doc)      
+{
+    doc = as(doc, "PDFToXMLDoc")
+    
+    length(getNodeSet(doc, "//text[contains(., 'http://www.oie.int/wahis_2/')]")) > 0
+}
+
+
+getOIETitle =
+function(doc, asNode = FALSE)
+{
+    doc = as(doc, "PDFToXMLDoc")
+     # Find the image on page 1 and then the text that is not black that is to the right of the image"    
+    p1 = doc[[1]]
+    img = getNodeSet(p1, ".//img")[[1]]                                       #    bbi = getBBox2()
+    atNames = c("x", "y", "width", "height")
+    bbi = structure(as(xmlAttrs(img)[atNames], "numeric"), names = atNames)
+    # not(@color = '#000000') and 
+    xp = sprintf(".//text[@left > %f and @top > %f and @top < %f ]", bbi["x"] + bbi["width"], bbi["y"], bbi["y"] + bbi["height"])
+    ans = getNodeSet(p1, xp)
+    colors = getTextNodeColors(ans, doc = doc)
+
+    ans = ans[colors != "#ababab"]
+
+    if(asNode)
+       ans
+    else
+       paste( sapply(ans, xmlValue), collapse = " ")
+
+}
+
+
+################################################################################
+# headerFooter.R
+
+
+getHeader =
+function(doc)
+{
+    if(is.character(doc))
+        doc = readPDFXML(doc)
+
+    p1 = doc[[1]]
+}
+
+getPageFooter =
+function(p,  bbox = getBBox2(getNodeSet(p, ".//text")), ignorePageNumber = TRUE)
+{
+    mx = max(bbox[, "top"], na.rm = TRUE)
+    w = bbox[, "top"] == mx
+    ans = rownames(bbox)[w][order(bbox[w, "left"])]
+
+       # We have some docs with E57 as a page number (de la Torre-2009)
+    if(length(ans) == 1 && (grepl("^[0-9]+$", ans) || grepl("Downloaded from", ans) || grepl("For +personal +use", ans) || (length(strsplit(ans, " +")[[1]]) == 1)))
+        getPageFooter(, bbox[!w,])
+    else
+        paste(trim(ans), collapse = " ")
+    
+#    foot = bbox[ w , ]
+     # Now combine the elements that are close
+#    foot
+}
+
+getPageHeader =
+    #' @param p an XML page node from the document
+    #' @param bbox the
+    #' @param nodes the list of XML nodes of interest in which to find possible header nodes. This allows us to filter the nodes, e.g., by font type/name/size, position.
+    #' @lineThreshold integer vertical distance within which nodes are considered on the same line.
+    #' interlineThreshold
+function(p, bbox = getBBox2(nodes),
+         nodes = getNodeSet(p, ".//text"),
+         lineThreshold = 4, asNodes = FALSE,
+         interlineThreshold = min(getDocFont(p)$size) * 2)
+{
+    mn = min(bbox[, "top"], na.rm = TRUE)
+    w = bbox[, "top"] - mn <= lineThreshold
+    #XXX Now check it is actually a header.
+    # Find how far the nodes are from the other nodes not within the threshold
+    # If this is sufficiently large (relative to the size of the text), then this is
+    # a header.
+    delta = min(bbox[!w, "top"] - mn)
+    if(delta < interlineThreshold)
+       return(if(asNodes) list() else character())
+        
+    if(asNodes)
+       nodes[w]
+    else
+      rownames(bbox)[w]
+}
+
+
+lineSpacing =
+function(doc)
+{
+   textNodes = getNodeSet(doc, "//text")
+   bb = getBBox2(textNodes)
+   
+}
+
+
+getFooterPos =
+function(page, docFont = getDocFont(page), fontInfo = getFontInfo(page))
+{
+    ll = getNodeSet(page, ".//rect | .//line")
+    if(length(ll)) {
+        bb = getBBox(ll)
+        bottom = max(bb[, "y0"])
+        # look for a line with all the text below it being smaller than the the document font.
+        nodes = getNodeSet(page, sprintf(".//text[ @top > %f]", bottom))
+        if(length(nodes)) {
+            fontId = sapply(nodes, xmlGetAttr, "font")
+            if(all(fontInfo[fontId, "size"] < docFont$size))
+                return(bottom)
+        }
+    }
+    
+    NA
+}
+################################################################################
+# images.R
+
+
+getTables =
+function(doc)
+{
+    if(is.character(doc))
+        doc = readPDFXML(doc)
+
+    getNodeSet(doc, "//img")
+}
+
+
+getCaption =
+function(node)
+{
+
+}
+################################################################################
+# tables.R
+
+# Look at Buckley-2003  Rectangle around the table 1. Are these lines
+# or a rectangle?
+
+
+# A collection of alternative terms in a regular expression which we use
+# to discard matches that are not the actual definition of a table
+# but references to a table.
+TableNodeRegex = c(
+    "table[a-z]",
+    "online .* table",
+    "table of contents",
+    "(using|also|and|with|for|in|from|to|by)( the)? +table",
+    "table ([0-9]+ )?also", 
+    "\\( ?table ([0-9]+)?\\)?",
+    "cdc.gov/",
+    "table ([0-9]+|I|II|III|IV|V|VI|VII|VIII|IX|X) *\\)",
+    "see (online",
+    "table)",
+    "(tables",
+    "supplementa(l|ry) table",
+    "\\(available online", 
+    "table [0-9]+\\.?\\))",
+    "table ([0-9]+ +)?shows +th", 
+    "[,;] table")
+
+getTableNodes =
+function(doc, drop = TRUE, useSiblings = c(FALSE, TRUE), dropHref = FALSE,
+           rejectRegex = TableNodeRegex)
+{
+    if(is.character(doc))
+        doc = readPDFXML(doc)
+    
+      # Some docs have T able as two separate text elements
+    tt = getNodeSet(doc,
+                     "//text[. = 'Table' or . = 'TABLE' or starts-with(., 'TABLE') or starts-with(., 'Table') or (. = 'T' and lower-case(following-sibling::text[1]) ='able') or contains(., ' Table')]")
+
+    if(!drop)
+       return(tt)
+
+    txt = sapply(tt, getTextAround, useSiblings = rep(useSiblings, length = 2))
+#    rx = "table[a-z]|online .* table|table of contents|(also|and|for|in|from)( the)? table|table ([0-9]+ )?also|\\( ?table ([0-9]+)?\\)?|table [0-9]+ *\\)|see (online|table)|(tables|supplementa(l|ry) table|\\(available online|in +table|table [0-9]+\\.?\\))|table ([0-9]+ +)?shows +th|[,;] table"
+
+    rx = paste(rejectRegex, collapse = "|")
+    w = grepl(rx, txt, ignore.case = TRUE) 
+    if(dropHref) {
+        hasHref = sapply(tt, function(x) "a" %in% names(x))
+        w = w | hasHref
+    }
+#   browser()    
+    tt[ !w ]
+}
+
+getTextAround =
+function(x, useSiblings = c(TRUE, TRUE))
+{
+    v = c(if(useSiblings[1]) xmlValue(getSibling(x, FALSE)) else character(),
+            xmlValue(x),
+          if(useSiblings[2]) xmlValue(getSibling(x)))
+    paste(v, collapse = " ")
+}
+
+getTables =
+function(doc, tableNodes = getTableNodes(doc), ...)
+{
+    if(is.character(doc))
+        doc = readPDFXML(doc)
+    
+    # Discard tables Table S1 (etc.) and if it is in the "section" named 'Supporting Online Material'
+    # This doesn't show up as an actual section header, so we just look for it.  But it has to be on the same
+    # page as the Table S text node so that we don't pick one up from another article.
+    # We could be stricter that it has to be within a few lines of the Supporting ... and in the same column.
+    # See Barrette-2009-Discovery...
+    label = sapply(tableNodes, xmlValue)
+    w = grepl("Table S[0-9]+", label)
+    if(any(w))
+       w[w] = z = sapply(tableNodes[w], function(x) length(getNodeSet(x, sprintf("./preceding::text[contains(., 'Supporting Online Material') and ../@number = %d]", pageOf(x)))) > 0)
+
+    # Table( ?[0-9])
+    w[!w] = grepl("\\(.*(online|Appendix)|(see|in) Table|Table [0-9] and\\)", label[!w])
+    tableNodes = tableNodes[!w]
+    
+
+      # Now find those that are in text and not part of a separate block
+    tbls = lapply(tableNodes, findTable, ...)
+    names(tbls) = sapply(tableNodes, xmlValue)
+    tbls
+}
+
+getRotation =
+function(node)
+{
+    if(xmlName(node) != "page")
+        node = pageOf(node, TRUE)
+
+    xmlGetAttr(node, "rotation", 0, as.numeric)
+}
+
+findTable =
+function(node, page = xmlParent(node),
+         colNodes = getTextByCols(page, asNodes = TRUE, perPage = perPage, breaks = colPos), # docFont = docFont), # 
+         docFont = getDocFont(node),
+         perPage = TRUE,
+         spansWithin = 20,
+         rotated = !(getRotation(page) %in% c(0, 180)),
+         colPos = getColPositions(page, perPage = perPage, docFont = docFont),         
+         ...)
+{
+#if(pageOf(page) == 4) browser()
+#browser()
+
+    if(rotated)
+        return(getRotatedTable(node, pageRotated = TRUE))
+
+     # check if page is regular but most of the text is rotated.
+    rot = table(unlist(getNodeSet(page, ".//text/@rotation")))
+    if(!(as.numeric(names(rot)[which.max(rot)]) %in% c(0, 180)))
+       return(getRotatedTable(node, pageRotated = FALSE, textRotated = TRUE))
+
+      #XXXX if the table dominates the col positions, recompute with perPage = FALSE, docFont = TRUE to discard the table.
+    # See Mehla-2009
+# getTextByCols() uses docFont = FALSE , perPage = TRUE and gets 76 and 220 for the breaks.    
+    colPos2 = getColPositions(page, perPage, docFont = TRUE)
+
+    
+    if(!perPage && length(colPos2) < 2)
+        colNodes = getTextByCols(page, asNodes = TRUE, perPage = TRUE)
+    
+    colNum = inColumn(node, colNodes)
+    centered = isCentered(node, colNodes)
+
+    if(!centered) {
+          # Check if the Table node is centered in the page since not the column
+        pwidth = xmlGetAttr(page, "width",, as.integer)
+        nwidth = xmlGetAttr(node, "width",, as.integer)
+        nx = xmlGetAttr(node, "left",, as.integer)                
+        if(abs( (nx + nwidth - pwidth)/2) < .1*pwidth) 
+            centered = 2
+    }
+
+
+      # also look at rectangles.  J Infect Dis. 2015 has no lines, just rect.
+    lines = getNodeSet(page, ".//line | .//rect")
+
+
+    if(length(lines) == 0 && !is.null(node[["a"]]))
+        return(list())
+#browser()    
+    lw = as.numeric(sapply(lines, xmlGetAttr, "lineWidth", 1))
+    lines = lines[ lw >= 0 & lw < 30]
+    bb = getBBox(lines, TRUE)
+      # discard rectangles that are probably too tall to be lines, i.e. span more than half a letter.
+      #XXXX 
+    bb = bb[ abs(bb$y1 - bb$y0) < docFont$size * .5, ]
+    
+    nodeTop = as.numeric(xmlGetAttr(node, "top"))
+       # recall we are going from top to bottom so these are below the node.
+    bb = bb[pmin(bb$y0, bb$y1) >= nodeTop, ]
+
+    if(nrow(bb) == 0)
+       return(list())
+
+    #XXX one of these is redundant, or they need to be merged.
+
+    bb = combineBBoxLines(bb)    
+    bb = mergeLines(bb)
+    
+    
+#    doesSpan = rep(FALSE, nrow(bb))    
+    if(centered == 1 || (colNum == length(colNodes))) {
+       # Could span all columns.
+      colLines = nodesByLine(colNodes[[colNum]])
+      le = getLineEnds(colLines)
+      ex = apply(le, 2, median)
+
+      # if column 1, then x1 of line has to be <= ex[2]
+      # if column 2, then x0 >= ex[1]
+
+      if(colNum == 1) 
+         bb = bb[bb$x1 <= ex[2]*1.15, ] # 1.075
+      else
+         bb = bb[bb$x0 >= ex[1]*.925, ]
+
+      doesSpan = spansWidth(bb, ex, spansWithin)
+      spansCols = colNum
+
+      if(!any(doesSpan)) {
+          # See if there are any text nodes to the right
+
+          # get the widest lines
+          m = max(bb$x1 - bb$x0)
+          i = (bb$x1 - bb$x0 == m)
+          wd = bb[i, ]
+          right = max(wd$x1)
+          ys = max(bb$y1)
+
+          # tor = to right
+          tor = sapply(unlist(colNodes),
+                       function(x) {
+                           b = getBBox2(list(x), TRUE, rotation = TRUE)
+                           b$rotation == 0 & b$left > right & b$top > nodeTop & b$top < ys
+                       })
+          if(!any(tor)) {
+              # nothing to the right
+              doesSpan[i] = TRUE
+          }
+      }
+    } else if(centered == 2 || centered == 0) {
+
+        # For the columns, get the start and the end "margins"
+        # by computing the start and end of each line and then computing
+        # the 
+ #        xpathSApply(page, ".//text")        
+        # Get rid of any lines that are only within one column.
+         colInfo = t(sapply(colNodes, function(x) {
+            ll = nodesByLine(x)
+            le = getLineEnds(ll)
+            ex = mapply(function(i, q) quantile(le[,i], q),
+                         1:2, c(.2, .75))
+         }))
+         ex = range(colInfo)
+
+           # Which lines span the page.
+           # same line as in earlier if() clause so should centralize. But may need it here now.
+         doesSpan = spansWidth(bb, ex, spansWithin)
+
+         # This may be a little cavalier and we may need to check.
+         spansCols = seq(along = colNodes)
+         
+         if(!any(doesSpan)) {
+
+             # If centered = 0 and no line spans more than one column, then
+             # the table is in that column
+
+             if(centered == 0) {
+                 w = abs(bb[, "x0"] - colInfo[colNum,1]) < 10 & abs(bb[, "x1"] - colInfo[colNum,2]) < 10
+                 doesSpan = w
+                 spansCols = colNum
+             }
+             
+             # Are there are text nodes to the right???  CHECK.
+             # Example where the table doesn't span the entire page, but there is no text to the right of it.
+             #  Table is on same page as image and there is nothing else so no text (other than figure caption).
+
+#XX Fix this.  Far too specific to 2 columns.             
+             if(length(colNodes) > 2) {
+                 # do any of the lines span 2 or more contiguous columns
+                doesSpan = spansWidth(bb, c(colInfo[1,1], colInfo[2, 2]), spansWithin)
+                if(!any(doesSpan)) {
+                    doesSpan = spansWidth(bb, c(colInfo[2,1], colInfo[3, 2]), spansWithin)
+                    if(any(doesSpan))
+                        spansCols = c(2, 3)
+                    # If we don't define spansCols above, then we need to do it here as an else or else won't necessarily be defined.
+                } else
+                    spansCols = c(1,2)
+             }
+         }
+
+         colLines = nodesByLine(unlist(colNodes[spansCols], recursive = FALSE))
+         # colLines = nodesByLine(getNodeSet(page, ".//text"))
+     }
+
+
+    # Handle more than 2 columns
+    # Then also find the lines that come after another table in the same column.
+    # See Leroy-2004 - tables 2 and 3 in same column (1) (and spans 2 columns)
+
+    
+ 
+    # Only the lines that are close.
+    # Aguilar-2007 has two tables in column 1 page 3 and we are merging
+    # them both with all the text in between.
+    spans =  bb[doesSpan,]
+    if(nrow(spans) > 3) {
+        # need the ones "close" to node.
+        # under node but closest to it.
+        # For, e.g. J Infect. Dist-2015, we have <rect> nodes and two of these are very close together. 866 and 868
+        # So looking at the first 3 is too simplistic.
+        # We need the next one which is the bottom of the table.
+        # And there is another line across the page but that is the footer that is on each page - and only 5 units above the text of the footer.
+
+        # so now group the "lines/rects" based on their y0 value into groups based on the document font size.
+        # Take the min from each group.
+        ii = seq(nodeTop, max(spans$y0, spans$y1) + docFont$size, by = docFont$size)
+        tmp = unlist(tapply(spans$y0, cut(spans$y0, ii), min))
+        tmp = tmp[!is.na(tmp)]
+
+        spans = spans[spans$y0 %in% tmp, ]
+        
+        spans = spans[ order(spans[,"y0"])[1:3], ]
+    }
+
+    # we should now have the start, header and footer lines.    
+
+    # Perhaps use getNodesBetween(). But no need.
+    # But for 3 columns, maybe we need to be using that to avoid repeating all the code.
+    b = max(spans[,2]) #XXX if spans is empty, what value should we return. The height of the page? or -Inf?
+    ok = sapply(colLines, function(x) {
+                            tp = as.numeric(xmlGetAttr(x[[1]], "top"))
+                            tp <= b & tp >= nodeTop
+                     })
+
+    colLines[ok]
+    # Find any text associated with the table as foonotes
+}
+
+spansWidth =
+    #
+    # Make if within < 1, treat it as a percentage and that the span
+    # has to be be at least within % of the width of locs.
+    #
+    #  spansWidth(matrix(c(2, 0, 8, 0,
+    #                      3, 0, 8, 0,
+    #                      3, 0, 7, 0), , 4, byrow = TRUE), c(0, 10), .8)
+    #
+    # To use  a within < 1 as an actual distance and not a multiple use, e.g., I(.6)
+    #
+function(bbox, locs, within = 4) # within was 2 but somewhat arbitrary. Needed 4 for Padula-2002
+{
+    if(within < 1 && !is(within, "AsIs"))
+       bbox[,3] - bbox[,1] >=  diff(locs)*within
+    else
+      abs(locs[1] - bbox[,1]) < within & abs(locs[2] - bbox[,3]) < within
+}
+
+
+
+
+
+nodesToTable =
+function(nodes, colPos = getColPositions.PDFToXMLPage( txtNodes = unlist(nodes)), bind = TRUE)
+{
+    if(length(nodes) == 0)
+        return(NULL)
+    
+    if(length(colPos) == 0) {
+        ll = nodesByLine(unlist(nodes))
+    }
+    
+    rows = lapply(nodes, function(x) getTextByCols( txtNodes = x, breaks = colPos))
+    if(bind) 
+        as.data.frame(unname( do.call(rbind, rows) ), stringsAsFactors = FALSE)
+    else
+        rows
+}
+
+
+getGap =
+    # nodes organized by lines.
+function(nodes, bbox = getBBox2(nodes))
+{
+    r = bbox[,1] + bbox[, 3]
+    r[-1] - bbox[-length(r), 1]
+}
+
+
+getRotatedTable =
+function(node, page = pageOf(node, TRUE), nodes = getNodeSet(page, ".//text"), bbox = getBBox2(nodes, asDataFrame = TRUE),
+         pageRotated =  FALSE, textRotated = NA, asNodes = TRUE)
+{
+    if(!pageRotated)
+        colPos = getColPositions(page, txtNodes = nodes, structure(bbox, names = c("top", "left", "height", "width", "text")), threshold = .05)
+    else
+        colPos = getColPositions(page, bbox = bbox)
+#XXX ROTATE  - WONG    
+    cols = getTextByCols(page, txtNodes = nodes, bbox = bbox, breaks = colPos, asNodes = TRUE)
+
+    if(pageRotated) {
+        # Take out text that is rotated the same amount as the page's rotation
+        # e.g. Wekesa, although that is odd. That rotates the page 90, then rotates the text 180 and rotates
+        # the header for the page 90.  So this is only done here if the page is rotated.
+        prot = as.numeric(xmlGetAttr(page, "rotation"))
+        cols = lapply(cols, function(x) x[ as.numeric(sapply(x, xmlGetAttr, "rotation")) != prot ])
+        cols = cols[ sapply(cols, length) > 0 ]
+    }
+    
+    v = lapply(cols, nodesByLine, asNodes = asNodes, rotate = TRUE)
+    class(v) = "RotatedTableColumns"
+    v
+}
+
+
+
+getRotatedDownloadNodes =
+function(doc)
+{
+    nodes = getNodeSet(doc, "//text[@rotation = 90 and starts-with(., 'Downloaded from')]")
+    if(length(nodes)) {
+        unlist(lapply(nodes, function(x) {
+                         l = xmlGetAttr(x, "left")
+                         getNodeSet(xmlParent(x), sprintf(".//text[@rotation = 90 and @left >= %s]", l))
+                      }))
+    } else
+        NULL
+}
+
+
+mergeLines =
+function(df, y = "y0")
+{
+    h = split(df, df[[y]])
+    ll = lapply(h, collapseLine)
+    do.call(rbind, ll)
+}
+
+collapseLine =
+function(x, gap = 5)
+{
+    d = x$x0[-1] - x$x1[-nrow(x)]
+    do.call(rbind, by(x, cumsum(c(0, !(d < gap))), function(x) data.frame(x0 = min(x$x0), y0 = min(x$y0), x1 = max(x$x1), y1 = max(x$y1))))
+}
+
+
+showNodes =
+function(nodes, showCircle = TRUE, text = sapply(nodes, xmlValue), ...)
+{
+    if(length(nodes) == 0)
+        return(NULL)
+    
+    pages = sapply(nodes, pageOf, TRUE)
+    pg = unique(pages)
+    if(length(pg) > 1) {
+        opar = par(no.readonly = TRUE)
+        on.exit(par(opar))
+        par(mfrow = c(1, length(pg)))
+    }
+    po = sapply(nodes, pageOf)
+    invisible(mapply(function(tt, page, text, ...) {
+               plot(page)
+               showNode(tt, page, text = text, showCircle = showCircle, ...)
+           }, split(nodes, po), pg, split(text, po)))
+}
+
+showNode =
+function(node, page = pageOf(node, TRUE), showCircle = TRUE, text = sapply(node, xmlValue), ...)    
+{
+    #XX Deal with rotation.
+    #XX Deal with line and rect nodes
+    
+    isText = (sapply(node, xmlName) == "text")
+    if(length(unique(isText)) > 1) {
+        showNode(node[isText], page, showCircle, text[isText])
+        showNode(node[!isText], page, FALSE, text[!isText])
+        invisible(return(NULL))
+    }
+    
+    h = dim(page)["height"]
+                 
+    bb = if(any(isText)) getBBox2(node) else getBBox(node)
+
+    if(any(isText)) {
+        x = bb[,1] + bb[,3]/2
+        y = h - (bb[,2] + bb[,4]/2)
+    } else {
+        x = (bb[,1] + bb[,3])/2
+        y = h - (bb[,2] + bb[,4])/2        
+    }
+    
+    if(length(text))
+       text(x, y, text, col = "red", cex = 2)
+    
+    if(showCircle) {
+       symbols(x, y, circles = rep(mean(bb[,4])*2, length(x)), fg = "red", lwd = 2, add = TRUE)
+    }
+}
+
+
+showTb =
+function(file, dropHref = FALSE, ...)
+{
+    tt = getTableNodes(file, dropHref = dropHref)
+    showNodes(tt, ...)
+    tt
+}
