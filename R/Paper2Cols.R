@@ -1,16 +1,6 @@
 #3 column example /Users/duncan/DSIProjects/Zoonotics/NewData_Feb2017/Zoo_02_02_2017 Copy.Data/PDF/2586849323
 
 
-if(FALSE) {
-doc = xmlParsePDFTOHTML("2ColPaper.xml")
-
-# Deal with the second page.
-p = doc[[2]]
-renderPage(p, cex = .5)
-
-cols = getTextByCols(p)
-nchar(cols)
-}
 
 
 ##
