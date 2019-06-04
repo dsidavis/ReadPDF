@@ -1,3 +1,4 @@
+library(ReadPDF)
 f = system.file("samples","2Column.xml", package = "ReadPDF")
 doc = xmlParsePDFTOHTML(f)
 

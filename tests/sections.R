@@ -1,5 +1,5 @@
 library(ReadPDF)
-f = "Lahm-2007-Morbidity and mortality of wild anim.xml"
+f = system.file("Lahm-2007-Morbidity and mortality of wild anim.xml", "samples", package = "ReadPDF")
 txt = getSectionText(f)
 
 #lm = readPDFXML(f)
