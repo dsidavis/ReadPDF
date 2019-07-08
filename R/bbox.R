@@ -63,7 +63,7 @@ function(nodes, asDataFrame = FALSE, attrs = c("left", "top", if(rotation) "rota
 
 
 
-getBBox =
+getShapesBBox = getBBox =
     #
     # This bbox function expects an attribute named bbox
     # This is for rect and line nodes, not <text> nodes. Use getBBox2() for that.

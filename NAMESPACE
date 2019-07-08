@@ -69,7 +69,7 @@ S3method(isTitleBad, character)
 
 
 
-export(getTextBBox)
+export(getTextBBox, getShapesBBox)
 export(getBBox, getBBox2)
 S3method(getBBox2, XMLNodeSet)
 S3method(getBBox2, list)
