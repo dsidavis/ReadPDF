@@ -1,23 +1,32 @@
 getTextBBox =
-function(nodes, asDataFrame = TRUE, attrs = c("left", "top", if(rotation) "rotation"), pages = FALSE, rotation = FALSE, color = FALSE)
+function(nodes, asDataFrame = TRUE, attrs = c("left", "top", if(rotation) "rotation"), pages = FALSE, rotation = FALSE, color = FALSE, ...)
     getBBox2(nodes, asDataFrame, attrs, pages, rotation, color)
 
 getBBox2 =
     # For text, not rect or line nodes.
-function(nodes, asDataFrame = FALSE, attrs = c("left", "top", if(rotation) "rotation"), pages = FALSE, rotation = FALSE, color = FALSE)
+function(nodes, asDataFrame = FALSE, attrs = c("left", "top", if(rotation) "rotation"), pages = FALSE, rotation = FALSE, color = FALSE, ...)
     UseMethod("getBBox2")
 
-getBBox2.PDFToXMLPage =
+getBBox2.PDFToXMLPage = getTextBBox.PDFToXMLPage =
     # For text, not rect or line nodes.
-function(nodes, asDataFrame = FALSE, attrs = c("left", "top", if(rotation) "rotation"), pages = FALSE, rotation = FALSE, color = FALSE)
+function(nodes, asDataFrame = FALSE, attrs = c("left", "top", if(rotation) "rotation"), pages = FALSE, rotation = FALSE, color = FALSE, ...)
     getBBox2(getNodeSet(nodes, ".//text"), asDataFrame, attrs = attrs, color = color)
 
+getBBox2.PDFToXMLDoc = getTextBBox.PDFToXMLDoc =
+    # For text, not rect or line nodes.
+function(nodes, asDataFrame = FALSE, attrs = c("left", "top", if(rotation) "rotation"), pages = FALSE, rotation = FALSE, color = FALSE, ...)
+{
+   bboxForDoc(getTextBBox, nodes, asDataFrame, attrs, pages, rotation, color)
+}
 
-getBBox2.XMLInternalNode =
+
+
+getBBox2.XMLInternalNode = getTextBBox.XMLInternalNode =
 function(nodes, asDataFrame = FALSE, attrs = c("left", "top", if(rotation) "rotation"), pages = FALSE, rotation = FALSE, color = FALSE)
     getBBox2(list(nodes), asDataFrame, attrs, pages, rotation, color)
 
-getBBox2.XMLNodeSet = getBBox2.list = 
+getBBox2.XMLNodeSet = getBBox2.list =
+  getTextBBox.XMLNodeSet = getTextBBox.list = 
     # For text, not rect or line nodes.
     #XXX Add support for color.
 function(nodes, asDataFrame = FALSE, attrs = c("left", "top", if(rotation) "rotation"), pages = FALSE, rotation = FALSE, color = FALSE)
@@ -58,6 +67,9 @@ function(nodes, asDataFrame = FALSE, attrs = c("left", "top", if(rotation) "rota
        else
            m = cbind(m, color = cols)
    }
+
+   class(m) = c("PDFTextBoundingBox", "PDFBoundingBox", class(m))
+    
    m
 }
 
@@ -70,11 +82,12 @@ getShapesBBox = getBBox =
 function(nodes, asDataFrame = FALSE, color = FALSE, diffs = FALSE, dropCropMarks = TRUE, ...)
     UseMethod("getBBox")
 
-getBBox.XMLInternalNode =
+getBBox.XMLInternalNode = getShapesBBox.XMLInternalNode =
 function(nodes, asDataFrame = FALSE, color = FALSE, diffs = FALSE, dropCropMarks = TRUE, ...)    
     getBBox(list(nodes), asDataFrame, color, diffs, dropCropMarks)
 
 getBBox.XMLNodeSet = getBBox.list =
+  getShapesBBox.XMLNodeSet = getShapesBBox.list =
     #
     # This bbox function expects an attribute named bbox
     #
@@ -120,6 +133,8 @@ function(nodes, asDataFrame = FALSE, color = FALSE, diffs = FALSE, dropCropMarks
         names(ans)[3:4] = c("width", "height")        
     }
 
+    class(ans) = c("PDFShapesBoundingBox", "PDFBoundingBox", class(ans))
+
     ans
 }
 
@@ -133,6 +148,7 @@ function(nodes, ans)
         } else 
             ans = cbind(ans, fill = cols[[1]], stroke = cols[[2]])
 
+#XXX Add a class to identify has colors        
         ans
 }
 
@@ -142,13 +158,36 @@ function(nodes, fontIds = sapply(nodes, xmlGetAttr, "font"), fontInfo = getFontI
     fontInfo[fontIds, "color"]
 }
 
-getBBox.PDFToXMLPage =
+getShapesBBox.PDFToXMLPage = getBBox.PDFToXMLPage =
     #
     # This bbox function expects an attribute named bbox
     #
 function(nodes, asDataFrame = FALSE, color = FALSE, diffs = FALSE, dropCropMarks = TRUE, ...)
 {
   getBBox(getNodeSet(nodes, ".//line| .//rect"), asDataFrame, color)
+}
+
+
+getShapesBBox.PDFToXMLDoc = getBBox.PDFToXMLDoc =
+    #
+    # This bbox function expects an attribute named bbox
+    #
+function(nodes, asDataFrame = FALSE, color = FALSE, diffs = FALSE, dropCropMarks = TRUE, ...)
+{
+    bboxForDoc(getShapesBBox, nodes, asDataFrame, color, diffs, dropCropMarks, ...)
+}
+
+bboxForDoc =
+function(pageFun, nodes, asDataFrame = FALSE, ...)
+{    
+    ans = lapply(nodes, pageFun, asDataFrame, ...)
+    if(asDataFrame) {
+        tmp = do.call(rbind, ans)
+        tmp$page = rep(seq(along = ans), sapply(ans, nrow))
+        class(tmp) = c("MultiPageBoundingBox", class(ans[[1]]))
+        tmp
+    } else
+       ans
 }
 
 
