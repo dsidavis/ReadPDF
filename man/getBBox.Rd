@@ -21,7 +21,7 @@ getBBox(nodes, asDataFrame = FALSE, color = FALSE, diffs = FALSE, dropCropMarks 
   A matrix or a data.frame depending on \code{asDataFrame}.
   The difference between the matrix and the data.frame is that
   the matrix does not contain the text in a column, but as row names;
-  the data.frame contains a column named \texttt{text} giving the text.
+  the data.frame contains a column named \code{text} giving the text.
   (Adding a column of text to the matrix would cause all columns to be
   character strings.)
 
