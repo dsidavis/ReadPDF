@@ -36,6 +36,6 @@ function(file, asText = FALSE, ...)
        return( convertPDF2XML(file, ...))
     
     doc = xmlParse(file, ...)
-    class(doc) = c("PDFToXMLDoc", "ConvertedPDFDoc", class(doc))
+    class(doc) = c("PDFToXMLDoc", "ConvertedPDFDoc", "Document", class(doc))
     doc
 }
