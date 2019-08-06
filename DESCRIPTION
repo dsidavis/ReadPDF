@@ -5,7 +5,7 @@ Description: This is a package to read PDF documents.
 Author: Duncan Temple Lang, Matt Espe.
 Maintainer: Duncan Temple Lang <duncan@r-project.org>
 License: BSD_3_clause + file LICENSE
-Imports: XML, methods
+Imports: Dociface, XML, methods
 Extra: (>= 3.99.0)
 System: Modified version of pdftohtml available at 
    https://github.com:dsidavis/pdftohtml

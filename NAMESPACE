@@ -8,6 +8,8 @@ importFrom("graphics", "par", "rect", "symbols")
 importFrom("stats", "median", "quantile")
 importFrom("utils", "URLdecode", "adist")
 
+import(Dociface)
+
 export(readPDFXML)
 export(findAbstract)
 export(getSectionText, getDocText, findSectionHeaders)
@@ -49,9 +51,6 @@ S3method(plot, PDFToXMLDoc)
 export(getNumCols)
 S3method(getNumCols,character)
 S3method(getNumCols,PDFToXMLPage)
-
-
-export(getNumPages)
 
 
 S3method(getColPositions,character)
@@ -150,3 +149,10 @@ export(getLinks)
 export(margins)
 
 export(isBold, isItalic)
+
+
+
+exportMethods(getPages, getNumPages)
+#exportMethods(dim, length)
+S3method(dim, "PDFToXMLPage")
+S3method(length, "ConvertedPDFDoc")
