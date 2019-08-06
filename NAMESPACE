@@ -146,7 +146,7 @@ export(getLines)
 export(getLinks)
 
 
-export(margins)
+#XXX export(margins)
 
 export(isBold, isItalic)
 
