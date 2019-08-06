@@ -1,3 +1,10 @@
+setAs("PDFToXMLPage", "TextBoundingBox",
+      function(from) {
+          getTextBBox(from, asDataFrame = TRUE)
+      })
+
+          
+
 `[[.ConvertedPDFDoc` =  #`[[.PDFMinerDoc` =
 function(x, i, j, ...)
 {
@@ -48,7 +55,8 @@ function(doc, ...)
   p = getNodeSet(doc, "//page")
     # Change the class of the page nodes so that we know they are PDF page nodes.
   lapply(p, function(x, newClass) {
-                   class(x) = c(newClass, class(x))
+      #!!! orig class(x) = c(newClass, class(x))
+                   class(x) = c("PDFToXMLPage", "ConvertedPDFPage", "DocumentPage", class(x))      
                    x
                 }, gsub("Doc$", "Page", grep("PDF", class(doc), value = TRUE)))
 })
