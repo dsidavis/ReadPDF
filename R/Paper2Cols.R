@@ -156,7 +156,7 @@ findShortLines =
     #
     # This finds lines that start at the left but are shorter than
     # other lines in the columns. This is one criterion that may identify
-    # such a lines a section or sub-section header.
+    # such a line a section or sub-section header.
     # It is also the case for the final line in a paragraph.
     #
 function(nodes, lines = nodesByLine(nodes),
