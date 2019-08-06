@@ -23,16 +23,17 @@ function(X, FUN, ...)
 
 setMethod("sapply", "ConvertedPDFDoc", sapply.ConvertedPDFDoc)
 
-getNumPages =
-function(doc)
-{
-    length(getNodeSet(doc, "//page"))
-}
 
-setGeneric("length")
+
+setMethod("getNumPages", "ConvertedPDFDoc",  # getNumPages =
+  function(doc, ...) {
+    length(getNodeSet(doc, "//page"))
+  })
+
+
+#setGeneric("length")
 setMethod("length", "ConvertedPDFDoc",
-          function(x)
-           getNumPages(x))
+    length.ConvertedPDFDoc <-  function(x)  getNumPages(x))
 
 
 dim.PDFToXMLPage =
@@ -40,8 +41,9 @@ function(x)
 {
    structure( as.numeric(xmlAttrs(x)[c("width", "height")]), names = c("width", "height"))
 }
-getPages = 
-function(doc)
+
+setMethod("getPages",  "ConvertedPDFDoc",
+function(doc, ...)
 {
   p = getNodeSet(doc, "//page")
     # Change the class of the page nodes so that we know they are PDF page nodes.
@@ -49,7 +51,7 @@ function(doc)
                    class(x) = c(newClass, class(x))
                    x
                 }, gsub("Doc$", "Page", grep("PDF", class(doc), value = TRUE)))
-}
+})
 
 
 

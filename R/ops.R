@@ -1,7 +1,17 @@
-setGeneric("dim")
-setMethod("dim", "PDFToXMLPage",
-          function(x)
-            c(getPageHeight(x), getPageWidth(x)))
+#setGeneric("dim")
+
+#setMethod("dim", "PDFToXMLPage",
+#          function(x)
+#            as.integer(xmlAttrs(x)[c("width", "height")]))
+
+
+tmp = function(x)
+            c(getPageHeight(x), getPageWidth(x))
+
+dim.PDFToXMLPage = tmp
+setMethod("dim", "PDFToXMLPage", tmp)
+
+
 
 getPageHeight =
 function(page)
