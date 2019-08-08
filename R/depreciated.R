@@ -490,7 +490,7 @@ function(page, nodes = getNodeSet(page, ".//rect"), mar = margins(page),# page i
         w2 = wd[1,] < (mar[1] + marThreshold) &  wd[2,] > ( mar[2] -  marThreshold)
     } else {
         ht = sapply(g, function(x) diff(range(x$y0, x$y1)))
-        w2 = ht > dim(page)[2]*.1
+        w2 = ht > dim(page)["height"]*.1
     }
 
     g = g[w2]

@@ -42,11 +42,13 @@ setMethod("getNumPages", "ConvertedPDFDoc",  # getNumPages =
 setMethod("length", "ConvertedPDFDoc",
     length.ConvertedPDFDoc <-  function(x)  getNumPages(x))
 
-
+if(FALSE) {
+    # See ops.R
 dim.PDFToXMLPage =
 function(x)
 {
    structure( as.numeric(xmlAttrs(x)[c("width", "height")]), names = c("width", "height"))
+}
 }
 
 setMethod("getPages",  "ConvertedPDFDoc",

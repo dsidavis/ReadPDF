@@ -5,14 +5,21 @@
 #            as.integer(xmlAttrs(x)[c("width", "height")]))
 
 
+# 
+# # 
+# Was
+#            c(height = getPageHeight(x), width = getPageWidth(x))
 tmp = function(x)
-            c(getPageHeight(x), getPageWidth(x))
+          structure( as.numeric(xmlAttrs(x)[c("height", "width")]), names = c("height", "width"))
+
 
 dim.PDFToXMLPage = tmp
 setMethod("dim", "PDFToXMLPage", tmp)
 
 
 
+if(FALSE) {
+    #@@@ Moved to Dociface
 getPageHeight =
 function(page)
 {
@@ -23,6 +30,7 @@ getPageWidth =
 function(page)
 {
    as.integer( xmlGetAttr(page, "width") )
+}
 }
 
 
