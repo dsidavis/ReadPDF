@@ -46,9 +46,9 @@ isCentered =
     #
     # Determine if the node is centered within a column
     # This is for use in determining section titles
-    # If we find a title that is centered and the find other text
+    # If we find a title that is centered and then find other text
     # with the same font but that is not centered, then that
-    # additional text not a section title.
+    # additional text is not a section title.
 function(node, cols = getTextByCols(xmlParent(node), asNodes = TRUE),
          threshold = .2, colNum = inColumn(node, cols))
 {
