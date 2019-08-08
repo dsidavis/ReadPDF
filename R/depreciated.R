@@ -8,6 +8,7 @@
 #
 #
 
+if(FALSE) {
 margins =
     # XXX Deal with rotation when the text is actually rotated.
     # Specifying @rotation = 0 for case when there is a rotate line of text identifying how
@@ -41,10 +42,14 @@ function(page, bbox = getBBox2(), ...)
 }
 
 margins.list = margins.XMLNodeSet =
+    
 function(page, bbox = getBBox2(unlist(page)), ...)
 {    
    c(left = min(bbox[, 1]), right = max(bbox[,1] + bbox[,3]), top = min(bbox[,2]), bottom = max(bbox[,4]))
 }
+
+}
+
 
 findAbstract =
 function(doc, asNodes = TRUE, page = doc[[1 + hasCoverPage(doc) ]], byLine = TRUE)
@@ -443,8 +448,8 @@ function(node, boxes, pos = getBBox2(list(node)))
 
 ################################################################################
 # AClasses.R
-setOldClass(c("PDFToXMLDoc", "ConvertedPDFDoc", "XMLInternalDocument", "XMLAbstractDocument"))
-setOldClass(c("PDFToXMLPage", "ConvertedPDFPage", "XMLInternalElement", "XMLInternalNode", "XMLAbstractNode"))
+#setOldClass(c("PDFToXMLDoc", "ConvertedPDFDoc", "XMLInternalDocument", "XMLAbstractDocument"))
+#setOldClass(c("PDFToXMLPage", "ConvertedPDFPage", "XMLInternalElement", "XMLInternalNode", "XMLAbstractNode"))
 
 
 setAs("character", "PDFToXMLDoc", function(from) readPDFXML(from))
@@ -455,7 +460,7 @@ setAs("XMLInternalNode", "PDFToXMLPage",
           if(xmlName(from) != 'page') 
               stop("XML node is not a <page>")
 
-          class(from) = c("PDFToXMLPage", "ConvertedPDFPage", class(from))
+          class(from) = c("PDFToXMLPage", "ConvertedPDFPage", "DocumentPage", class(from))
           from
       })
 ################################################################################
@@ -1317,7 +1322,7 @@ function(doc, sectionName = c('introduction', 'background',
 
 isUpperCase =
 function(x, hasChars = TRUE)
-    x == toupper(x) & grepl("[A-Z]", x)
+    (x == toupper(x)) & grepl("[A-Z]", x)
 
 isLowerCase =
 function(x)
