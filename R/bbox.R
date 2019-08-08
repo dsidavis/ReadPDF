@@ -75,12 +75,18 @@ function(nodes, asDataFrame = FALSE, attrs = c("left", "top", if(rotation) "rota
 
 
 
-getShapesBBox = getBBox =
+getShapesBBox = 
     #
     # This bbox function expects an attribute named bbox
     # This is for rect and line nodes, not <text> nodes. Use getBBox2() for that.
+    # Here asDataFrame is TRUE. For getBBox() it is FALSE for backward-compatability.
+function(nodes, asDataFrame = TRUE, color = FALSE, diffs = FALSE, dropCropMarks = TRUE, ...)
+    #??? Do we have to make an explicit call to getBBox() and pass the arguments or will UseMethod do the right thing.
+  UseMethod("getBBox")
+
+getBBox =
 function(nodes, asDataFrame = FALSE, color = FALSE, diffs = FALSE, dropCropMarks = TRUE, ...)
-    UseMethod("getBBox")
+    UseMethod("getBBox")    
 
 getBBox.XMLInternalNode = getShapesBBox.XMLInternalNode =
 function(nodes, asDataFrame = FALSE, color = FALSE, diffs = FALSE, dropCropMarks = TRUE, ...)    
