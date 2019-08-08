@@ -156,3 +156,5 @@ exportMethods(getPages, getNumPages)
 #exportMethods(dim, length)
 S3method(dim, "PDFToXMLPage")
 S3method(length, "ConvertedPDFDoc")
+
+exportMethods(right, bottom, width, height)
