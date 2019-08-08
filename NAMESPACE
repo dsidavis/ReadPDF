@@ -68,7 +68,6 @@ S3method(isTitleBad, character)
 
 
 
-export(getTextBBox, getShapesBBox)
 export(getBBox, getBBox2)
 S3method(getBBox2, XMLNodeSet)
 S3method(getBBox2, list)
@@ -77,10 +76,10 @@ S3method(getBBox2, PDFToXMLPage)
 S3method(getBBox2, PDFToXMLDoc)
 
 S3method(getTextBBox, XMLNodeSet)
-S3method(getTextBBox, list)
+#S3method(getTextBBox, list)
 S3method(getTextBBox, XMLInternalNode)
 S3method(getTextBBox, PDFToXMLPage)
-S3method(getTextBBox, PDFToXMLDoc)
+#S3method(getTextBBox, PDFToXMLDoc)
 
 
 S3method(getBBox, XMLNodeSet)
@@ -90,10 +89,10 @@ S3method(getBBox, XMLInternalNode)
 S3method(getBBox, PDFToXMLDoc)
 
 S3method(getShapesBBox, XMLNodeSet)
-S3method(getShapesBBox, list)
+#??? S3method(getShapesBBox, list)
 S3method(getShapesBBox, PDFToXMLPage)
 S3method(getShapesBBox, XMLInternalNode)
-S3method(getShapesBBox, PDFToXMLDoc)
+#S3method(getShapesBBox, PDFToXMLDoc)
 
 
 export(getPageHeader)
@@ -158,3 +157,5 @@ S3method(dim, "PDFToXMLPage")
 S3method(length, "ConvertedPDFDoc")
 
 exportMethods(right, bottom, width, height)
+
+exportMethods(getTextColors)

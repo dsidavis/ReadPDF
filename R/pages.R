@@ -1,10 +1,3 @@
-setAs("PDFToXMLPage", "TextBoundingBox",
-      function(from) {
-          getTextBBox(from, asDataFrame = TRUE)
-      })
-
-          
-
 `[[.ConvertedPDFDoc` =  #`[[.PDFMinerDoc` =
 function(x, i, j, ...)
 {

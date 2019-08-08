@@ -4,3 +4,16 @@ setMethod("bottom", "PDFTextBoundingBox", function(x, ...) x$top + x$height)
 
 setMethod("width", "TextBoundingBox", function(x, ...) x$width)
 setMethod("height", "TextBoundingBox", function(x, ...) x$height)
+
+
+# See getTextNodeColors
+setMethod("getTextColors", "PDFToXMLPage",
+          function(obj, ...) {
+            getTextNodeColors(getNodeSet(obj, ".//text"))
+          })
+
+
+setAs("PDFToXMLPage", "TextBoundingBox",
+      function(from) {
+          getTextBBox(from, asDataFrame = TRUE)
+      })

@@ -1,22 +1,22 @@
-getTextBBox =
-function(nodes, asDataFrame = TRUE, attrs = c("left", "top", if(rotation) "rotation"), pages = FALSE, rotation = FALSE, color = FALSE, ...)
-    getBBox2(nodes, asDataFrame, attrs, pages, rotation, color)
+getTextBBox.PDFToXMLPage =
+function(obj, asDataFrame = TRUE, attrs = c("left", "top", if(rotation) "rotation"), pages = FALSE, rotation = TRUE, color = TRUE, ...)
+     getBBox2(obj, asDataFrame, attrs, pages, rotation, color)
 
 getBBox2 =
     # For text, not rect or line nodes.
 function(nodes, asDataFrame = FALSE, attrs = c("left", "top", if(rotation) "rotation"), pages = FALSE, rotation = FALSE, color = FALSE, ...)
     UseMethod("getBBox2")
 
-getBBox2.PDFToXMLPage = getTextBBox.PDFToXMLPage =
+getBBox2.PDFToXMLPage = # XXX getTextBBox.PDFToXMLPage =
     # For text, not rect or line nodes.
 function(nodes, asDataFrame = FALSE, attrs = c("left", "top", if(rotation) "rotation"), pages = FALSE, rotation = FALSE, color = FALSE, ...)
     getBBox2(getNodeSet(nodes, ".//text"), asDataFrame, attrs = attrs, color = color)
 
-getBBox2.PDFToXMLDoc = getTextBBox.PDFToXMLDoc =
+getBBox2.PDFToXMLDoc =  #XXX getTextBBox.PDFToXMLDoc =
     # For text, not rect or line nodes.
 function(nodes, asDataFrame = FALSE, attrs = c("left", "top", if(rotation) "rotation"), pages = FALSE, rotation = FALSE, color = FALSE, ...)
 {
-   bboxForDoc(getTextBBox, nodes, asDataFrame, attrs, pages, rotation, color)
+   Dociface:::bboxForDoc(getTextBBox, nodes, asDataFrame, attrs, pages, rotation, color)
 }
 
 
@@ -75,15 +75,6 @@ function(nodes, asDataFrame = FALSE, attrs = c("left", "top", if(rotation) "rota
 
 
 
-getShapesBBox = 
-    #
-    # This bbox function expects an attribute named bbox
-    # This is for rect and line nodes, not <text> nodes. Use getBBox2() for that.
-    # Here asDataFrame is TRUE. For getBBox() it is FALSE for backward-compatability.
-function(nodes, asDataFrame = TRUE, color = FALSE, diffs = FALSE, dropCropMarks = TRUE, ...)
-    #??? Do we have to make an explicit call to getBBox() and pass the arguments or will UseMethod do the right thing.
-  UseMethod("getBBox")
-
 getBBox =
 function(nodes, asDataFrame = FALSE, color = FALSE, diffs = FALSE, dropCropMarks = TRUE, ...)
     UseMethod("getBBox")    
@@ -91,6 +82,7 @@ function(nodes, asDataFrame = FALSE, color = FALSE, diffs = FALSE, dropCropMarks
 getBBox.XMLInternalNode = getShapesBBox.XMLInternalNode =
 function(nodes, asDataFrame = FALSE, color = FALSE, diffs = FALSE, dropCropMarks = TRUE, ...)    
     getBBox(list(nodes), asDataFrame, color, diffs, dropCropMarks)
+
 
 getBBox.XMLNodeSet = getBBox.list =
   getShapesBBox.XMLNodeSet = getShapesBBox.list =
@@ -158,6 +150,7 @@ function(nodes, ans)
         ans
 }
 
+
 getTextNodeColors =
 function(nodes, fontIds = sapply(nodes, xmlGetAttr, "font"), fontInfo = getFontInfo(doc), doc = as(nodes[[1]], "XMLInternalDocument"))
 {
@@ -168,13 +161,16 @@ getShapesBBox.PDFToXMLPage = getBBox.PDFToXMLPage =
     #
     # This bbox function expects an attribute named bbox
     #
-function(nodes, asDataFrame = FALSE, color = FALSE, diffs = FALSE, dropCropMarks = TRUE, ...)
+function(nodes, asDataFrame = TRUE, color = TRUE, diffs = FALSE, dropCropMarks = TRUE, ...)
 {
-  getBBox(getNodeSet(nodes, ".//line| .//rect"), asDataFrame, color)
+  getBBox(getNodeSet(nodes, ".//line| .//rect"), asDataFrame, color, ...)
 }
 
 
-getShapesBBox.PDFToXMLDoc = getBBox.PDFToXMLDoc =
+
+# Method for Document in Dociface now.
+#    getShapesBBox.PDFToXMLDoc =
+getBBox.PDFToXMLDoc =
     #
     # This bbox function expects an attribute named bbox
     #
@@ -183,18 +179,7 @@ function(nodes, asDataFrame = FALSE, color = FALSE, diffs = FALSE, dropCropMarks
     bboxForDoc(getShapesBBox, nodes, asDataFrame, color, diffs, dropCropMarks, ...)
 }
 
-bboxForDoc =
-function(pageFun, nodes, asDataFrame = FALSE, ...)
-{    
-    ans = lapply(nodes, pageFun, asDataFrame, ...)
-    if(asDataFrame) {
-        tmp = do.call(rbind, ans)
-        tmp$page = rep(seq(along = ans), sapply(ans, nrow))
-        class(tmp) = c("MultiPageBoundingBox", class(ans[[1]]))
-        tmp
-    } else
-       ans
-}
+
 
 
 
