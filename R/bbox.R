@@ -68,7 +68,7 @@ function(nodes, asDataFrame = FALSE, attrs = c("left", "top", if(rotation) "rota
            m = cbind(m, color = cols)
    }
 
-   class(m) = c("PDFTextBoundingBox", "PDFBoundingBox", class(m))
+   class(m) = c("PDFTextBoundingBox", "PDFBoundingBox", "TextBoundingBox", class(m))
     
    m
 }
