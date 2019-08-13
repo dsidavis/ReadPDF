@@ -10,8 +10,10 @@ function(x, i, j, ...)
     getPages(x)[i, ...]
 }
 
-setGeneric("lapply")
 
+if(FALSE) {
+    # Moved to Dociface
+setGeneric("lapply")
 lapply.ConvertedPDFDoc  =  lapply.PDFToXMLDoc = # PDFMinerDoc =
 function(X, FUN, ...)
     lapply(getPages(X), FUN, ...)
@@ -22,7 +24,7 @@ function(X, FUN, ...)
   sapply(getPages(X), FUN, ...)
 
 setMethod("sapply", "ConvertedPDFDoc", sapply.ConvertedPDFDoc)
-
+}
 
 
 setMethod("getNumPages", "ConvertedPDFDoc",  # getNumPages =
