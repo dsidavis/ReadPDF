@@ -142,9 +142,16 @@ function(doc, local = FALSE, byNumChars = TRUE, fontInfo = getFontInfo(as(doc, "
 
 
 
-isBold =
-function(x, ...)
-    UseMethod("isBold")
+if(FALSE)
+{   
+ isBold =
+  function(x, ...)
+      UseMethod("isBold")
+
+ isItalic =
+  function(x, ...)
+      UseMethod("isItalic")
+}
 
 isBold.XMLInternalNode =
 function(x, fontInfo = getFontInfo(as(x, "XMLInternalDocument")), ...)    
@@ -153,22 +160,27 @@ function(x, fontInfo = getFontInfo(as(x, "XMLInternalDocument")), ...)
 }
 
 isBold.character =
+    #
+    # not for the text itself but the name of the font.
+    #
 function(x, ...)    
 {
     grepl("([Bb]old|CMB)", x)
 }
+setMethod("isBold", "character", isBold.character)
 
-
-isBold.data.frame =
-function(x, ...)    
+isBold.TextBoundingBox = isBold.data.frame =
+function(x, strict = FALSE, ...)    
 {
-   x$isBold | isBold(x$name)
+    ans = x$fontIsBold
+    if(!strict)
+        ans = ans | isBold(fontName(x))
+    
+    ans
 }
+setMethod("isBold", "TextBoundingBox", isBold.TextBoundingBox)
 
 
-isItalic =
-function(x, ...)
-    UseMethod("isItalic")
 
 isBold.XMLInternalNode =
 function(x, fontInfo = getFontInfo(as(x, "XMLInternalDocument")), ...)    
@@ -182,9 +194,15 @@ function(x, ...)
     grepl("([Ii]talic|CMT?I|Oblique|-?It[0-9]?$|Obl$|Ital$|MTMI)", x, ...)
 }
 
+setMethod("isItalic", "character", isItalic.character)
 
-isItalic.data.frame =
-function(x, ...)    
+isItalic.TextBoundingBox = isItalic.data.frame =
+function(x, strict = FALSE< ...)    
 {
-   x$isItalic | isItalic(x$name)
+    ans = x$fontIsItalic
+    if(!strict)
+        ans = ans | isItalic(fontName(x))
+    
+    ans
 }
+setMethod("isItalic", "TextBoundingBox", isItalic.TextBoundingBox)
