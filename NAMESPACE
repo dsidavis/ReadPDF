@@ -27,9 +27,11 @@ export(getDocTitle, getDocTitleString)
 export(isScanned, isScanned2)
 export(getColPositions)
 
+if(FALSE) {
 export(lapply, sapply)
 exportMethods(lapply)
 exportMethods(sapply)
+}
 
 export(length)
 exportMethods(length)
@@ -114,6 +116,8 @@ export(isCentered)
 
 
 export(showPage)
+exportMethods(show)
+S3method(print, PDFToXMLDoc)
 
 
 export(convertPDF2XML)
@@ -147,7 +151,11 @@ export(getLinks)
 
 #XXX export(margins)
 
-export(isBold, isItalic)
+export(isBold)  #, isItalic)
+exportMethods(isBold, isItalic)
+#S3method(isBold, TextBoundingBox)
+#S3method(isBold, character)
+#S3method(isBold, XMLInternalNode)
 
 
 
@@ -159,3 +167,6 @@ S3method(length, "ConvertedPDFDoc")
 exportMethods(right, bottom, width, height)
 
 exportMethods(getTextColors)
+
+S3method(getPageHeight, PDFTextBoundingBox)
+S3method(getPageWidth, PDFTextBoundingBox)
