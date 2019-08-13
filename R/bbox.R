@@ -1,6 +1,6 @@
 getTextBBox.PDFToXMLPage =
 function(obj, asDataFrame = TRUE, attrs = c("left", "top", if(rotation) "rotation"), pages = FALSE, rotation = TRUE, color = TRUE, ...)
-     getBBox2(obj, asDataFrame, attrs, pages, rotation, color)
+     getBBox2(obj, asDataFrame, attrs, pages, rotation, color, ...)
 
 getBBox2 =
     # For text, not rect or line nodes.
@@ -10,26 +10,43 @@ function(nodes, asDataFrame = FALSE, attrs = c("left", "top", if(rotation) "rota
 getBBox2.PDFToXMLPage = # XXX getTextBBox.PDFToXMLPage =
     # For text, not rect or line nodes.
 function(nodes, asDataFrame = FALSE, attrs = c("left", "top", if(rotation) "rotation"), pages = FALSE, rotation = FALSE, color = FALSE, ...)
-    getBBox2(getNodeSet(nodes, ".//text"), asDataFrame, attrs = attrs, color = color)
+{
+    ans = getBBox2(getNodeSet(nodes, ".//text"), asDataFrame, attrs = attrs, color = color, ...)
+    attributes(ans) = append(attributes(ans), list(pageNumber = as.integer(xmlGetAttr(nodes, "number")), document = docName(nodes), pageDimensions = dim(nodes)))
+    ans
+}
+
+getPageHeight.PDFTextBoundingBox =
+function(page)
+{
+   attr(page, "pageDimensions")[1]
+}
+
+getPageWidth.PDFTextBoundingBox =
+function(page)
+{
+   attr(page, "pageDimensions")[2]
+}
+
 
 getBBox2.PDFToXMLDoc =  #XXX getTextBBox.PDFToXMLDoc =
     # For text, not rect or line nodes.
-function(nodes, asDataFrame = FALSE, attrs = c("left", "top", if(rotation) "rotation"), pages = FALSE, rotation = FALSE, color = FALSE, ...)
+function(nodes, asDataFrame = FALSE, attrs = c("left", "top", if(rotation) "rotation"), pages = FALSE, rotation = FALSE, color = FALSE, font = FALSE, ...)
 {
    Dociface:::bboxForDoc(getTextBBox, nodes, asDataFrame, attrs, pages, rotation, color)
 }
 
 
-
 getBBox2.XMLInternalNode = getTextBBox.XMLInternalNode =
-function(nodes, asDataFrame = FALSE, attrs = c("left", "top", if(rotation) "rotation"), pages = FALSE, rotation = FALSE, color = FALSE)
+function(nodes, asDataFrame = FALSE, attrs = c("left", "top", if(rotation) "rotation"), pages = FALSE, rotation = FALSE, color = FALSE, ...)
+    # Should check if xmlName(nodes) is "page"
     getBBox2(list(nodes), asDataFrame, attrs, pages, rotation, color)
 
 getBBox2.XMLNodeSet = getBBox2.list =
   getTextBBox.XMLNodeSet = getTextBBox.list = 
     # For text, not rect or line nodes.
     #XXX Add support for color.
-function(nodes, asDataFrame = FALSE, attrs = c("left", "top", if(rotation) "rotation"), pages = FALSE, rotation = FALSE, color = FALSE)
+function(nodes, asDataFrame = FALSE, attrs = c("left", "top", if(rotation) "rotation"), pages = FALSE, rotation = FALSE, color = FALSE, font = TRUE, ...)
 {
     if(is(nodes, "XMLInternalElementNode")) {
         if(xmlName(nodes) == "text")
@@ -60,7 +77,7 @@ function(nodes, asDataFrame = FALSE, attrs = c("left", "top", if(rotation) "rota
        rownames(m) = txt
    }
 
-    if(color) {
+   if(color) {
        cols = getTextNodeColors(nodes) # , m$font)
        if(asDataFrame)
            m$color = cols
@@ -68,12 +85,30 @@ function(nodes, asDataFrame = FALSE, attrs = c("left", "top", if(rotation) "rota
            m = cbind(m, color = cols)
    }
 
+   if(font) {
+       if(asDataFrame) {
+           info = getFontInfo(xmlParent(xmlParent(nodes[[1]])))
+           fid = sapply(nodes, xmlGetAttr, "font")
+           i = match(fid, info$id)
+           vars = c("size", "family", "isItalic", "isBold", "isOblique", "name")
+           # we could keep these with the same partial matching, but unique, name with isBold.font
+           m[, paste0("font", capitalize(vars))] = info[i, vars]
+
+       } else
+           warning("for now, font = TRUE and asDataFrame = FALSE is not supported for TextBoundingBox for PDF/XML documents")
+       
+   }
+
    class(m) = c("PDFTextBoundingBox", "PDFBoundingBox", "TextBoundingBox", class(m))
     
    m
 }
 
-
+capitalize =
+function(x)
+{
+  paste0(toupper(substring(x, 1, 1)), substring(x, 2))
+}
 
 getBBox =
 function(nodes, asDataFrame = FALSE, color = FALSE, diffs = FALSE, dropCropMarks = TRUE, ...)
@@ -89,7 +124,7 @@ getBBox.XMLNodeSet = getBBox.list =
     #
     # This bbox function expects an attribute named bbox
     #
-function(nodes, asDataFrame = FALSE, color = FALSE, diffs = FALSE, dropCropMarks = TRUE, ...)    
+function(nodes, asDataFrame = FALSE, color = TRUE, diffs = FALSE, dropCropMarks = TRUE, ...)    
 {
     if(length(nodes) == 0) {
         ans = if(asDataFrame)
@@ -131,7 +166,10 @@ function(nodes, asDataFrame = FALSE, color = FALSE, diffs = FALSE, dropCropMarks
         names(ans)[3:4] = c("width", "height")        
     }
 
-    class(ans) = c("PDFShapesBoundingBox", "PDFBoundingBox", class(ans))
+
+    ans$lineWidth = as.numeric(sapply(nodes, xmlGetAttr, "lineWidth", NA))
+    
+    class(ans) = c("PDFShapesBoundingBox", "PDFBoundingBox", "ShapeBoundingBox", class(ans))
 
     ans
 }
@@ -139,7 +177,7 @@ function(nodes, asDataFrame = FALSE, color = FALSE, diffs = FALSE, dropCropMarks
 addBBoxColors =
 function(nodes, ans)    
 {
-        cols = lapply(c("fill.color", "stroke.color"), function(at) sapply(nodes, xmlGetAttr, at))
+        cols = lapply(c("fill.color", "stroke.color"), function(at) mkColor(sapply(nodes, xmlGetAttr, at)))
         if(is.data.frame(ans)) {
             ans$fill = cols[[1]]
             ans$stroke = cols[[2]]            
