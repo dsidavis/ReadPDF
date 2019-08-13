@@ -17,3 +17,12 @@ setAs("PDFToXMLPage", "TextBoundingBox",
       function(from) {
           getTextBBox(from, asDataFrame = TRUE)
       })
+
+
+
+setMethod("show", "PDFToXMLDoc",
+   print.PDFToXMLDoc <- function(object) {
+
+    np = getNumPages(object)
+    show(paste(docName(object), ";",  np, paste0("page", if(np == 1) "" else "s"), "XML representation of PDF document"))
+ })
