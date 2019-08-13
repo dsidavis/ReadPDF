@@ -81,9 +81,6 @@ function(node, asNode = FALSE)
 }
 
 
-setGeneric("columnOf",
-function(node, cols = getColPositions(xmlParent(node)), ...)
-           standardGeneric("columnOf"))
 
 setMethod("columnOf", "list",
 function(node, cols = getColPositions(xmlParent(node)), ...)

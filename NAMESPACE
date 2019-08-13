@@ -63,7 +63,6 @@ S3method(getColPositions,PDFToXMLPage)
 S3method(pageOf, list)
 S3method(pageOf,XMLInternalElementNode)
 
-export(columnOf)
 exportMethods(columnOf)
 
 S3method(isTitleBad, character)
