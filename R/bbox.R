@@ -12,7 +12,7 @@ getBBox2.PDFToXMLPage = # XXX getTextBBox.PDFToXMLPage =
 function(nodes, asDataFrame = FALSE, attrs = c("left", "top", if(rotation) "rotation"), pages = FALSE, rotation = FALSE, color = FALSE, ...)
 {
     ans = getBBox2(getNodeSet(nodes, ".//text"), asDataFrame, attrs = attrs, color = color, ...)
-    attributes(ans) = append(attributes(ans), list(pageNumber = as.integer(xmlGetAttr(nodes, "number")), document = docName(nodes), pageDimensions = dim(nodes)))
+    attributes(ans) = append(attributes(ans), list(pageNumber = as.integer(xmlGetAttr(nodes, "number")), filename = docName(nodes), pageDimensions = dim(nodes)))
     ans
 }
 
