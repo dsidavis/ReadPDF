@@ -129,11 +129,13 @@ function(nodes, asDataFrame = FALSE, color = TRUE, diffs = FALSE, dropCropMarks 
     if(length(nodes) == 0) {
         ans = if(asDataFrame)
                 data.frame(x0 = numeric(), y0 = numeric(), x1 = numeric(), y1 = numeric())
+            
               else
-                 matrix(0, nrow = 0, ncol = 4 + if(color) 2 else 0, dimnames = list(NULL, c("x0", "y0", "x1", "y1", if(color) c("fill", "stroke"))))
+                matrix(0, nrow = 0, ncol = 4 + if(color) 2 else 0, dimnames = list(NULL, c("x0", "y0", "x1", "y1", if(color) c("fill", "stroke"))))
         if(diffs)
             names(ans)[3:4] = c("width", "height")
 
+        class(ans) = c("PDFShapesBoundingBox", "PDFBoundingBox", "ShapeBoundingBox", class(ans))
         return(ans)
     }
     
