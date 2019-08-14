@@ -11,6 +11,8 @@ setClass("PDFToXMLPage", contains = c("ConvertedPDFPage", "DocumentPage"))
 
 
 setOldClass(c("PDFTextBoundingBox", "TextBoundingBox", "BoundingBox"))
+setOldClass(c("PDFShapesBoundingBox", "PDFBoundingBox", "ShapeBoundingBox", "data.frame"))
+setOldClass(c("MultiPageBoundingBox", "PDFShapesBoundingBox"))
 } 
 
 setAs("character", "PDFToXMLDoc", function(from) readPDFXML(from))
