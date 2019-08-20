@@ -16,8 +16,7 @@ export(getSectionText, getDocText, findSectionHeaders)
 
 export(pdfText, pdf_text)
 
-export(getTextFonts, getFontInfo)
-
+export(getTextFonts)
 export(bodyLine)
 
 export(getPageFooter)
@@ -124,7 +123,8 @@ export(convertPDF2XML)
 export(findTable)
 
 
-export(getDocFont)
+exportMethods(getDocFont)
+
 export(getDocWords)
 
 export(getTextByCols)

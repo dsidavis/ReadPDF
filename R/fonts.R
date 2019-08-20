@@ -19,7 +19,6 @@ getFontInfo =
     # used to be fontInfo
 function(doc)
 {
-
    tmp = xpathSApply(doc, xpathQ("//fontspec", doc), xmlAttrs)
    if(length(tmp) > 0) {
        df = as.data.frame(t(tmp), stringsAsFactors = FALSE)
@@ -31,10 +30,12 @@ function(doc)
    
        rownames(df) = df$id
    } else
-       df = data.frame(size = integer(), isItalic = logical(), isBold = logical(), isOblique = logical())
+       df = data.frame(fontSize = integer(), fontIsItalic = logical(), fontIsBold = logical(), fontIsOblique = logical())
    
    structure(df, class = c("FontSpecInfo", class(df)))
 }
+
+
 
 
 if(FALSE)
@@ -114,7 +115,8 @@ function(doc, local = FALSE)
     txt
 }
 
-getDocFont = getTextFont =
+#getDocFont =
+getTextFont =
     #
     # Get the font information for the most commonly used font in the document,
     # which is assumed to be that of the text.
@@ -137,6 +139,14 @@ function(doc, local = FALSE, byNumChars = TRUE, fontInfo = getFontInfo(as(doc, "
     fontInfo[fontInfo[,"id"] == id, ]
 } 
 
+setMethod("getDocFont", "PDFToXMLPage",
+          function(x, ...)
+              getTextFont(x, ...))
+ 
+setMethod("getDocFont", "PDFToXMLDoc",
+           function(x, ...)
+              getTextFont(x, ...))
+          
 
 
 
