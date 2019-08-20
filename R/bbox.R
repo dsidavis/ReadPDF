@@ -128,7 +128,7 @@ function(nodes, asDataFrame = FALSE, color = TRUE, diffs = FALSE, dropCropMarks 
 {
     if(length(nodes) == 0) {
         ans = if(asDataFrame)
-                data.frame(x0 = numeric(), y0 = numeric(), x1 = numeric(), y1 = numeric())
+                data.frame(x0 = numeric(), y0 = numeric(), x1 = numeric(), y1 = numeric(), nodeType = character())
             
               else
                 matrix(0, nrow = 0, ncol = 4 + if(color) 2 else 0, dimnames = list(NULL, c("x0", "y0", "x1", "y1", if(color) c("fill", "stroke"))))
@@ -201,9 +201,22 @@ getShapesBBox.PDFToXMLPage = getBBox.PDFToXMLPage =
     #
     # This bbox function expects an attribute named bbox
     #
-function(nodes, asDataFrame = TRUE, color = TRUE, diffs = FALSE, dropCropMarks = TRUE, ...)
+function(nodes, asDataFrame = TRUE, color = TRUE, diffs = FALSE, dropCropMarks = TRUE, images = TRUE, ...)
 {
-  getBBox(getNodeSet(nodes, ".//line| .//rect"), asDataFrame, color, ...)
+    ans = getBBox(getNodeSet(nodes, ".//line| .//rect"), asDataFrame, color, ...)
+    if(images) {
+        imgs = getImages(nodes, attrs = c("x", "y", "width", "height"))
+        if(nrow(imgs) > 0) {
+            imgs$x1 = imgs$x + imgs$width
+            imgs$y1 = imgs$y + imgs$height
+            imgs$nodeType = "img"
+            imgs = imgs[, c("x", "y", "x1", "y1", "nodeType")]
+            imgs$fill = imgs$stroke = imgs$lineWidth = NA
+            names(imgs)[1:2] = c("x0", "y0")
+            ans = rbind(ans, imgs)
+        }
+    }
+    ans
 }
 
 
