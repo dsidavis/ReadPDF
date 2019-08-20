@@ -9,7 +9,10 @@ function(doc, addPageNum = TRUE,
 
     if(length(attrs)) {
         ans = xpathSApply(doc, query, function(x) xmlAttrs(x)[attrs])
-        tmp = as.data.frame(t(ans), stringsAsFactors = FALSE)
+        tmp = if(length(ans) == 0)
+                 as.data.frame(structure(replicate(length(attrs), character(), simplify = FALSE), names = attrs), stringsAsFactors = FALSE)
+              else
+                 as.data.frame(t(ans), stringsAsFactors = FALSE)
         names(tmp) = attrs
         ans = type.convert(tmp)
     } else
