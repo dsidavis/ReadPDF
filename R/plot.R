@@ -72,6 +72,65 @@ function(page, cex.text = .5, adj = c(0, 1), showText = TRUE, showBoxes = FALSE,
     plot(0, type = "n", xlab = "", ylab = "", xlim = c(0, psize[2]), ylim = c(0, psize[1]))
     title(title)
 
+    renderLinesRects(page, h = h)
+    renderCoords(page, h = h)
+    
+    imgs = getNodeSet(page, ".//img")
+    if(length(imgs)) {
+        bb = getBBox2(imgs, attrs = c("x", "y"))
+
+        #XXX??? Should these y values be subtracted from h???
+        # And are these widths and heights that need to be added!
+        rect(bb[,1], h - bb[,2], bb[,1] + bb[,3], h - bb[,4] - bb[,4], border = "blue", lty = 3)
+    }    
+
+    if(showText) {
+        txt = getNodeSet(page, ".//text")
+        if(length(txt)) {
+            bb = t(sapply(txt, xmlAttrs))
+            if(!("rotation"  %in% colnames(bb)))
+               bb = cbind(bb, rotation = rep(0, nrow(bb)))
+            storage.mode(bb) = "double"
+
+            prot = xmlGetAttr(page, "rotation", NA, as.numeric)
+            if(!is.na(prot))
+                bb[, "rotation"] =  bb[, "rotation"] + prot
+            
+            colors = getNodeColors(txt)
+            text = sapply(txt, xmlValue)
+            by(1:nrow(bb), bb[, "rotation"],
+                   function(i)
+                       text(bb[i,2], h - bb[i,1], text[i], cex = cex.text, adj = adj, col = colors[i], srt = - bb[i[1], "rotation"]))
+        }
+    }
+
+    if(showBoxes) {
+        txt = getNodeSet(page, ".//text")
+        bb = getBBox2(txt)
+
+        rect(bb[,1], h - bb[,2], bb[,1] + bb[,3], h - bb[,2] - bb[,4], border = "lightgreen")
+    }
+
+    TRUE
+}
+
+renderCoords =
+function(page, h, coords = getCoords(page))
+{
+   lapply(coords, renderCoord, h)
+}
+
+renderCoord =
+function(x, h)
+{
+    lines(x$x, h - x$y, col = x$stroke, lwd = x$lineWidth)
+}
+
+
+
+renderLinesRects =
+function(page, h)
+{
     rr = getNodeSet(page, ".//rect ")
     if(length(rr)) {
         bb = getBBox(rr)
@@ -91,42 +150,6 @@ function(page, cex.text = .5, adj = c(0, 1), showText = TRUE, showBoxes = FALSE,
                 })
         # lines(bb[,1], h - bb[,2], bb[,3], h-bb[,4], col = "red")
     }
-
-    
-    imgs = getNodeSet(page, ".//img")
-    if(length(imgs)) {
-        bb = getBBox2(imgs, attrs = c("x", "y"))
-
-        #XXX??? Should these y values be subtracted from h???
-        # And are these widths and heights that need to be added!
-        rect(bb[,1], h - bb[,2], bb[,1] + bb[,3], h - bb[,4] - bb[,4], border = "blue", lty = 3)
-    }    
-
-    if(showText) {
-        txt = getNodeSet(page, ".//text")
-        if(length(txt)) {
-            bb = t(sapply(txt, xmlAttrs))
-            if(!("rotation"  %in% colnames(bb)))
-               bb = cbind(bb, rotation = rep(0, nrow(bb)))
-            storage.mode(bb) = "double"
-
-            
-            colors = getNodeColors(txt)
-            text = sapply(txt, xmlValue)
-            by(1:nrow(bb), bb[, "rotation"],
-                   function(i)
-                       text(bb[i,2], h - bb[i,1], text[i], cex = cex.text, adj = adj, col = colors[i], srt = - bb[i[1], "rotation"]))
-        }
-    }
-
-    if(showBoxes) {
-        txt = getNodeSet(page, ".//text")
-        bb = getBBox2(txt)
-
-        rect(bb[,1], h - bb[,2], bb[,1] + bb[,3], h - bb[,2] - bb[,4], border = "lightgreen")
-    }
-
-    TRUE
 }
 
 

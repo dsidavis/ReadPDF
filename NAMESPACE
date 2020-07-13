@@ -37,6 +37,7 @@ exportClass("ConvertedPDFDoc")
 
 export(dim)
 exportMethods(dim)
+S3method(dim, "PDFToXMLPage")
 
 S3method("[", "ConvertedPDFDoc")
 S3method("[[", "ConvertedPDFDoc")
@@ -68,6 +69,12 @@ exportMethods(columnOf)
 S3method(isTitleBad, character)
 
 
+
+export(getCoords)
+S3method(getCoords, XMLNodeSet)
+S3method(getCoords, XMLNodeList)
+S3method(getCoords, list)
+S3method(getCoords, PDFToXMLPage)
 
 export(getTextBBox)
 export(getBBox, getBBox2)

@@ -58,6 +58,11 @@ function(nodes, asDataFrame = FALSE, attrs = c("left", "top", if(rotation) "rota
        else
            m = cbind(m, color = cols)
    }
+
+   if(font) {
+       if(asDataFrame)
+           m$font = as.integer(sapply(nodes, xmlGetAttr, "font"))
+   }
    m
 }
 
@@ -154,3 +159,36 @@ function(nodes, asDataFrame = FALSE, color = FALSE, diffs = FALSE, dropCropMarks
 
 
 
+
+
+getCoords =
+function(x, lwd = TRUE, color = TRUE, ...)
+    UseMethod("getCoords")
+
+getCoords.PDFToXMLPage =    
+function(x, lwd = TRUE, color = TRUE, ...)    
+{
+    getCoords(getNodeSet(x, ".//coords"), lwd, color, ...)
+}
+
+getCoords.XMLNodeSet = getCoords.XMLNodeList = getCoords.list =
+function(x, lwd = TRUE, color = TRUE, ...)    
+  lapply(x, parseCoord, lwd = lwd, color = color, ...)
+
+
+
+parseCoord =
+function(node, lwd = TRUE, color = TRUE)
+{
+  ans = as.data.frame(matrix(scan(textConnection(xmlSApply(node, xmlValue)), sep = " ", quiet = TRUE), , 2, byrow = TRUE))
+  names(ans) = c("x", "y")
+  class(ans) = c("PDFCoord", class(ans))
+  if(lwd)
+      ans$lineWidth = xmlGetAttr(node, "lineWidth", NA, as.numeric)
+  if(color) {
+      ans$stroke = xmlGetAttr(node, "stroke.color", NA, mkColor)
+      ans$fill = xmlGetAttr(node, "fill.color", NA, mkColor)
+  }
+
+  ans
+}
