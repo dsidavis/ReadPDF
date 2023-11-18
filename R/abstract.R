@@ -39,8 +39,11 @@ function(page, bbox = getBBox2(), ...)
 
 margins.list = margins.XMLNodeSet =
 function(page, bbox = getBBox2(unlist(page)), ...)
-{    
-   c(left = min(bbox[, 1]), right = max(bbox[,1] + bbox[,3]), top = min(bbox[,2]), bottom = max(bbox[,4]))
+{
+    if(length(page) == 0)
+        return(c(left = integer(), right = integer(), top = integer(), bottom = integer()))
+    
+    c(left = min(bbox[, 1]), right = max(bbox[,1] + bbox[,3]), top = min(bbox[,2]), bottom = max(bbox[,4]))
 }
 
 findAbstract =
