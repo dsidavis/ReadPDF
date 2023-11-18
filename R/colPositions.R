@@ -74,7 +74,7 @@ function(p, threshold = .1,
                   center = (bbox$left + bbox$right)/2
                  )
     tt = table(vals)
-#browser()    
+
     if(missing(txtNodes) && nrow(bbox) == 0 && !local) {
         # Use the page-specific font count
         return(getColPositions(p, threshold, docFont = docFont, align = align, local = TRUE, ...))
@@ -110,6 +110,24 @@ function(p, threshold = .1,
     
     ans
 }
+
+
+getLinePositions = 
+function(page, bbox = getTextBBox(page, rotation = TRUE, color = TRUE), fontSize = median(getDocFont(page)$size), align = "center")
+{
+    vals = switch(align,
+                  top = bbox$top,
+                  bottom = bbox$top + bbox$height,
+                  center = bbox$top + bbox$height/2
+        )
+    
+    seq(min(vals), max(vals), by = fontSize)
+    
+#    ll = cut(bbox, )
+}
+
+
+
 
 
 collapsePageCols =
