@@ -48,7 +48,8 @@ function(page, bbox = getBBox2(unlist(page)), ...)
    c(left = min(bbox[, 1]), right = max(bbox[,1] + bbox[,3]), top = min(bbox[,2]), bottom = max(bbox[,4]))
 }
 
-}
+} # end of if(FALSE)
+
 
 
 findAbstract =
@@ -2243,7 +2244,7 @@ function(page, docFont = getDocFont(page), fontInfo = getFontInfo(page))
     ll = getNodeSet(page, ".//rect | .//line")
     if(length(ll)) {
         bb = getBBox(ll)
-        bottom = max(bb[, "y0"])
+        bottom = max(bb[, "y0"])  # bottom(bb)
         # look for a line with all the text below it being smaller than the the document font.
         nodes = getNodeSet(page, sprintf(".//text[ @top > %f]", bottom))
         if(length(nodes)) {
