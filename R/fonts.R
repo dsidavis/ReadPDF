@@ -55,7 +55,7 @@ function(page, fonts = getNodeSet(page, xpathQ("//fontspec", page)))
 }
 
 getNodeFontInfo =
-function(page, nodes = getNodeSet(page, ".//fontspec"))    
+function(page, nodes = getNodeSet(page, xpath), xpath = ".//fontspec")    
 {
    if(length(nodes) == 0)
        return(NULL)
