@@ -24,15 +24,20 @@ function(X, FUN, ...)
 setMethod("sapply", "ConvertedPDFDoc", sapply.ConvertedPDFDoc)
 
 getNumPages =
-function(doc)
+function(doc, ...)
 {
+    if(is.character(doc))
+        doc = xmlParse(doc, ...)
+    
     length(getNodeSet(doc, "//page"))
 }
 
-setGeneric("length")
-setMethod("length", "ConvertedPDFDoc",
-          function(x)
-           getNumPages(x))
+#setGeneric("length", function(x) standardGeneric("length"))
+setMethod("length", signature(x = "PDFToXMLDoc"), #     "ConvertedPDFDoc",
+          function(x) {
+              cat("In length method\n")
+              getNumPages(x)
+          })
 
 
 dim.PDFToXMLPage =
