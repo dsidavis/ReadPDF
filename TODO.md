@@ -1,5 +1,12 @@
 # 
 
++ Rich Pauloo's examples of where getSectionText() fails.
+
++ In findSectionHeader() - deal with combine nodes from the section title
+   + on different lines
+   + different fonts.
+   + Group them together and use the last of them for the text to the next section.
+
 + Identify watermark
    + Rotated
    + In center of page

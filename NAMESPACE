@@ -139,5 +139,11 @@ export(getLinks)
 
 
 export(margins)
+S3method(margins, "PDFToXMLPage")
+S3method(margins, "PDFToXMLDoc")
+S3method(margins, "XMLNodeSet")
 
 export(isBold, isItalic)
+
+
+export(pageOf)
