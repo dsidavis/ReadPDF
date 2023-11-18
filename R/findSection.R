@@ -9,8 +9,11 @@ function(doc, asNodes = FALSE, secHeaders = findSectionHeaders(doc, ...), maxNum
     if(is.character(doc))
         doc = readPDFXML(doc)
 
-    if(getNumPages(doc) > maxNumPages)
-        return(list())
+    if(getNumPages(doc) > maxNumPages) {
+      warning("doc pages exceeds maxNumPages")
+      return(list())      
+    }
+
 
     if(separateTables) {
         tblNodes = getTables(doc)
@@ -27,7 +30,12 @@ function(doc, asNodes = FALSE, secHeaders = findSectionHeaders(doc, ...), maxNum
         return(ans)
     }
 
-
+    #if only one node supplied, add last node as end node, flag to return one thing
+    if(length(secHeaders) == 1) {
+      secHeaders = c(secHeaders, getLastNode(secHeaders))
+      pasteTxt = TRUE
+    } else {pasteTxt = FALSE}
+    
     secHeaders = orderNodes(unlist(secHeaders))
 
     secs = lapply(seq(along = secHeaders),
@@ -57,7 +65,7 @@ function(doc, asNodes = FALSE, secHeaders = findSectionHeaders(doc, ...), maxNum
     if(separateTables && length(tbls)) 
         txt[paste0("Table", seq(along = tbls))] = tbls
     
-    txt
+    if (pasteTxt) {c(txt[[1]],txt[[2]])} else {txt}
 }
 
 
@@ -325,26 +333,32 @@ function(x = NULL, y = NULL, useLines = TRUE, exclude = FALSE, ...)
     
     s = pageOf(x)
     e = pageOf(y)
+    
+    #check if going from same node to same node, 
+    if (identical(x,y) & s == e) {
+      return(x)
+    } else {
 
-    ans = if(e > s) {
-        # get all the nodes on each page up to e
-        p1 = getTextAfter(x, useLines = useLines)
-        if(e - s > 1) {
+        ans = if(e > s) {
+         # get all the nodes on each page up to e
+          p1 = getTextAfter(x, useLines = useLines)
+          if(e - s > 1) {
             pgs = getPages(as(x, "XMLInternalDocument"))[ seq(s + 1, e - 1)]
             pgs = lapply(pgs, getTextByCols, asNodes = TRUE)
-        } else
+          } else
             pgs = NULL
-        pe = getTextAfter(, y, useLines = useLines)
-        c(p1, unlist(pgs, recursive = FALSE), pe)
-    } else {
-        getTextAfter(x, y, useLines = useLines, ...)
-    }
+          pe = getTextAfter(, y, useLines = useLines)
+          c(p1, unlist(pgs, recursive = FALSE), pe)
+        } else {
+          getTextAfter(x, y, useLines = useLines, ...)
+        }
 
-    if(exclude) 
+      if(exclude) 
            # drop x and y.  XXX need to handle if y is null in call and keep then.
         ans = ans[-c(1, length(ans))]
 
-    ans
+      ans
+    }
     
 }
 
@@ -485,8 +499,8 @@ getLastNode =
     # Use this when getting the content for the last section
 function(node, doc = as(node, "XMLInternalDocument"))
 {
-    #    ans = getNodeSet(doc, "//page[last()]/text[last()]")[[1]]
-    ans = getNodeSet(doc, "//text[last() and ancestor::page]")[[1]]    
+    #  getNodeSet(doc, "//text[last() and ancestor::page]")[[1]]    <- returns bad results
+    ans = getNodeSet(doc, "//page[last()]/text[last()]")[[1]]  # above caused errors so I  put this back in. Whay was it replaced?
     if(pageOf(ans) == pageOf(node)) {
         # if on the same page, then we need to check which column node is in
         # and ensure that the ans node is in the same column.

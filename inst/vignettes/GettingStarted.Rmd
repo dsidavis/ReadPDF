@@ -1,3 +1,11 @@
+---
+output:
+  pdf_document: default
+  html_document: default
+---
+
+<!--1) Explain Xpath syntax with xpathApply? 2) Add any special instructions for working with documents with tables 3) Speed up getSectionText? -->
+
 # Getting Started
 
 
@@ -5,7 +13,7 @@ The `ReadPDF` package is one approach to extracting content and information from
 This approach converts the PDF document to an XML document using an adapted version of
 the `pdftohtml` tool.  We then read the resulting XML  document into `R` (using the XML package).
 The structure of the XML document is quite simple.
-Under a root node, we have a `<docinfo>` node and a sequence of 0 or more `<page>` nodes, for example,
+Under a root node, we have a `<docinfo>` node and a sequence of 0 or more `<page>` nodes, for example, the color.pdf file in the inst/samples folder in the ReadPDF directory:
 ```
 <?xml version="1.0" encoding="ISO-8859-1"?>
 <!DOCTYPE pdf2xml SYSTEM "pdf2xml.dtd">
@@ -30,7 +38,7 @@ Within the `<page>`, we have specifications of fonts introduced on this page for
 These are `<fontspec>` nodes.
 
 Next we typically have `<text>` nodes containing the text of the page.
-Each `<text>` node as attributes that identify the bounding box containing the text, i.e.,
+Each `<text>` node has attributes that identify the bounding box containing the text, i.e.,
 the location of the page for the rectangle in which the text resides.
 This is given by the top-left corner, with the origin in the top-left of the page and increasing
 from left to right horizontally and top to bottom vertically. In other words, PDF goes down the page
@@ -53,22 +61,31 @@ the XML structure. It provides functions that allow one to work on elements of t
 level. However, one can still work directly with XML.
 
 The page- and document-level concepts include
-+ text
-+ lines of text
-+ columns
-+ font tables
-+ hyperlinks
-+ shapes such as lines and rectangles
-+ images
-+ centered text
-+ section headers
-+ margins
-+ footers and headers
-+ is the document scanned.
 
+  + text
+  + lines of text
+  + columns
+  + font tables
+  + hyperlinks
+  + shapes such as lines and rectangles
+  + images
+  + centered text
+  + section headers
+  + margins
+  + footers and headers
+  + is the document scanned.
 
+# Installation
 
-## Reading the Document
+See the README.md file here: https://github.com/dsidavis/ReadPDF for installation instructions.
+
+As detailed there, you will need to install an extended version of pdftohtml from its github repository, i.e. 
+
+```
+git clone https://github.com/dsidavis/pdftohtml.git
+```
+
+# Reading the Document
 
 We can read a PDF document with
 ```
@@ -83,30 +100,35 @@ resulting XML file each time.
 
 The conversion of the PDF to XML can be done from within R
 (via `convertPDF2XML()`) or in the terminal by calling the
-`pdftohtml` executable.  The most important thing is to install
-pdftohtml from the github repository `https://github.com/dsidavis/pdftohtml.git`, i.e.,
+`pdftohtml` executable.  
+
 ```
-git clone https://github.com/dsidavis/pdftohtml.git
+doc2 = convertPDF2XML(system.file("samples/RClang.pdf", package = "ReadPDF"))
+readPDFXML(doc2) 
 ```
-Then invoke make.
+**@Duncan Above should work? but error: **
+
+```
+in as.vector(x, "character") : cannot coerce type 'externalptr' to vector of type 'character 
+```
 
 The `convertPDF2XML()` function needs to know where the pdftohtml executable
 is. It can find this in several ways - via
+
 1. your shell's path
-1. the (shell) environment variable PDFTOHTML, or
-1. the R option "PDFTOHTML".
+2. the (shell) environment variable PDFTOHTML, or
+3. the R option "PDFTOHTML" (`options(PDFTOHTML = "path/to/pdftohtml"`).
 You set any of these to where you installed the pdftohtml executable
 or directly to where you compiled it in the cloned repository,
 e.g., under `pdftohtml/src/pdftohtml`.
 
 
 
-## Once we have read the document ...
-
+# Inspecting Document Elements
+##
 Now that we have read the document, we can query it for various points of interest.
 
-
-We'll use the RClang.pdf and RClang.xml documents included in the package:
+To illustrate, we'll use the RClang.pdf and RClang.xml documents included in the package:
 ```
 doc = readPDFXML(system.file("samples/RClang.xml", package = "ReadPDF"))
 ```
@@ -136,7 +158,7 @@ Typically we are interested in the text of the document and specific pages.
 However, we have to be a little more precise in what we want.
 We can get the individual text nodes for the entire document or just a single page with
 ```
-getTextNodes(doc)
+getTextNodes(doc)  #@Duncan FIX?
 getTextNodes(doc[[1]])
 ```
 These return the list of XML `<text>` nodes which contain
@@ -147,13 +169,18 @@ PDF can draw/render to any part of the page at any time.
 We can get the locations of the text nodes with
 `getBBox`, e.g.,
 ```
-bb = getBBoxText(doc[[1]])
+bb = getBBoxText(doc[[1]]) #@Duncan should Text be remove?
 ```
 
+We can get all text nodes with 
+
+getNodeSet(doc, "//text")
+
+@Duncan make a note somewhere about Xpath syntax? Suggest a reference (e.g.? https://www.w3schools.com/xml/xpath_syntax.asp)? Make a subsection for getting specific nodes?
 
 ## Font Information
 
-We can a list of all of the fonts used within a document or defined within a page with 
+We can get a list of all of the fonts used within a document or defined within a page with 
 ```
 fi = getFontInfo(doc)
 ```
@@ -186,14 +213,14 @@ bold or italic. For example, in the output above, the font
 Similarly, `PJXZJR+CMBX12` (row 6) indicates bold from the B in CMBX, and specifically `bold extended`.
 (The CM stands for 'Computer Modern'.)
 CMR indicates computer modern roman, while
-`OAZGEE+CMBXSL10` indicates bold extended slanted, while CMBXTI indicates bold extended and italic.
+`OAZGEE+CMBXSL10` indicates bold extended slanted, and CMBXTI indicates bold extended and italic.
 `CMSS10` indicates computer modern sans serif.
 
-
+#### Finding Section Titles Using Font Information
 
 One approach to finding the section titles in the paper is to use the font size.
 (There are other heuristic approaches we use.)
-We can see that Motivation is the first section title.
+We can see that Motivation is the first section title in the sample file RClang.pdf.
 Let's find that word/phrase and look at its font.
 We hope that the PDF tool that created the document didn't split the word Motivation into separate
 `text` nodes.
@@ -204,7 +231,7 @@ getNodeSet(doc, "//text[. = 'Motivation']")
 ```
 Unfortunately the result is empty.
 Perhaps the term is 1. Motivation.
-So we could look for that exact string, or look for a text node that contains Motivation:
+We could look for that exact string, or look for a text node that contains Motivation:
 ```
 tt = getNodeSet(doc, "//text[contains(., 'Motivation')]")
 ```
@@ -214,7 +241,7 @@ tt = getNodeSet(doc, "//text[contains(., 'Motivation')]")
 ```
 So we have the node.
 
-The font id is 16:
+The font id is 16, which we can read from the node outputor extract:
 ```
 id = xmlGetAttr(tt[[1]], "font")
 ```
@@ -222,12 +249,12 @@ We can find the font information via
 ```
 fi[id, ]
 ```
-since we previously computed the documents font table and assigned it to `fi`.
+since we previously computed the document's font table and assigned it to `fi`.
 
-However, we don't even need the font information, but only its id to find other text nodes
-that have the same font.
+However, we only need the font id to find other text nodes that have the same font.
+
 ```
-tt = getNodeSet(doc, sprintf("//text[@font = '%s']", id))
+tt = getNodeSet(doc, path = sprintf("//text[@font = '%s']", id))
 ```
 ```
 [[1]]
@@ -262,18 +289,22 @@ The fourth element is odd - just the word package. And the third element is just
 These are parts of a section title. If we look at their top attribute, we see they are on the same line.
 We expect they are on the same page also:
 ```
-pageOf(tt[3:4])
+pageOf(tt[3:4]) #@Duncan FIX?
 ```
+```
+"Error in UseMethod("pageOf") : no applicable method for 'pageOf' applied to an object of class "list"
+```
+
 And they are both on page 6.
 
 These are part of the section title "The RCIndex package".
-The word `RCIndex`  is in a different font. But we can assemble the
-title by finding all `<text>` nodes on the same line.
-We can do it in this context with
+The word `RCIndex`  is in a different font. But we can reassemble the
+section title by finding all `<text>` nodes on the same line as indicated by their value of `top`.
+
 ```
 getNodeSet(doc[[6]], ".//text[@top = 371]")
 ```
-and we get all the terms in the title and in the correct order.
+We get all the terms in the title and in the correct order.
 ```
 [[1]]
 <text top="371" left="325" width="71" height="19" font="16" rotation="0.000000">3. The</text> 
@@ -285,6 +316,7 @@ and we get all the terms in the title and in the correct order.
 <text top="371" left="498" width="82" height="19" font="16" rotation="0.000000">package</text> 
 ```
 
+#### Finding Package References Using Font Information
 
 We might also want to find all references to R packages in this document.
 Since these presumably appear in the same font, we can find one and
@@ -297,7 +329,7 @@ table(xpathSApply(doc, "//text[. = 'RCIndex']", xmlGetAttr, "font"))
  1 21 16  1 
 ```
 
-Looking at the two primary fonts from these nodes,
+Looking at the two primary fonts from these nodes in our previously constructed font information table,
 ```
 fi[ c("15", "20"), ]
 ```
@@ -306,7 +338,8 @@ fi[ c("15", "20"), ]
 15 15   14  Times #000000    FALSE  FALSE     FALSE  JUMNNB+CMB10
 20 20   14  Times #000000    FALSE  FALSE     FALSE QFOEOM+CMSL10
 ```
-we see the same size.
+we see that they have the same size.
+
 Let's find all `<text>` nodes using either of these fonts:
 ```
 pkg = getNodeSet(doc, "//text[@font = 15 or @font = 20]")
@@ -355,6 +388,7 @@ semantic terms.
 ```
 getLinks(doc)
 ```
+This may include internal references such as to a section in the document. 
 
 We can focus on an individual page with, e.g.,
 ```
@@ -376,11 +410,11 @@ or perhaps more general `<path>` elements.
 
 We can find the locations of these shape objects with
 ```
-bb = getBBox(doc[[5]], TRUE)
+bb = getBBox(doc[[5]], asDataFrame = TRUE)
 ```
 The result is a data.frame. This is because we specified `TRUE` for the `asDataFrame` parameter
-in the call so that we didn't get a matrix.
-The data frame contains the same information as the matrix but has allows for additional
+in the call -- otherwise the function returns a matrix.
+The data.frame contains the same information as the matrix but allows for additional
 information with different types of columns, of course.
 
 Each row of the data.frame contains the start and end point of each line
@@ -401,7 +435,7 @@ All of the lines corresponds to the lines connecting the nodes in the tree in th
 
 ## Centered text
 
-Consider the first section title again - `1. Motivation`.
+Consider the first section title again,  `1. Motivation`.
 Let's retrieve this `<text>` node as we did before
 ```
 mov = getNodeSet(doc, "//text[contains(., 'Motivation')]")[[1]]
@@ -413,14 +447,14 @@ We can use the function isCentered() to attempt to determine this programmatical
 ```
 isCentered(mov)
 ```
-Compare this with the word typically in the line below
+Compare this with the word "typically" in the line below
 ```
 isCentered( getNodeSet(doc, "//text[contains(., 'typically')]")[[1]])
 ```
 This returns `FALSE` as we expect.
 
 
-Note that isCenetered()  works heuristically and can be fooled.
+Note that isCentered()  works heuristically and can be fooled.
 
 
 
@@ -430,7 +464,7 @@ The function margins() attempts to determine the margins
 for a page or each page of a document:
 
 ```
-margins(doc[[1]])
+margins(doc[[1]]) #**only works when R folder sourced
 ```
 ```
 [1] 121 784
@@ -442,15 +476,18 @@ do.call(rbind, margins(doc))
 ```
 
 
-# Detecting Scanned Documents
+## Detecting Scanned Documents
 
 isScanned() and isScanned2() are functions that attempt to determine
 if a PDF document is scanned.
 The general idea is that there  are very few words on each page
 and/or there is an image which occupies most of each page.
 
+```
+@Duncan Add a scanned pdf to sample images to illustrate (one you have copyright for)
+```
 
-# Section Headers
+## Section Headers
 
 There is no doubt that academic journal articles are different from other types of PDF documents.
 However, we worked on a lot of academic articles. As a result, we built some
@@ -458,25 +495,65 @@ functions that focus on those but may still be useful more generally.
 One such function is findSectionHeaders() which attempts to find
 section titles in a document.
 We saw how we did this earlier with the section title "1. Motivation".
-There we knew one title and found the others based on matching this known one.
-findSectionHeaders() attempts to find the first one using a variety of heuristics
-+ recognize common phrases in titles (e.g. Background, Methods, References)
-+ centered text in a column
+In that case we knew one title and found the others based on matching this known one.
+findSectionHeaders() attempts to find the first one using a variety of heuristics, such as
+
++ common phrases in titles (e.g. Background, Methods, References)
++ find centered text in a column
 + short phrases
 + text with a slightly larger font than the main text.
 
+```
+sh = findSectionHeaders(doc)
+```
 
+In this case `findSectionHeaders` finds all but the Section 3 header, which we say earlier was made up of two different fonts. 
 
-# Images
+## Section Text
 
-Of course PDF documents can contain images.
-The conversion to an XML document does preserve some information about each image
-but not the content of the image. (The pdftohtml command can write the images
+We can extract text by section using `getSectionText`. By default, this returns a list where each item corresponds to one of the section headers found by `findSectionHeaders`. That means that if `findSectionHeaders` missed any section headers then `getSectionText` will group text from multiple sections under one header.
+
+```
+secText = getSectionText(doc, maxNumPages = 50, cleanSectionNums = F)
+```
+
+Each item of `secText` is a list of text by node in a section. To view sections as text blocks we can paste their entries together:
+
+```
+lapply(secText, paste, collapse = " ")
+```
+
+To extract the text from a specific section we can combine the functionality of `getSectionText` and `getNodeSet`. We specify in `getNodeSet` the nodes we are interested in and use them as the argument to `secHeaders` in `getSectionText`. For example, if we only want text from the section "1. Motivation", we can supply this and the following header to `secHeaders`. We use XPath syntax, specifically `starts-with` and `or`, to extract section headers that begin "1. Motivation", and "2. Concepts".
+
+```
+movText = getSectionText(doc, maxNumPages = 50, cleanSectionNums = F, 
+  secHeaders = getNodeSet(doc, 
+  "//text[starts-with(.,'1. Motivation') or starts-with(.,'2. Concepts')]"))[[1]]
+```
+ **^ FIX? Long-term would be better to have an "end" header so we don't have to extract an unwanted section and user doesn't need to append [[1]].**
+ 
+A common use case is to extract only the references section. We can use the previously found section headers stored as `sh`, and identify the one containing "References", "Work Cited", or "Bibliography". 
+
+```
+refSecNum = grep(pattern = "References|Works Cited|Bibliography", sapply(sh, xmlValue))
+```
+We then extract the text from that header until, by default, the end of the document. **FIXED? Now if only one node is supplied, goes til end of doc, and returns just that section, no need for [[1]].**
+
+```
+refText = getSectionText(doc, maxNumPages = 50, cleanSectionNums = F, 
+  secHeaders = sh[[refSecNum]],  addOmitted = FALSE)
+```
+
+## Images
+
+PDF documents can contain images.
+The conversion to an XML document preserves some information about each image
+but not the content of the image. (The `pdftohtml` command can write the images
 to separate files.)
 The function getImages(), by default, returns a data.frame  with information about
 all of the images.
 ```
-img = getImages(doc)
+img = getImages(doc) #**only works when R folder sourced
 head(img)
 ```
 ```
@@ -489,11 +566,11 @@ head(img)
 6   35 -117  -1.0000  1.0000           624            556     <NA>  <NA>    <NA>     <NA>         <NA>       5
 ```
 All images in the XML will have information for the top-left position (x, y) and also its width and height,
-so these are included in the data.frame.
+so these are included in the data.frame `img`.
 The page number is also included by default but can be avoided via the `addPageNum` parameter.
 
-Some images have more information such as the original filename of the image when they were included in the PDF,
-a title, a date it was created (again separately from the PDF). In XML, these are additional attributes.
+Some images have more information such as the original filename of the image when it was included in the PDF,
+title, and date created (again separately from the PDF). In XML, these are additional attributes.
 The getImages() function allows the caller to either 1) specify the names of the attributes to retrieve from each
 `<img>` node, with NA values for those that are not present, or alternatively 2) to retrieve all attributes for each
 node and not arrange them as a data.frame since they may not have the same number or names.
