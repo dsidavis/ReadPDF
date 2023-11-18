@@ -13,6 +13,22 @@ nchar(cols)
 }
 
 
+setGeneric("getTextNodes",
+           function(x, ...)
+             standardGeneric("getTextNodes"))
+
+setMethod("getTextNodes", "PDFToXMLDoc",
+          function(x, ...) {
+              getNodeSet(x, "//text")
+          })
+
+setMethod("getTextNodes", "PDFToXMLPage",
+          function(x, ...) {
+              getNodeSet(x, ".//text")
+          } )         
+          
+
+
 ##
 # Todo
 #[Done]  Deal with pages that have some text in a column that spans the entire width of the page
