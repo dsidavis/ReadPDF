@@ -89,10 +89,10 @@ isScanned =
     # See /Users/duncan/DSIProjects/Zoonotics-shared/NewData_Feb2017/Zoo_02_02_2017 Copy.Data/PDF/0201749332/Aviles-1992-Transmission of western equine enc.xml
     #  Scanned but there is text on the side rotated 270 degrees.
     # XXpdftohtml doesn't seem to have the rotation. Add this.
-function(doc, checkFuns = NULL, textNodeThreshold = 10)
+function(doc, checkFuns = NULL, textNodeThreshold = 10, wordThreshold = 75, encoding = "UTF8")
 {
   if(is.character(doc))
-     doc = xmlParse(doc)
+     doc = tryCatch(xmlParse(doc, encoding = encoding), error = function(e) xmlParse(doc))
 
    # if every page only has img, fontspec, rect or line elements, then there is no text and it is a scanned document.
   nodes = getNodeSet(doc, "//page/*[not(local-name(.) = 'img') and not(local-name(.) = 'fontspec') and not(local-name(.) = 'rect') and not(local-name(.) = 'line')]")
@@ -107,7 +107,7 @@ function(doc, checkFuns = NULL, textNodeThreshold = 10)
      # the page nodes themselves.
    pg = getNodeSet(doc, "//page")  
 
-   textWords = sapply(pg, isScannedPage, textNodeThreshold)
+   textWords = sapply(pg, isScannedPage, textNodeThreshold, wordThreshold)
    if(!any(textWords))
       return(FALSE)
 
