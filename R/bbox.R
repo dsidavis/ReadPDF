@@ -15,12 +15,17 @@ function(nodes, asDataFrame = FALSE, attrs = c("left", "top", if(rotation) "rota
 
 getBBox2.XMLInternalNode =
 function(nodes, asDataFrame = FALSE, attrs = c("left", "top", if(rotation) "rotation"), pages = FALSE, rotation = FALSE, color = FALSE)
+{
+    if(xmlName(nodes) == "page")
+        return(getBBox2.PDFToXMLPage(nodes, asDataFrame, attrs, pages, rotation, color))
+
     getBBox2(list(nodes), asDataFrame, attrs, pages, rotation, color)
+}
 
 getBBox2.XMLNodeSet = getBBox2.list = 
     # For text, not rect or line nodes.
     #XXX Add support for color.
-function(nodes, asDataFrame = FALSE, attrs = c("left", "top", if(rotation) "rotation"), pages = FALSE, rotation = FALSE, color = FALSE)
+function(nodes, asDataFrame = FALSE, attrs = c("left", "top", if(rotation) "rotation"), pages = FALSE, rotation = FALSE, color = FALSE, font = FALSE)
 {
     if(is(nodes, "XMLInternalElementNode")) {
         if(xmlName(nodes) == "text")
@@ -63,6 +68,8 @@ function(nodes, asDataFrame = FALSE, attrs = c("left", "top", if(rotation) "rota
        if(asDataFrame)
            m$font = as.integer(sapply(nodes, xmlGetAttr, "font"))
    }
+
+   class(m) = c("TextElementsLocations", class(m))
    m
 }
 
@@ -77,13 +84,18 @@ function(nodes, asDataFrame = FALSE, color = FALSE, diffs = FALSE, dropCropMarks
 
 getBBox.XMLInternalNode =
 function(nodes, asDataFrame = FALSE, color = FALSE, diffs = FALSE, dropCropMarks = TRUE, ...)    
+{
+    if(xmlName(nodes) == "page")
+        return(getBBox.PDFToXMLPage(nodes, asDataFrame, color, diffs, dropCropMarks, ...))
+    
     getBBox(list(nodes), asDataFrame, color, diffs, dropCropMarks)
+}
 
 getBBox.XMLNodeSet = getBBox.list =
     #
     # This bbox function expects an attribute named bbox
     #
-function(nodes, asDataFrame = FALSE, color = FALSE, diffs = FALSE, dropCropMarks = TRUE, ...)    
+function(nodes, asDataFrame = FALSE, color = FALSE, diffs = FALSE, dropCropMarks = TRUE, sort = TRUE, ...)    
 {
     if(length(nodes) == 0) {
         ans = if(asDataFrame)
@@ -125,13 +137,17 @@ function(nodes, asDataFrame = FALSE, color = FALSE, diffs = FALSE, dropCropMarks
         names(ans)[3:4] = c("width", "height")        
     }
 
+    if(sort & asDataFrame)
+        ans = ans[order(ans[, "nodeType"]), ]
+
+    class(ans) = c("LineRectLocations", class(ans))
     ans
 }
 
 addBBoxColors =
 function(nodes, ans)    
 {
-        cols = lapply(c("fill.color", "stroke.color"), function(at) sapply(nodes, xmlGetAttr, at))
+        cols = lapply(c("fill.color", "stroke.color"), function(at) sapply(nodes, xmlGetAttr, at, ""))
         if(is.data.frame(ans)) {
             ans$fill = cols[[1]]
             ans$stroke = cols[[2]]            
