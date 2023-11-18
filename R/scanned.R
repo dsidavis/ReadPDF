@@ -111,9 +111,12 @@ function(doc, checkFuns = NULL, textNodeThreshold = 10, wordThreshold = 75, enco
    if(!any(textWords))
       return(FALSE)
 
-   pageHasImg = sapply(pg, function(x) "img" %in% names(x))
-
-   if(all(textWords) && all(pageHasImg))
+  # used below
+  pageHasImg = sapply(pg, function(x) "img" %in% names(x))  
+  # Too simple. Need to have the image cover the page.
+  #if(all(textWords) && all(pageHasImg))
+  
+  if(any(sapply(pg, pageSpannedByImage))) # so not all scanned necessarily!XXX
       return(TRUE)
 
 
@@ -199,14 +202,39 @@ function(p, textNodeThreshold = 10, wordThreshold = 75)
 }
 
 imgSpansPage =
-function(img, threshold = .8)
+    #
+    # for an image.
+    #
+function(img, threshold = .8, p = xmlParent(img))
 {
-  p = xmlParent(img)
-
   a = as.integer(xmlAttrs(p)[c("width", "height")])
   b = as.integer(xmlAttrs(img)[c("width", "height")])
   all(b > (a * threshold))
 }
+
+imgSpansAnyPage =
+    
+    #
+    # for an entire document
+    #
+function(doc, threshold = .8)
+{
+    if(is.character(doc))
+        doc = readPDFXML(doc)
+
+    any(sapply(doc[], pageSpannedByImage, threshold))
+}
+
+pageSpannedByImage =
+    #
+    # for a single page
+    #
+function(page, threshold = .8)    
+{
+   any(xpathSApply(page, "./img", imgSpansPage, threshold))
+}
+
+
 
 sameFileName =
 function(x, threshold = 3, proportion = .95, useEditDist = TRUE) {
