@@ -115,9 +115,13 @@ function(page, cex.text = .5, adj = c(0, 1), showText = TRUE, showBoxes = FALSE,
 }
 
 renderCoords =
-function(page, h, coords = getCoords(page))
+function(page, h, coords = getCoords(page), col = "black")
 {
-   lapply(coords, renderCoord, h)
+    #   lapply(coords, renderCoord, h)
+    X = unlist(lapply(coords, function(x) c(x$x, NA)))
+    Y = unlist(lapply(coords, function(x) c(x$y, NA)))
+    #XXX add color and lwd.
+    lines(X, h - Y, col = col)
 }
 
 renderCoord =
@@ -129,27 +133,55 @@ function(x, h)
 
 
 renderLinesRects =
-function(page, h)
+function(page, h, border = "green")
 {
     rr = getNodeSet(page, ".//rect ")
     if(length(rr)) {
         bb = getBBox(rr)
         col = sapply(rr, function(x) mkColor(xmlGetAttr(x, "fill.color", "0,0,0"), isFill = TRUE))
         lwd = max(1, as.numeric(sapply(rr, function(x) xmlGetAttr(x, "lineWidth", "1.0"))))
-        rect(bb[,1], h - bb[,2], bb[,3], h - bb[,4], border = "green", col = col, lwd = lwd)
+        rect(bb[,1], h - bb[,2], bb[,3], h - bb[,4], border = border, col = col, lwd = lwd)
+#XXXX temp        rect(bb[,1], bb[,2], bb[,3], bb[,4], border = border, col = col, lwd = lwd)        
     }
 
     if(length ( lines <- getNodeSet(page, ".//line "))) {
         bb = getBBox(lines)
-        sapply(1:nrow(bb),
-                function(i) {
-                     at = xmlAttrs(lines[[i]])
-                     lines(bb[i, c(1,3)], h - bb[i, c(2, 4)], col = mkColor(at["stroke.color"]),
-                           lwd = max(1, as.numeric(at["lineWidth"], na.rm = TRUE)),
-                           lty = 2)
-                })
-        # lines(bb[,1], h - bb[,2], bb[,3], h-bb[,4], col = "red")
+        renderLines(bb, h, lines)
     }
+}
+
+
+
+renderLines =
+    # See below for vectorized version.
+function(bb, h, lines)
+{
+    sapply(1:nrow(bb),
+           function(i) {
+               at = xmlAttrs(lines[[i]])
+               lines(bb[i, c(1,3)], h - bb[i, c(2, 4)], col = mkColor(at["stroke.color"]),
+                     lwd = max(1, as.numeric(at["lineWidth"], na.rm = TRUE)),
+                     lty = 2)
+           })
+        # lines(bb[,1], h - bb[,2], bb[,3], h-bb[,4], col = "red")    
+}
+
+
+renderLines =
+    # need to split by lwd and color.
+    # Add lwd and color from nodes.
+function(bb, h, nodes)
+{
+    n = nrow(bb)*3
+    x = y = rep(as.numeric(NA), n)
+    i = seq(1, by = 3, length = nrow(bb))    
+    x[i] = bb[,"x0"]
+    x[i+1] = bb[, "x1"]
+    y[i] = bb[, "y0"]
+    y[i+1] = bb[, "y1"]
+    col = "black"
+    lines(x, h - y, col = col, lwd = 1, lty = 2)
+#XXXX temp    lines(x, y, col = col, lwd = 1, lty = 2)
 }
 
 
