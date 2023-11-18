@@ -213,7 +213,7 @@ function(nodes, asDataFrame = TRUE, color = TRUE, diffs = FALSE, dropCropMarks =
             imgs = imgs[, c("x", "y", "x1", "y1", "nodeType")]
             imgs$fill = imgs$stroke = imgs$lineWidth = NA
             names(imgs)[1:2] = c("x0", "y0")
-            ans = rbind(ans, imgs)
+            ans = structure(rbind(ans, imgs), class = class(ans))
         }
     }
     ans
