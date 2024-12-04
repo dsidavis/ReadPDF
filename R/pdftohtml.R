@@ -9,6 +9,10 @@ convertPDF2XML =
 function(file, out = character(), args = c("-q", "-xml"),
              pdftohtml = getOption("PDFTOHTML", Sys.getenv("PDFTOHTML", 'pdftohtml')))
 {
+
+    if(file.info(file)$size == 0)
+        stop(paste(file, "is empty"))
+    
       # -q - quiet
       # -xml - convert to xml
     # No -c with -stdout!!!
