@@ -1,31 +1,32 @@
 getTextBBox =
-function(nodes, asDataFrame = TRUE, attrs = c("left", "top", if(rotation) "rotation"), pages = FALSE, rotation = FALSE, color = FALSE)
-    getBBox2(nodes, asDataFrame, attrs, pages, rotation, color)
+function(nodes, asDataFrame = TRUE, attrs = c("left", "top", if(rotation) "rotation"), pages = FALSE, rotation = FALSE, color = FALSE, ...)
+    getBBox2(nodes, asDataFrame, attrs, pages, rotation, color, ...)
 
 getBBox2 =
     # For text, not rect or line nodes.
-function(nodes, asDataFrame = FALSE, attrs = c("left", "top", if(rotation) "rotation"), pages = FALSE, rotation = FALSE, color = FALSE)
+function(nodes, asDataFrame = FALSE, attrs = c("left", "top", if(rotation) "rotation"), pages = FALSE, rotation = FALSE, color = FALSE, ...)
     UseMethod("getBBox2")
 
 getBBox2.PDFToXMLPage =
     # For text, not rect or line nodes.
-function(nodes, asDataFrame = FALSE, attrs = c("left", "top", if(rotation) "rotation"), pages = FALSE, rotation = FALSE, color = FALSE)
-    getBBox2(getNodeSet(nodes, ".//text"), asDataFrame, attrs = attrs, color = color)
+function(nodes, asDataFrame = FALSE, attrs = c("left", "top", if(rotation) "rotation"), pages = FALSE, rotation = FALSE, color = FALSE, ...)
+    getBBox2(getNodeSet(nodes, ".//text"), asDataFrame, attrs = attrs, color = color, ...)
 
 
 getBBox2.XMLInternalNode =
-function(nodes, asDataFrame = FALSE, attrs = c("left", "top", if(rotation) "rotation"), pages = FALSE, rotation = FALSE, color = FALSE)
+function(nodes, asDataFrame = FALSE, attrs = c("left", "top", if(rotation) "rotation"), pages = FALSE, rotation = FALSE, color = FALSE, ...)
 {
     if(xmlName(nodes) == "page")
-        return(getBBox2.PDFToXMLPage(nodes, asDataFrame, attrs, pages, rotation, color))
+        return(getBBox2.PDFToXMLPage(nodes, asDataFrame, attrs, pages, rotation, color, ...))
 
-    getBBox2(list(nodes), asDataFrame, attrs, pages, rotation, color)
+    getBBox2(list(nodes), asDataFrame, attrs, pages, rotation, color, ...)
 }
 
 getBBox2.XMLNodeSet = getBBox2.list = 
     # For text, not rect or line nodes.
     #XXX Add support for color.
-function(nodes, asDataFrame = FALSE, attrs = c("left", "top", if(rotation) "rotation"), pages = FALSE, rotation = FALSE, color = FALSE, font = FALSE)
+function(nodes, asDataFrame = FALSE, attrs = c("left", "top", if(rotation) "rotation"),
+           pages = FALSE, rotation = FALSE, color = FALSE, font = FALSE, ...)
 {
     if(is(nodes, "XMLInternalElementNode")) {
         if(xmlName(nodes) == "text")
