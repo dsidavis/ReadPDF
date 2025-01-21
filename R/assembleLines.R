@@ -57,7 +57,27 @@ function(xx, horiz = TRUE, maxGap = 5, vars = if(horiz) c("x0", "x1") else c("y0
                    }))
 }
 
-
-
-
 #any(diff(uvals) < threshold)
+
+
+byLine = docByLine =
+    #
+    # get all text nodes in the entire document and group by line.
+    # Handles splitting across pages.
+    #
+function(doc)    
+{
+    txt = getNodeSet(doc, "//text[normalize-space(.) != '']")
+    nodesByLine(txt)
+}
+
+
+nodes2Line =
+    # takes a collection of nodes that are assumed to be on the same line
+    # and converts this to text.
+    # This doesn't (currently) order them based on position within the line.
+function(x)
+    unname(paste(sapply(x, xmlValue, trim = TRUE), collapse = " "))
+
+
+

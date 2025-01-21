@@ -147,3 +147,5 @@ export(isBold, isItalic)
 
 
 export(pageOf)
+
+export(nodesByLine, nodes2Line, docByLine, byLine)
