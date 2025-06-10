@@ -7,9 +7,12 @@ function(x)
 convertPDF2XML =
     # Convert a PDF document to XML using stdout
 function(file, out = character(), args = c("-q", "-xml"),
-             pdftohtml = getOption("PDFTOHTML", Sys.getenv("PDFTOHTML", 'pdftohtml')))
+         pdftohtml = getOption("PDFTOHTML", Sys.getenv("PDFTOHTML", 'pdftohtml'))
+         ...)
 {
 
+    file = normalizePath(file)
+    
     if(file.info(file)$size == 0)
         stop(paste(file, "is empty"))
     
@@ -33,7 +36,7 @@ function(file, out = character(), args = c("-q", "-xml"),
     if(length(out))
         return(paste0(out, ".xml"))
 
-    doc = xmlParsePDFTOHTML(status, asText = TRUE)
+    doc = xmlParsePDFTOHTML(status, asText = TRUE, ...)
     docName(doc) = file
     
     doc
